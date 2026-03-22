@@ -1,0 +1,368 @@
+* {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0;
+    white-space: nowrap;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    color: black;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#Z {
+    width: 100%;
+    height: calc( 100% - 50px );
+    display: flex;
+    background-color: #cacaca;
+}
+
+.text {
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    color: #575e75;
+    background-color: #fff;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #00000026;
+    border-radius: 2rem;
+    outline: none;
+    cursor: text;
+    transition: 0.25s ease-out;
+    box-shadow: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: calc(100% - 15px);
+}
+
+#title {
+    color: #fff;
+    border: 1px dashed #00000026;
+    border-radius: calc(0.5rem / 2);
+    -webkit-border-radius: calc(0.5rem / 2);
+    -moz-border-radius: calc(0.5rem / 2);
+    background-color: #ffffff40;
+    background-clip: padding-box;
+    -webkit-background-clip: padding-box;
+    height: 20px;
+    padding: .5rem;
+}
+
+#blocklyDiv {
+    background-color: #fff;
+    height: calc( ( 100% - 40px ) - 60px - 20px );
+    width: 100%;
+    padding: 5px;
+    padding-left: 0;
+    border: 8px #4d6277 solid;
+    border-left: none;
+    border-radius: 20px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    float: left;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#kekka {
+    background-color: #fff;
+    min-height: 360px;
+    min-width: 100%;
+    margin-left: 20px;
+    border: 8px #4d6277 solid;
+    border-radius: 20px;
+    overflow: auto;
+    z-index: 2;
+}
+
+#settei {
+    background-color: #fff;
+    min-height: 100%;
+    min-width: 100%;
+    margin-top: 8px;
+    margin-left: 20px;
+    border: 8px #4d6277 solid;
+    border-bottom: none;
+    border-radius: 20px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    float: left;
+    font-size: 30px;
+    z-index: 2;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#settei > .setteimozi {
+    font-size: 40px;
+    font-weight: 600;
+}
+
+.check {
+    display: none;
+}
+
+.label {
+    position: relative;
+    background: #9db5ca;
+    color: #fff;
+    display: block;
+    width: 350px;
+    margin-bottom: 1px;
+    padding: 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    z-index: 4;
+}
+
+.content {
+    background-color: #b2b8dc;
+    border-radius: 20px;
+    width: 340px;
+    height: 0;
+    margin-left: 5px;
+    opacity: 0;
+    padding: 0 10px;
+    transition: .5s;
+    visibility: hidden;
+    z-index: 3;
+    overflow-wrap: break-word;
+}
+
+.check:checked + .label + .content{
+    height: 65px;
+    margin-top: -30px;
+    opacity: 1;
+    padding-top: 40px;
+    visibility: visible;
+    z-index: 4;
+}
+
+.naka {
+    margin-left: 40px;
+}
+
+#run {
+    font-size: 20px;
+    overflow: auto;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border-color: transparent;
+    box-shadow:
+        0 0 0 4px rgb(105, 171, 209),
+        0 0 0 8px rgb(198, 224, 231);
+    background-color: rgb(44, 147, 206);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: 0.5s;
+    z-index: 2;
+    color: black;
+}
+
+.run:hover{
+    box-shadow:
+        0 0 0 4px rgb(93, 145, 174),
+        0 0 0 8px rgb(163, 204, 215);
+    background-color: rgb(35, 117, 164);
+    transform: scale(1.1);
+}
+
+#top {
+    display: flex;
+    align-items: center;
+    min-height: 60px;
+}
+
+#left {
+    float: left;
+    height: 100%;
+    min-width: calc( 100% - 520px);
+}
+
+#right {
+    float: right;
+    height: 100%;
+    min-width: 480px;
+}
+
+#sidebar {
+    background-color: #5485ee;
+    white-space: nowrap;
+    height: 50px;
+    width: 100%;
+}
+
+#sidebar>div {
+    height: fit-content;
+    width: fit-content;
+    margin: 0 auto;
+    display: flex;
+}
+
+#sidebar .title {
+    padding: 15px 15px 4px 15px;
+    width: fit-content;
+    font-weight: bold;
+    line-height: 24px;
+    cursor: pointer;
+    color: white;
+    transition: 0.5s;
+}
+
+#sidebar .title:hover {
+    transform: scale(1.1,1.1);
+}
+
+#sidebar .Picosuke {
+    padding: 7px 15px 4px 15px;
+    width: fit-content;
+    font-weight: bold;
+    line-height: 24px;
+    cursor: pointer;
+    color: white;
+    transition: 0.5s;
+}
+
+#sidebar .Picosuke:hover {
+    transform: scale(1.2,1.2);
+}
+
+#sidebar .hover {
+    padding: 15px 15px 4px 15px;
+    width: fit-content;
+    font-weight: bold;
+    font-size: 13.6px;
+    line-height: 24px;
+    height: 32.5px;
+    cursor: pointer;
+    color: white;
+}
+
+#sidebar .hover:hover {
+    background-color: #3e87d0;
+}
+
+#display {
+    height: calc(100% - 50px);
+    overflow-y: scroll;
+    width: 100%;
+}
+
+#display::-webkit-scrollbar {
+    display: none;
+}
+
+#nsg {
+    background-image: url(https://scratch.mit.edu/images/nav-search-glass.png);
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
+    background-position: 50%;
+    height: 40px;
+    width: 40px;
+}
+
+/* ========================================================
+   Scratch風 ツールボックス（カテゴリーメニュー）のCSS
+   ======================================================== */
+
+.blocklyToolboxDiv {
+    background-color: #ffffff !important; /* 背景を白に */
+    border-right: 1px solid #e5e5e5; /* 右側の薄い線 */
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0;
+    width: 60px !important; /* Scratchのように細くする */
+    z-index: 40;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* スクロールバーを隠す（Scratch仕様） */
+.blocklyToolboxDiv::-webkit-scrollbar {
+    display: none;
+}
+
+.blocklyToolboxContents {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    gap: 12px; /* アイコン同士の隙間 */
+}
+
+.blocklyTreeIcon {
+    background-image: url(./media/sprites.svg);
+}
+
+.blocklyTreeIconClosed {
+    background-position: -16px 0;
+}
+
+.blocklyTreeIconOpen {
+    background-position: -32px 0;
+}
+
+/* 各カテゴリー（動き、見た目など）の枠 */
+.blocklyTreeRow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    
+    padding: 0 !important;
+    margin: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: transparent;
+    transition: background-color 0.2s;
+}
+
+/* 選択されているカテゴリーの背景色 */
+.blocklyTreeSelected.blocklyTreeRow {
+    background-color: #e9eef2 !important;
+}
+
+/* マウスを乗せた時の文字色 */
+.blocklyTreeRow:hover .blocklyTreeLabel {
+    color: #4c97ff !important;
+}
+
+/* 文字のスタイル */
+.blocklyTreeLabel {
+    color: #575e75 !important;
+    font-size: 10px !important;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.blocklyTreeRowContentContainer {
+    display: block;
+    width: 45px;
+}
+
+.blocklyMenuItemSelected .blocklyMenuItemCheckbox {
+    background-image: url(./media/sprites.svg) !important;
+    background-repeat: no-repeat !important;
+    background-size: 120px auto !important;
+    background-position: -58px -19px !important;
+    width: 20px !important;
+    height: 20px !important;
+}
