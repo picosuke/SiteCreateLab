@@ -409,8 +409,8 @@ Blockly.defineBlocksWithJsonArray([
         "message0": "%1 を %2 にする",
         "args0": [
 		    {"type": "field_dropdown", "name": "name", "options": [
-    			  ["色", "c"],
-      			  ["背景色", "bc"]
+    			  ["色", "color"],
+      			  ["背景色", "background-color"]
     		]}
           { "type": "input_value", "name": "color", "check": "color" }
         ],
@@ -533,9 +533,10 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "ND",
-        "message0": "%1",
+        "message0": "%1 %2",
         "output": "naga",
         "args0": [
+            { "type": "input_value", "name": "kazu", "check": "kazu" }
             {
               "type": "field_dropdown",
               "name": "ND",
