@@ -411,7 +411,7 @@ Blockly.defineBlocksWithJsonArray([
 		    {"type": "field_dropdown", "name": "name", "options": [
     			  ["色", "color"],
       			  ["背景色", "background-color"]
-    		]}
+    		]},
           { "type": "input_value", "name": "color", "check": "color" }
         ],
         "inputsInline": true,
@@ -423,9 +423,12 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "WS",
-        "message0": "横幅を %1 %2 にする",
+        "message0": "%1 を %2 にする",
         "args0": [
-            { "type": "input_value", "name": "kazu", "check": "kazu" },
+		    {"type": "field_dropdown", "name": "name", "options": [
+    			  ["横幅", "width"],
+      			  ["縦幅", "height"]
+    		]},
             { "type": "input_value", "name": "naga", "check": "naga" }
         ],
         "inputsInline": true,
@@ -1102,9 +1105,9 @@ javascript.javascriptGenerator.forBlock['NS'] = function(block, generator) {
 };
 
 javascript.javascriptGenerator.forBlock['WS'] = function(block, generator) {
-    var value_kazu = generator.valueToCode(block, 'kazu', javascript.Order.NONE) || '';
+    var name = block.getFieldValue('name');
     var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
-    cssd = cssd + "\n    width: " + value_kazu + value_naga + ";";
+    cssd = cssd + "\n    " + name + ": " + value_kazu + value_naga + ";";
     return "\n";
 };
 
