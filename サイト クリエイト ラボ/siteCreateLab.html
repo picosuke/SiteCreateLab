@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"/>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.1.2/blockly_compressed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.1.2/blocks_compressed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.1.2/javascript_compressed.js"></script>
+  <script src="./en.js"></script>
+  <script src="./date.js"></script>
+  <script src="./colorslider.js"></script>
+  <script src="./choice.js"></script>
+  <script src="./Move-Blocks.js"></script>
+  <script src="./slider.js"></script>
+  <link rel="stylesheet" href="./siteCreateLab.css">
+  <title>Blockly Sample</title>
+</head>
+<body>
+    <div id="sidebar">
+        <div>
+            <a class="title" id="site create lab" onclick="">
+                サイトクリエイトラボ
+            </a>
+            <p class="hover" id="topPage" style="
+                padding: 7px 15px 4px 15px;
+                height: 40.5px;
+                width: 300px;"><input type="text" class="text" id="title"></p>
+            <p class="hover" id="download" onclick="">ダウンロード</p>
+        </div>
+    </div>
+    <div id="Z">
+        <xml id="toolbox" style="display: none">
+            <category name="テスト" colour="#aa8800">
+                <block type="F">
+                    <value name="color">
+                        <shadow type="CID"></shadow>
+                    </value>
+                </block>
+            </category>
+            <category name="HTML" colour="#e96228">
+                <category name="スタート" colour="#ffbf00">
+                    <block type="HCJ"></block>
+                    <block type="HSE"></block>
+                    <block type="HDA"></block>
+                    <block type="T">
+                        <value name="websiteName">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="JY">
+                        <value name="JS">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="CY">
+                        <value name="CSS">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                </category>
+                <category name="動作" colour="#0580ed">
+                    <block type="M">
+                        <value name="MOZI">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="Ibtn">
+                        <value name="value">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="Bbtn"></block>
+                    </block>
+                    <block type="div"></block>
+                    <block type="span"></block>
+                    <block type="p"></block>
+                    <block type="K"></block>
+                </category>
+                <category name="文字" colour="#20a002">
+                    <block type="TD"></block>
+                    <block type="GD">
+                        <value name="M1">
+                            <shadow type="MD"></shadow>
+                        </value>
+                        <value name="M2">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                </category>
+                <category name="コメント" colour="#f0a080">
+                    <block type="HC">
+                        <value name="MOZI">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                </category>
+                <category name="詳細" colour="#893273">
+                    <block type="CD">
+                        <value name="CM">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="ID">
+                        <value name="IM">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="SGD"></block>
+                </category>
+            </category>
+            <category name="CSS" colour="#3997d4">
+                <category name="コメント" colour="#f0a080">
+                    <block type="CC">
+                        <value name="MOZI">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                </category>
+                <category name="何を" colour="#298a8f">
+                    <block type="CN">
+                    </block>
+                    <block type="CNCD">
+                        <value name="class">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="CNID">
+                        <value name="id">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="CNYD">
+                        <value name="you">
+                            <shadow type="MD"></shadow>
+                        </value>
+                    </block>
+                    <block type="KTD"></block>
+                </category>
+                <category name="詳細" colour="#f289af">
+                    <block type="CKLD"></block>
+                    <block type="CHOD"></block>
+                </category>
+                <category name="見た目" colour="#ff0d4b">
+                    <block type="CIS">
+                        <value name="color">
+                            <shadow type="CID"></shadow>
+                        </value>
+                    </block>
+                    <block type="BCIS">
+                        <value name="color">
+                            <shadow type="CID"></shadow>
+                        </value>
+                    </block>
+                    <block type="NS">
+                        <value name="kazu">
+                            <shadow type="KD"></shadow>
+                        </value>
+                    </block>
+                    <block type="TMD"></block>
+                    <block type="WS">
+                        <value name="kazu">
+                            <shadow type="KD"></shadow>
+                        </value>
+                        <value name="naga">
+                            <shadow type="ND"></shadow>
+                        </value>
+                    </block>
+                    <block type="HS">
+                        <value name="kazu">
+                            <shadow type="KD"></shadow>
+                        </value>
+                        <value name="naga">
+                            <shadow type="ND"></shadow>
+                        </value>
+                    </block>
+                    <block type="KMS">
+                        <value name="doko">
+                            <shadow type="KMID"></shadow>
+                        </value>
+                        <value name="kazu">
+                            <shadow type="KD"></shadow>
+                        </value>
+                        <value name="naga">
+                            <shadow type="ND"></shadow>
+                        </value>
+                    </block>
+                    <block type="PDS">
+                        <value name="doko">
+                            <shadow type="PDD"></shadow>
+                        </value>
+                        <value name="kazu">
+                            <shadow type="KD"></shadow>
+                        </value>
+                        <value name="naga">
+                            <shadow type="ND"></shadow>
+                        </value>
+                    </block>
+                    <block type="DSS">
+                        <value name="soroe">
+                            <shadow type="DSD"></shadow>
+                        </value>
+                    </block>
+                </category>
+            </category>
+            <category name="JS" colour="#f7d700">
+                <category name="変数" colour="#ee8f2d">
+                    <category name="値" colour="#aabbcc">
+                        <block type="JKAD">
+                            <value name="DKTK">
+                                <shadow type="JKD"></shadow>
+                            </value>
+                        </block>
+                        <block type="JMAD">
+                            <value name="DKTM">
+                                <shadow type="JMD"></shadow>
+                            </value>
+                        </block>
+                    </category>
+                    <category name="配列" colour="#ba4545">
+                        <block type="HAD{"></block>
+                        <block type="HAD"></block>
+                        <block type="HAD["></block>
+                        <block type="NNSD">
+                            <value name="DKTM1">
+                                <shadow type="JMAD">
+                                    <value name="DKTM">
+                                        <shadow type="JMD"></shadow>
+                                    </value>
+                                </shadow>
+                            </value>
+                            <value name="DKTM2">
+                                <shadow type="JMAD">
+                                    <value name="DKTM">
+                                        <shadow type="JMD"></shadow>
+                                    </value>
+                                </shadow>
+                            </value>
+                        </block>
+                    </category>
+                    <category name="変数" colour="#fe9f3d">
+                        <block type="NW">
+                            <value name="NANI">
+                                <shadow type="HD">
+                                    <value name="HEN">
+                                        <shadow type="JMD"></shadow>
+                                    </value>
+                                </shadow>
+                            </value>
+                            <value name="DOU">
+                                <shadow type="JMAD">
+                                    <value name="DKTM">
+                                        <shadow type="JMD"></shadow>
+                                    </value>
+                                </shadow>
+                            </value>
+                        </block>
+                        <block type="HD">
+                            <value name="HEN">
+                                <shadow type="MD"></shadow>
+                            </value>
+                        </block>
+                    </category>
+                </category>
+                <category name="関数" colour="#8a88bb">
+                    <block type="KB">
+                        <value name="text">
+                            <shadow type="JMAD">
+                                <value name="DKTM">
+                                    <shadow type="JMD"></shadow>
+                                </value>
+                            </shadow>
+                        </value>
+                    </block>
+                    <block type="KA">
+                        <value name="text">
+                            <shadow type="JMAD">
+                                <value name="DKTM">
+                                    <shadow type="JMD"></shadow>
+                                </value>
+                            </shadow>
+                        </value>
+                    </block>
+                    <block type="KS">
+                        <value name="nani">
+                            <shadow type="JMAD">
+                                <value name="DKTM">
+                                    <shadow type="JMD"></shadow>
+                                </value>
+                            </shadow>
+                        </value>
+                    </block>
+                    <block type="MKS"></block>
+                </category>
+                
+    <category name="制御" colour="#ffab19">
+        <block type="p_control_if"></block>
+        <block type="p_control_if_else"></block>
+        <block type="p_control_repeat"></block>
+        <block type="p_if_mozi_reporter"></block>
+    </category>
+    <category name="演算" colour="#59c059">
+        <block type="p_logic_compare">
+            <value name="A"><shadow type="JKD"></shadow></value>
+            <value name="B"><shadow type="JKD"></shadow></value>
+        </block>
+        <block type="p_logic_operation"></block>
+        <block type="p_logic_negate"></block>
+    </category>
+
+                <category name="コメント" colour="#f0a080">
+                    <block type="JC">
+                        <value name="MOZI">
+                            <shadow type="JMAD">
+                                <value name="DKTM">
+                                    <shadow type="JMD"></shadow>
+                                </value>
+                            </shadow>
+                        </value>
+                    </block>
+                </category>
+            </category>
+        </xml>
+
+        <xml id="startBlocks" style="display: none">
+            <block type="S" deletable="false">
+            </block>
+        </xml>
+
+        <div id="left">
+            <div id="top">
+            </div>
+            <div id="blocklyDiv"></div>
+        </div>
+
+        <div id="right">
+            <div id="top">
+                <button id="run">実行</button>
+            </div>
+            <div id="kekka"></div>
+            
+            <div id="settei">
+                <div class="setteimozi">
+                    コード
+                </div>
+                <div class="naka">
+                    <input id="check1" class="check" type="checkbox">
+                    <label class="label" for="check1">ダウンロード</label>
+                    <div class="content">
+                        <button class="copi" id="download">ダウンロード</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@blockly/continuous-toolbox@5.0.10/dist/index.min.js"></script>
+    <script src="https://raw.githubusercontent.com/google/blockly-samples/master/plugins/workspace-minimap/package.json"></script>
+    <script src="./siteCreateLab.js"></script>
+</body>
+</html>
