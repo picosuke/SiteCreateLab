@@ -406,21 +406,12 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CIS",
-        "message0": "色を %1 にする",
+        "message0": "%1 %2 にする",
         "args0": [
-          { "type": "input_value", "name": "color", "check": "color" }
-        ],
-        "inputsInline": true,
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ff0d4b",
-        "tooltip": "",
-        "helpUrl": ""
-    },
-    {
-        "type": "BCIS",
-        "message0": "背景の色を %1 にする",
-        "args0": [
+		    {"type": "field_dropdown", "name": "OP", "options": [
+    			  ["色を", "c"],
+      			  ["背景色を", "bc"]
+    		]}
           { "type": "input_value", "name": "color", "check": "color" }
         ],
         "inputsInline": true,
