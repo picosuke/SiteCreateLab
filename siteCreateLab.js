@@ -406,11 +406,11 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CIS",
-        "message0": "%1 %2 にする",
+        "message0": "%1 を %2 にする",
         "args0": [
-		    {"type": "field_dropdown", "name": "OP", "options": [
-    			  ["色を", "c"],
-      			  ["背景色を", "bc"]
+		    {"type": "field_dropdown", "name": "name", "options": [
+    			  ["色", "c"],
+      			  ["背景色", "bc"]
     		]}
           { "type": "input_value", "name": "color", "check": "color" }
         ],
@@ -1088,14 +1088,9 @@ javascript.javascriptGenerator.forBlock['CN'] = function(block, generator) {
 };
 
 javascript.javascriptGenerator.forBlock['CIS'] = function(block, generator) {
+    var name = block.getFieldValue('name');
     var value_color = generator.valueToCode(block, 'color', javascript.Order.NONE) || '';
-    cssd = cssd + "\n    color: " + value_color + ";";
-    return "\n";
-};
-
-javascript.javascriptGenerator.forBlock['BCIS'] = function(block, generator) {
-    var value_color = generator.valueToCode(block, 'color', javascript.Order.NONE) || '';
-    cssd = cssd + "\n    background-color: " + value_color + ";";
+    cssd = cssd + "\n    " + name + ": " + value_color + ";";
     return "\n";
 };
 
