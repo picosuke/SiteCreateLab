@@ -958,7 +958,8 @@ javascript.javascriptGenerator.forBlock['DSD'] = function(block) {
     return [dropdown_DSD, javascript.Order.ATOMIC];
 };
 
-javascript.javascriptGenerator.forBlock['ND'] = function(block) {
+// 【修正】 引数に generator を追加しました
+javascript.javascriptGenerator.forBlock['ND'] = function(block, generator) {
     var value_kazu = generator.valueToCode(block, 'kazu', javascript.Order.NONE) || '0';
     var dropdown_ND = block.getFieldValue('ND');
     return [value_kazu + dropdown_ND, javascript.Order.ATOMIC];
@@ -1089,10 +1090,11 @@ javascript.javascriptGenerator.forBlock['NS'] = function(block, generator) {
     return "\n";
 };
 
+// 【修正】 value_kazu を削除 (naga に数字も単位も含まれているため)
 javascript.javascriptGenerator.forBlock['WS'] = function(block, generator) {
     var name = block.getFieldValue('name');
     var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
-    cssd = cssd + "\n    " + name + ": " + value_kazu + value_naga + ";";
+    cssd = cssd + "\n    " + name + ": " + value_naga + ";";
     return "\n";
 };
 
@@ -1102,17 +1104,19 @@ javascript.javascriptGenerator.forBlock['DSS'] = function(block, generator) {
     return "\n";
 };
 
+// 【修正】 value_kazu を削除
 javascript.javascriptGenerator.forBlock['PDS'] = function(block, generator) {
     var value_kado = generator.valueToCode(block, 'doko', javascript.Order.NONE) || '';
     var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
-    cssd = cssd + "\n    padding" + value_kado + ":" + value_kazu + value_naga + ";";
+    cssd = cssd + "\n    padding" + value_kado + ":" + value_naga + ";";
     return "\n";
 };
 
+// 【修正】 value_kazu を削除
 javascript.javascriptGenerator.forBlock['KMS'] = function(block, generator) {
     var value_kado = generator.valueToCode(block, 'doko', javascript.Order.NONE) || '';
     var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
-    cssd = cssd + "\n    border" + value_kado + "-radius:" + value_kazu + value_naga + ";";
+    cssd = cssd + "\n    border" + value_kado + "-radius:" + value_naga + ";";
     return "\n";
 };
 
@@ -1161,21 +1165,24 @@ javascript.javascriptGenerator.forBlock['KTD'] = function(block, generator) {
     return [value_m1 + value_m2, javascript.Order.ATOMIC];
 };
 
+// 【修正】 field_input に対応するように getFieldValue に変更
 javascript.javascriptGenerator.forBlock['KB'] = function(block, generator) {
-    var txt = generator.valueToCode(block, 'text', javascript.Order.NONE) || '';
+    var txt = block.getFieldValue('mozi') || '';
     jstext = jstext + txt + "();\n";
     return '\n';
 };
 
+// 【修正】 field_input に対応するように getFieldValue に変更
 javascript.javascriptGenerator.forBlock['KS'] = function(block, generator) {
-    var nani = generator.valueToCode(block, 'nani', javascript.Order.NONE) || '';
+    var nani = block.getFieldValue('mozi') || '';
     var js = generator.statementToCode(block, 'js');
     jstext = jstext + "function " + nani + "() {\n" + js + "}\n";
     return '\n';
 };
 
+// 【修正】 field_input に対応するように getFieldValue に変更
 javascript.javascriptGenerator.forBlock['KA'] = function(block, generator) {
-    var txt = generator.valueToCode(block, 'text', javascript.Order.NONE) || '';
+    var txt = block.getFieldValue('mozi') || '';
     return [txt + "()", javascript.Order.ATOMIC];
 };
 
@@ -1284,7 +1291,6 @@ javascript.javascriptGenerator.forBlock['p_if_mozi_reporter'] = function(block, 
     var code = '(' + condition + ' ? ' + valueA + ' : ' + valueB + ')';
     return [code, javascript.Order.NONE];
 };
-
 
 // ============================================
 
