@@ -959,8 +959,9 @@ javascript.javascriptGenerator.forBlock['DSD'] = function(block) {
 };
 
 javascript.javascriptGenerator.forBlock['ND'] = function(block) {
+    var value_kazu = generator.valueToCode(block, 'kazu', javascript.Order.NONE) || '0';
     var dropdown_ND = block.getFieldValue('ND');
-    return [dropdown_ND, javascript.Order.ATOMIC];
+    return [value_kazu + dropdown_ND, javascript.Order.ATOMIC];
 };
 
 javascript.javascriptGenerator.forBlock['JKD'] = function(block) {
