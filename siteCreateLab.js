@@ -439,25 +439,10 @@ Blockly.defineBlocksWithJsonArray([
         "helpUrl": ""
     },
     {
-        "type": "HS",
-        "message0": "縦幅を %1 %2 にする",
-        "args0": [
-          { "type": "input_value", "name": "kazu", "check": "kazu" },
-          { "type": "input_value", "name": "naga", "check": "naga" }
-        ],
-        "inputsInline": true,
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ff0d4b",
-        "tooltip": "",
-        "helpUrl": ""
-    },
-    {
         "type": "KMS",
-        "message0": "角丸 %1 %2 %3 にする",
+        "message0": "角の %1 を %2 で丸くする",
         "args0": [
           { "type": "input_value", "name": "doko", "check": "doko" },
-          { "type": "input_value", "name": "kazu", "check": "kazu" },
           { "type": "input_value", "name": "naga", "check": "naga" }
         ],
         "inputsInline": true,
@@ -482,10 +467,9 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "PDS",
-        "message0": "要素内側の %1 の余白を %2 %3 にする",
+        "message0": "要素内側の %1 の余白を %2 にする",
         "args0": [
           { "type": "input_value", "name": "doko", "check": "doko" },
-          { "type": "input_value", "name": "kazu", "check": "kazu" },
           { "type": "input_value", "name": "naga", "check": "naga" }
         ],
         "inputsInline": true,
@@ -1111,13 +1095,6 @@ javascript.javascriptGenerator.forBlock['WS'] = function(block, generator) {
     return "\n";
 };
 
-javascript.javascriptGenerator.forBlock['HS'] = function(block, generator) {
-    var value_kazu = generator.valueToCode(block, 'kazu', javascript.Order.NONE) || '';
-    var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
-    cssd = cssd + "\n    height: " + value_kazu + value_naga + ";";
-    return "\n";
-};
-
 javascript.javascriptGenerator.forBlock['DSS'] = function(block, generator) {
     var value_soroe = generator.valueToCode(block, 'soroe', javascript.Order.NONE) || '';
     cssd = cssd + "\n    text-align: " + value_soroe + ";";
@@ -1126,7 +1103,6 @@ javascript.javascriptGenerator.forBlock['DSS'] = function(block, generator) {
 
 javascript.javascriptGenerator.forBlock['PDS'] = function(block, generator) {
     var value_kado = generator.valueToCode(block, 'doko', javascript.Order.NONE) || '';
-    var value_kazu = generator.valueToCode(block, 'kazu', javascript.Order.NONE) || '';
     var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
     cssd = cssd + "\n    padding" + value_kado + ":" + value_kazu + value_naga + ";";
     return "\n";
@@ -1134,7 +1110,6 @@ javascript.javascriptGenerator.forBlock['PDS'] = function(block, generator) {
 
 javascript.javascriptGenerator.forBlock['KMS'] = function(block, generator) {
     var value_kado = generator.valueToCode(block, 'doko', javascript.Order.NONE) || '';
-    var value_kazu = generator.valueToCode(block, 'kazu', javascript.Order.NONE) || '';
     var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
     cssd = cssd + "\n    border" + value_kado + "-radius:" + value_kazu + value_naga + ";";
     return "\n";
