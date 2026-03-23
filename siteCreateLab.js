@@ -539,7 +539,7 @@ Blockly.defineBlocksWithJsonArray([
         "message0": "%1 %2",
         "output": "naga",
         "args0": [
-            { "type": "input_value", "name": "kazu", "check": "kazu" }
+            { "type": "input_value", "name": "kazu", "check": "kazu" },
             {
               "type": "field_dropdown",
               "name": "ND",
