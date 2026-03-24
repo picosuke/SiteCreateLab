@@ -153,10 +153,6 @@ body {
     z-index: 4;
 }
 
-.naka {
-    margin-left: 40px;
-}
-
 #run {
     font-size: 20px;
     overflow: auto;
