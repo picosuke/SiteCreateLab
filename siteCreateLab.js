@@ -1387,3 +1387,95 @@ if (downloadBtn) {
 
 
 workspace.addChangeListener(Blockly.Events.disableOrphans);
+
+
+
+
+
+// ==========================================
+// ファイル追加（ドラッグ＆ドロップ）機能
+// ==========================================
+var dropArea = document.getElementById('dropArea');
+var fileInput = document.getElementById('fileInput');
+var fileList = document.getElementById('fileList');
+
+// ① エリアをクリックしたらファイル選択の画面を開く
+dropArea.addEventListener('click', function() {
+    fileInput.click();
+});
+
+// ② ファイルがエリアに乗った時の見た目（色が少し変わる）
+dropArea.addEventListener('dragover', function(e) {
+    e.preventDefault(); // これがないとブラウザでファイルが開いちゃう
+    dropArea.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+    dropArea.style.borderColor = '#fff';
+});
+
+// ③ ファイルがエリアから出た時の見た目（元に戻す）
+dropArea.addEventListener('dragleave', function() {
+    dropArea.style.backgroundColor = 'transparent';
+    dropArea.style.borderColor = '#aaa';
+});
+
+// ④ ファイルがドロップ（離された）された時の処理
+dropArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dropArea.style.backgroundColor = 'transparent';
+    dropArea.style.borderColor = '#aaa';
+    
+    var files = e.dataTransfer.files;
+    addFilesToList(files);
+});
+
+// ⑤ クリックでファイルを選んだ時の処理
+fileInput.addEventListener('change', function(e) {
+    var files = e.target.files;
+    addFilesToList(files);
+    fileInput.value = ''; // 同じファイルを連続で選べるようにリセット
+});
+
+// ⑥ ファイルを下のリストに追加して並べる関数
+function addFilesToList(files) {
+    for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+
+        // リストの行(li)を作る
+        var li = document.createElement('li');
+        li.style.padding = '5px 8px';
+        li.style.marginBottom = '5px';
+        li.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+        li.style.borderRadius = '3px';
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+        li.style.color = '#fff'; // 文字色（背景が暗い場合）
+
+        // ファイル名のテキスト
+        var nameSpan = document.createElement('span');
+        nameSpan.textContent = file.name;
+        nameSpan.style.overflow = 'hidden';
+        nameSpan.style.textOverflow = 'ellipsis';
+        nameSpan.style.whiteSpace = 'nowrap';
+        nameSpan.style.maxWidth = '80%';
+
+        // 削除ボタンを作る
+        var delBtn = document.createElement('button');
+        delBtn.textContent = '✖';
+        delBtn.style.cursor = 'pointer';
+        delBtn.style.background = 'transparent';
+        delBtn.style.border = 'none';
+        delBtn.style.color = '#ff4d4d';
+        
+        // ✖ボタンを押したらそのファイルをリストから消す
+        delBtn.onclick = function() {
+            li.remove();
+        };
+
+        // 行の中に名前とボタンを入れる
+        li.appendChild(nameSpan);
+        li.appendChild(delBtn);
+
+        // リスト(ul)に行を追加する
+        fileList.appendChild(li);
+    }
+}
