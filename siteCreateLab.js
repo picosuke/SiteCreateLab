@@ -410,12 +410,7 @@ Blockly.defineBlocksWithJsonArray([
         "args0": [
 		    {"type": "field_dropdown", "name": "name", "options": [
     			  ["色", "color"],
-      			  ["背景色", "background-color"],
-                  ["最大横幅", "max-width"],
-                  ["最小横幅", "min-width"],
-                  ["最大縦幅", "max-height"],
-                  ["最小縦幅", "min-height"],
-                  ["文字の大きさ", "font-size"]
+      			  ["背景色", "background-color"]
     		]},
           { "type": "input_value", "name": "color", "check": "color" }
         ],
@@ -432,7 +427,12 @@ Blockly.defineBlocksWithJsonArray([
         "args0": [
 		    {"type": "field_dropdown", "name": "name", "options": [
     			  ["横幅", "width"],
-      			  ["縦幅", "height"]
+      			  ["縦幅", "height"],
+                  ["最大横幅", "max-width"],
+                  ["最小横幅", "min-width"],
+                  ["最大縦幅", "max-height"],
+                  ["最小縦幅", "min-height"],
+                  ["文字の大きさ", "font-size"]
     		]},
             { "type": "input_value", "name": "naga", "check": "naga" }
         ],
