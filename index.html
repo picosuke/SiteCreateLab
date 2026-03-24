@@ -334,9 +334,14 @@
             
             <div id="settei">
                 <div class="setteimozi">
-                    コード
+                    ファイル
                 </div>
                 <div class="naka">
+                    <div id="dropArea" style="border: 2px dashed #aaa; border-radius: 5px; padding: 15px; text-align: center; cursor: pointer; color: #aaa; margin-bottom: 10px;">
+                        📂 ここにファイルをドロップ<br>またはクリックして選択
+                        <input type="file" id="fileInput" multiple style="display: none;">
+                    </div>
+                    <ul id="fileList" style="list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto;"></ul>
                 </div>
             </div>
         </div>
