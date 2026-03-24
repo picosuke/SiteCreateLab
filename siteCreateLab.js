@@ -1439,6 +1439,8 @@ function addFilesToList(files) {
 
         // リストの行(li)を作る
         var li = document.createElement('li');
+        li.style.boxSizing = 'border-box';
+        li.style.width = '100%';
         li.style.padding = '5px 8px';
         li.style.marginBottom = '5px';
         li.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
