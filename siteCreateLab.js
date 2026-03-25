@@ -604,6 +604,30 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "",
         "helpUrl": ""
     },
+
+	{
+        "type": "img_block",
+        "message0": "パス %1 で画像を表示 詳細設定 %2",
+        "args0": [
+            {
+                "type": "field_input",
+                "name": "SRC",
+                "text": "./media/画像名.png"
+            },
+            {
+                "type": "input_value",
+                "name": "syo",
+                "check": "syo"
+            }
+        ],
+        "inputsInline": true,
+        "previousStatement": "body",
+        "nextStatement": "body",
+        "colour": "#0580ed",
+        "tooltip": "画像を表示します",
+        "helpUrl": ""
+    },
+	
     {
         "type": "JC",
         "message0": "JS コメント // %1",
@@ -1137,6 +1161,16 @@ javascript.javascriptGenerator.forBlock['CHOD'] = function() {
     return [":hover", javascript.Order.ATOMIC];
 };
 
+
+javascript.javascriptGenerator.forBlock['img_block'] = function(block, generator) {
+    var src = block.getFieldValue('SRC') || '';
+    var value_syo = generator.valueToCode(block, 'syo', javascript.Order.NONE) || '';
+    // <img src="./media/〇〇.png" class="xxx"> を作る
+    text = text + '\n<img src="' + src + '"' + value_syo + '>';
+    return '\n';
+};
+
+
 javascript.javascriptGenerator.forBlock['CNCD'] = function(block, generator) {
     var value_class = generator.valueToCode(block, 'class', javascript.Order.NONE) || '';
     return ["." + value_class + "_site", javascript.Order.ATOMIC];
@@ -1365,9 +1399,26 @@ function updateBlocks() {
     title = "";
     const code = Blockly.JavaScript.workspaceToCode(workspace);
 
-    lastGeneratedHtml = '<!DOCTYPE html>\n<html lang="ja">\n<head>\n    <meta charset="utf-8"/>' + YOMI + '\n    <style>\n' + csstext + '\n    </style>\n    <title>' + title + '</title>\n</head>\n<body id="kekka">' + text + '\n    <script>\n' + jstext + '\n    </script>\n</body>';
-    kekka.innerHTML = YOMI + text + '<style>\n' + csstext + '\n    </style>\n<script>\n' + jstext + '\n    </script>';
-    window.alert(lastGeneratedHtml);
+    // ▼ ダウンロード用の本番HTML
+    lastGeneratedHtml = '<!DOCTYPE html>\n<html lang="ja">\n<head>\n    <meta charset="utf-8"/>' + YOMI + '\n    <style>\n' + csstext + '\n    </style>\n    <title>' + title + '</title>\n</head>\n<body id="kekka">\n' + text + '\n    <script>\n' + jstext + '\n    </script>\n</body>';
+    
+    // ▼ エディタのプレビュー用（右下に追加した画像を見れるようにする魔法の処理）
+    var previewText = text;
+    var listItems = document.getElementById('fileList').querySelectorAll('li');
+    listItems.forEach(function(li) {
+        if (li.dataset.type === 'file' && li.fileData) {
+            var fileName = li.querySelector('.itemName').textContent;
+            var targetPath = "./media/" + fileName; // ブロックで入力するパス
+            
+            // ブロックで作ったテキストの中に「./media/ファイル名」があったら、仮の画像URLにすり替える
+            if (previewText.indexOf(targetPath) !== -1) {
+                var blobUrl = URL.createObjectURL(li.fileData);
+                previewText = previewText.split(targetPath).join(blobUrl);
+            }
+        }
+    });
+
+    kekka.innerHTML = YOMI + previewText + '<style>\n' + csstext + '\n    </style>\n<script>\n' + jstext + '\n    </script>';
 }
 
 // ==========================================
