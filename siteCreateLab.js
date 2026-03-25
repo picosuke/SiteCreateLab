@@ -1727,5 +1727,72 @@ if (downloadBtn) {
     });
 }
 
+// ==========================================
+// ブロックの保存（セーブ）と読み込み（ロード）機能
+// ==========================================
+var saveBtn = document.getElementById('saveBlocksBtn');
+var loadBtn = document.getElementById('loadBlocksBtn');
+var loadInput = document.getElementById('loadBlocksInput');
+
+// ① 【保存機能】現在のブロックの形をデータ(JSON)にしてダウンロードする
+if (saveBtn) {
+    saveBtn.addEventListener('click', function() {
+        // ワークスペースのすべてのブロックをデータに変換
+        var state = Blockly.serialization.workspaces.save(workspace);
+        var jsonText = JSON.stringify(state, null, 2);
+        
+        // タイトルの名前を使ってファイル名を決める（タイトルが空なら my_blocks.json になる）
+        var titleInput = document.getElementById("title").value.trim() || "my_blocks";
+        titleInput = titleInput.replace(/\.html?$/i, ""); // 間違えて .html を付けていたら消す
+
+        // データファイルとしてパソコンにダウンロードさせる
+		var blob = new Blob([jsonText], { type: "text/plain" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = titleInput + ".scl1";
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+}
+
+// ② 【読み込み機能】保存したファイルを選んで、ブロックを復元する
+if (loadBtn && loadInput) {
+    // 読み込みボタンを押したら、隠しておいたファイル選択画面を開く
+    loadBtn.addEventListener('click', function() {
+        loadInput.click();
+    });
+    
+    // ファイルが選ばれたら中身を読み取る
+    loadInput.addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var content = e.target.result;
+            try {
+                // 文字データをプログラム用のデータに戻す
+                var state = JSON.parse(content);
+                // 今画面にあるブロックを一旦すべて消す
+                workspace.clear();
+                // データを流し込んでブロックを完全復元する！
+                Blockly.serialization.workspaces.load(state, workspace);
+                alert("ブロックを読み込みました！");
+            } catch (err) {
+                alert("ファイルの読み込みに失敗しました。\n保存した正しいファイルか確認してください。");
+                console.error(err);
+            }
+        };
+        // テキストとしてファイルを読み込む
+        reader.readAsText(file);
+        
+        // 連続して同じファイルを読み込めるようにリセットしておく
+        loadInput.value = '';
+    });
+}
+
+
 
 workspace.addChangeListener(Blockly.Events.disableOrphans);
+
