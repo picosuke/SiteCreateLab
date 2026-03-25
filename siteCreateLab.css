@@ -75,7 +75,7 @@ body {
     user-select: none;
 }
 
-#kekka {
+#kekka_s {
     background-color: #fff;
     min-height: 360px;
     width: calc(100% - 20px); /* 100%からmarginの20pxを引く */
