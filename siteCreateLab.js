@@ -1728,71 +1728,149 @@ if (downloadBtn) {
 }
 
 // ==========================================
-// ブロックの保存（セーブ）と読み込み（ロード）機能
+// プロジェクト全体の保存（セーブ）と読み込み（ロード）機能 (.scl1)
 // ==========================================
 var saveBtn = document.getElementById('saveBlocksBtn');
 var loadBtn = document.getElementById('loadBlocksBtn');
 var loadInput = document.getElementById('loadBlocksInput');
 
-// ① 【保存機能】現在のブロックの形をデータ(JSON)にしてダウンロードする
+// ① 【保存機能】ブロックと右下のファイルをZIPにまとめて「.scl1」で保存する
 if (saveBtn) {
     saveBtn.addEventListener('click', function() {
-        // ワークスペースのすべてのブロックをデータに変換
+        if (typeof JSZip === 'undefined') {
+            alert("JSZipが読み込まれていません。<head>を確認してください。");
+            return;
+        }
+
+        var zip = new JSZip();
+
+        // 1. ブロックの形をデータにして「blocks.json」としてZIPに入れる
         var state = Blockly.serialization.workspaces.save(workspace);
         var jsonText = JSON.stringify(state, null, 2);
-        
-        // タイトルの名前を使ってファイル名を決める（タイトルが空なら my_blocks.json になる）
-        var titleInput = document.getElementById("title").value.trim() || "my_blocks";
-        titleInput = titleInput.replace(/\.html?$/i, ""); // 間違えて .html を付けていたら消す
+        zip.file("blocks.json", jsonText);
 
-        // データファイルとしてパソコンにダウンロードさせる
-		var blob = new Blob([jsonText], { type: "text/plain" });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = titleInput + ".scl1";
-        a.click();
-        URL.revokeObjectURL(url);
+        // 2. 右下のファイルやフォルダを「media」フォルダとしてZIPに入れる
+        var mediaFolder = zip.folder("media");
+        buildZipTree(mediaFolder, document.getElementById('fileList'));
+
+        // タイトルの名前を使ってファイル名を決める
+        var titleInput = document.getElementById("title").value.trim() || "my_project";
+        titleInput = titleInput.replace(/\.html?$/i, "").replace(/\.scl1$/i, "");
+
+        // 3. 全てを1つに圧縮して「.scl1」という名前でダウンロードさせる
+        zip.generateAsync({type:"blob"}).then(function(content) {
+            var url = URL.createObjectURL(content);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = titleInput + ".scl1"; // ★専用の拡張子
+            a.click();
+            URL.revokeObjectURL(url);
+        });
     });
 }
 
-// ② 【読み込み機能】保存したファイルを選んで、ブロックを復元する
+// ② 【読み込み機能】保存した「.scl1」を選んで、ブロックとファイルを完全復元する
 if (loadBtn && loadInput) {
-    // 読み込みボタンを押したら、隠しておいたファイル選択画面を開く
     loadBtn.addEventListener('click', function() {
         loadInput.click();
     });
     
-    // ファイルが選ばれたら中身を読み取る
     loadInput.addEventListener('change', function(e) {
         var file = e.target.files[0];
         if (!file) return;
+
+        if (typeof JSZip === 'undefined') {
+            alert("JSZipが読み込まれていません。");
+            return;
+        }
+
+        var zip = new JSZip();
         
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var content = e.target.result;
+        // ZIP(.scl1)の中身を読み解く
+        zip.loadAsync(file).then(async function(loadedZip) {
             try {
-                // 文字データをプログラム用のデータに戻す
-                var state = JSON.parse(content);
-                // 今画面にあるブロックを一旦すべて消す
-                workspace.clear();
-                // データを流し込んでブロックを完全復元する！
-                Blockly.serialization.workspaces.load(state, workspace);
-                alert("ブロックを読み込みました！");
+                // ================================
+                // 1. ブロックの復元
+                // ================================
+                if (loadedZip.file("blocks.json")) {
+                    var jsonText = await loadedZip.file("blocks.json").async("string");
+                    var state = JSON.parse(jsonText);
+                    workspace.clear();
+                    Blockly.serialization.workspaces.load(state, workspace);
+                } else {
+                    alert("プロジェクトの中にブロックのデータが見つかりませんでした。");
+                }
+
+                // ================================
+                // 2. 右下のファイル・フォルダの復元
+                // ================================
+                var fileListUl = document.getElementById('fileList');
+                fileListUl.innerHTML = ''; // 一旦今のリストを空にする
+
+                var root = { type: 'folder', children: {} };
+
+                // ZIP内の「media」フォルダの中身を調べて、元の階層（ツリー）を組み立てる
+                for (var relativePath in loadedZip.files) {
+                    if (!relativePath.startsWith("media/")) continue;
+                    if (relativePath === "media/") continue;
+
+                    var pathObj = loadedZip.files[relativePath];
+                    var pathParts = relativePath.replace("media/", "").split('/').filter(p => p !== "");
+                    
+                    var currentDir = root;
+                    for (var i = 0; i < pathParts.length; i++) {
+                        var part = pathParts[i];
+                        var isLast = (i === pathParts.length - 1);
+                        
+                        if (!currentDir.children[part]) {
+                            currentDir.children[part] = {
+                                type: (isLast && !pathObj.dir) ? 'file' : 'folder',
+                                children: {},
+                                fileObj: pathObj
+                            };
+                        }
+                        currentDir = currentDir.children[part];
+                    }
+                }
+
+                // 組み立てた階層データをもとに、画面上のHTMLリスト（右下のエリア）を作る
+                async function buildDOM(node, targetUl) {
+                    for (var name in node.children) {
+                        var childNode = node.children[name];
+                        if (childNode.type === 'folder') {
+                            var li = createListItem(name, 'folder', null);
+                            targetUl.appendChild(li);
+                            var childUl = li.querySelector('ul');
+                            await buildDOM(childNode, childUl); // フォルダの中身も作る
+                        } else {
+                            // ファイルのデータをBlobとして取り出し、Fileオブジェクトのふりをさせる
+                            var blob = await childNode.fileObj.async("blob");
+                            var f = new File([blob], name, { type: blob.type });
+                            var li = createListItem(name, 'file', f);
+                            targetUl.appendChild(li);
+                        }
+                    }
+                }
+
+                await buildDOM(root, fileListUl); // 復元実行！
+                
+                alert("プロジェクト（.scl1）の読み込みが完了しました！");
+                
+                // 読み込んだ画像を使ってプレビューを即座に更新する
+                updateBlocks();
+
             } catch (err) {
-                alert("ファイルの読み込みに失敗しました。\n保存した正しいファイルか確認してください。");
+                alert("読み込み中にエラーが発生しました。");
                 console.error(err);
             }
-        };
-        // テキストとしてファイルを読み込む
-        reader.readAsText(file);
+        }).catch(function(err) {
+            alert("ファイルが正しい形式(.scl1)ではありません。または壊れています。");
+            console.error(err);
+        });
         
-        // 連続して同じファイルを読み込めるようにリセットしておく
-        loadInput.value = '';
+        loadInput.value = ''; // 連続で同じファイルを読み込めるようにリセット
     });
 }
-
-
 
 workspace.addChangeListener(Blockly.Events.disableOrphans);
 
