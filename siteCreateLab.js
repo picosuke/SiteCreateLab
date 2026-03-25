@@ -1371,7 +1371,7 @@ function updateBlocks() {
 }
 
 // ==========================================
-// ファイル・フォルダ管理 ＆ ZIPダウンロード機能（スマホ・iPad対応）
+// ファイル・フォルダ管理 ＆ ZIPダウンロード機能（スマホ対応・デザイン統一版）
 // ==========================================
 var dropArea = document.getElementById('dropArea');
 var fileInput = document.getElementById('fileInput');
@@ -1436,7 +1436,7 @@ function createListItem(name, type, fileData) {
     li.dataset.type = type;
     li.fileData = fileData;
     
-    // 見た目の設定（白背景・黒文字・灰色枠）
+    // 見た目の設定
     li.style.boxSizing = 'border-box';
     li.style.width = '100%';
     li.style.marginBottom = '5px';
@@ -1483,12 +1483,19 @@ function createListItem(name, type, fileData) {
         }
     });
 
+    // ==============================================
+    // 【改善】名前が長い時は「...」で省略させる設定
+    // ==============================================
     var leftDiv = document.createElement('div');
     leftDiv.style.display = 'flex';
     leftDiv.style.alignItems = 'center';
+    leftDiv.style.flex = '1';       // 空きスペースを埋める
+    leftDiv.style.minWidth = '0';   // これがないとはみ出る
+    leftDiv.style.marginRight = '10px'; // 右のボタンとの隙間
 
     var iconSpan = document.createElement('span');
     iconSpan.textContent = type === 'folder' ? '📁 ' : '📄 ';
+    iconSpan.style.flexShrink = '0'; // アイコンは縮ませない
     
     // 名前の変更機能
     var nameSpan = document.createElement('span');
@@ -1496,6 +1503,11 @@ function createListItem(name, type, fileData) {
     nameSpan.textContent = name;
     nameSpan.style.cursor = 'pointer';
     nameSpan.title = 'ダブルクリックで名前を変更';
+    // はみ出た分を「...」にする魔法のCSS
+    nameSpan.style.overflow = 'hidden';
+    nameSpan.style.textOverflow = 'ellipsis';
+    nameSpan.style.whiteSpace = 'nowrap';
+
     nameSpan.addEventListener('dblclick', function(e) {
         e.stopPropagation();
         var newName = prompt("名前を変更", nameSpan.textContent);
@@ -1509,23 +1521,28 @@ function createListItem(name, type, fileData) {
 
 
     // ==============================================
-    // 【iPad対応】操作ボタン（右側に並べる）
+    // 【改善】操作ボタンの見た目を統一
     // ==============================================
     var rightDiv = document.createElement('div');
     rightDiv.style.display = 'flex';
     rightDiv.style.alignItems = 'center';
+    rightDiv.style.flexShrink = '0'; // ボタン群は縮ませない
 
+    // 統一デザインのボタンを作る関数
     function createNavBtn(text, title, onClick) {
         var btn = document.createElement('button');
         btn.textContent = text;
         btn.title = title;
         btn.style.cursor = 'pointer';
-        btn.style.background = '#f0f0f0';
-        btn.style.border = '1px solid #ccc';
+        // ご要望のデザイン（白背景・黒枠・黒文字・角丸）
+        btn.style.backgroundColor = '#ffffff';
+        btn.style.border = '1px solid #000000';
+        btn.style.color = '#000000';
         btn.style.borderRadius = '3px';
         btn.style.marginRight = '4px';
-        btn.style.padding = '3px 8px';
+        btn.style.padding = '3px 6px';
         btn.style.fontSize = '12px';
+        
         btn.onclick = function(e) {
             e.stopPropagation();
             onClick();
@@ -1533,29 +1550,7 @@ function createListItem(name, type, fileData) {
         return btn;
     }
 
-    // ▲：一つ上に移動
-    var upBtn = createNavBtn('▲', '一つ上に移動', function() {
-        var prev = li.previousElementSibling;
-        if (prev) li.parentNode.insertBefore(li, prev);
-    });
-    
-    // ▼：一つ下に移動
-    var downBtn = createNavBtn('▼', '一つ下に移動', function() {
-        var next = li.nextElementSibling;
-        if (next) li.parentNode.insertBefore(next, li);
-    });
-
-    // ▶：すぐ上のフォルダの中に入れる
-    var inBtn = createNavBtn('▶', 'すぐ上のフォルダの中に入れる', function() {
-        var prev = li.previousElementSibling;
-        if (prev && prev.dataset.type === 'folder') {
-            prev.querySelector('ul').appendChild(li);
-        } else {
-            alert('すぐ上にフォルダがある時だけ、中に入れることができます！\n(▲ボタンでフォルダの下に移動させてから押してください)');
-        }
-    });
-
-    // ◀：いまのフォルダから外に出す
+    // 各種ボタンの作成
     var outBtn = createNavBtn('◀', 'いまのフォルダの外に出す', function() {
         var parentUl = li.parentNode;
         if (parentUl && parentUl.id !== 'fileList') {
@@ -1563,20 +1558,28 @@ function createListItem(name, type, fileData) {
             parentFolder.parentNode.insertBefore(li, parentFolder.nextSibling);
         }
     });
-
-    // ✖：削除ボタン
-    var delBtn = document.createElement('button');
-    delBtn.textContent = '✖';
-    delBtn.style.cursor = 'pointer';
-    delBtn.style.background = 'transparent';
-    delBtn.style.border = 'none';
-    delBtn.style.color = '#ff4d4d';
-    delBtn.style.padding = '3px';
-    delBtn.style.marginLeft = '5px';
-    delBtn.onclick = function(e) {
+    var upBtn = createNavBtn('▲', '一つ上に移動', function() {
+        var prev = li.previousElementSibling;
+        if (prev) li.parentNode.insertBefore(li, prev);
+    });
+    var downBtn = createNavBtn('▼', '一つ下に移動', function() {
+        var next = li.nextElementSibling;
+        if (next) li.parentNode.insertBefore(next, li);
+    });
+    var inBtn = createNavBtn('▶', 'すぐ上のフォルダの中に入れる', function() {
+        var prev = li.previousElementSibling;
+        if (prev && prev.dataset.type === 'folder') {
+            prev.querySelector('ul').appendChild(li);
+        } else {
+            alert('すぐ上にフォルダがある時だけ、中に入れることができます！');
+        }
+    });
+    var delBtn = createNavBtn('✖', '削除', function() {
         li.remove();
-        e.stopPropagation();
-    };
+    });
+
+    // 一番右の削除ボタンの右余白を消す
+    delBtn.style.marginRight = '0';
 
     // ボタンを並べる
     rightDiv.appendChild(outBtn);
@@ -1641,58 +1644,6 @@ if (downloadBtn) {
             var a = document.createElement("a");
             a.href = url;
             a.download = titleInput + "_site.zip"; 
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-    });
-}
-
-// ⑤ フォルダの中身を再帰的にZIPにまとめる関数
-function buildZipTree(zipFolder, ulElement) {
-    var items = ulElement.children;
-    for (var i = 0; i < items.length; i++) {
-        var li = items[i];
-        var name = li.querySelector('.itemName').textContent;
-        if (li.dataset.type === 'folder') {
-            var newFolder = zipFolder.folder(name);
-            buildZipTree(newFolder, li.querySelector('ul')); // フォルダの中身を調べる
-        } else {
-            zipFolder.file(name, li.fileData); // ファイルをZIPに詰める
-        }
-    }
-}
-
-// ⑥ ダウンロードボタンを押した時の処理（ZIP化して保存）
-var downloadBtn = document.getElementById('download');
-if (downloadBtn) {
-    downloadBtn.addEventListener("click", function() {
-        if (typeof JSZip === 'undefined') {
-            alert("JSZipが読み込まれていません。<head>を確認してください。");
-            return;
-        }
-
-        updateBlocks();
-        
-        // タイトルの取得と「html.htm」問題の解消
-        var titleInput = document.getElementById("title").value.trim();
-        if (!titleInput) titleInput = "index";
-        titleInput = titleInput.replace(/\.html?$/i, ""); // ユーザーが「.html」と書いていたら消す
-
-        var zip = new JSZip();
-        
-        // 1. 作ったHTMLコードを直下に保存
-        zip.file(titleInput + ".html", lastGeneratedHtml);
-
-        // 2. 「media」フォルダを作り、リストのアイテムを全部そこに入れる
-        var mediaFolder = zip.folder("media");
-        buildZipTree(mediaFolder, document.getElementById('fileList'));
-
-        // 3. 全てまとめた「ZIPファイル」としてダウンロード
-        zip.generateAsync({type:"blob"}).then(function(content) {
-            var url = URL.createObjectURL(content);
-            var a = document.createElement("a");
-            a.href = url;
-            a.download = titleInput + "_site.zip"; // .zip としてダウンロード
             a.click();
             URL.revokeObjectURL(url);
         });
