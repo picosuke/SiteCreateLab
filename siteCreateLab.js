@@ -1371,14 +1371,17 @@ function updateBlocks() {
 }
 
 // ==========================================
-// ファイル・フォルダ管理 ＆ ZIPダウンロード機能
+// ファイル・フォルダ管理 ＆ ZIPダウンロード機能（スマホ・iPad対応）
 // ==========================================
 var dropArea = document.getElementById('dropArea');
 var fileInput = document.getElementById('fileInput');
 var fileList = document.getElementById('fileList');
 var addFolderBtn = document.getElementById('addFolderBtn');
 
-var draggingItem = null; // ドラッグ中の要素を記憶
+// リストの一番下に「外に出すためのスキマ」を広めに作る
+fileList.style.paddingBottom = '60px';
+
+var draggingItem = null;
 
 // ① ファイル選択エリアの処理
 dropArea.addEventListener('click', () => fileInput.click());
@@ -1395,6 +1398,17 @@ dropArea.addEventListener('drop', (e) => {
 fileInput.addEventListener('change', (e) => {
     addFilesToList(e.target.files, fileList);
     fileInput.value = '';
+});
+
+// 一番外側のスキマにドロップしたら一番外側に出す処理
+fileList.addEventListener('dragover', function(e) {
+    e.preventDefault();
+});
+fileList.addEventListener('drop', function(e) {
+    e.preventDefault();
+    if (draggingItem && e.target === fileList) {
+        fileList.appendChild(draggingItem);
+    }
 });
 
 // ② フォルダ追加ボタンの処理
@@ -1420,12 +1434,11 @@ function addFilesToList(files, targetUl) {
 function createListItem(name, type, fileData) {
     var li = document.createElement('li');
     li.dataset.type = type;
-    li.fileData = fileData; // ファイル本体のデータを保存
+    li.fileData = fileData;
     
-    // 見た目の設定（ご要望の「白背景・黒文字・灰色枠」）
+    // 見た目の設定（白背景・黒文字・灰色枠）
     li.style.boxSizing = 'border-box';
     li.style.width = '100%';
-    li.style.padding = '5px 8px';
     li.style.marginBottom = '5px';
     li.style.backgroundColor = 'white';
     li.style.border = '1px solid gray';
@@ -1434,41 +1447,41 @@ function createListItem(name, type, fileData) {
     li.style.fontSize = '14px';
     li.style.listStyle = 'none';
 
-    // ドラッグ＆ドロップでフォルダに入れる設定
+    // PC用のドラッグ＆ドロップ設定
     li.setAttribute('draggable', 'true');
     li.addEventListener('dragstart', function(e) {
         draggingItem = li;
         e.stopPropagation();
     });
-    li.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        li.style.borderBottom = '3px solid #5485ee'; // ドロップ先を青線で強調
-    });
-    li.addEventListener('dragleave', function(e) {
-        li.style.borderBottom = '1px solid gray';
-        e.stopPropagation();
-    });
-    li.addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        li.style.borderBottom = '1px solid gray';
-        if (draggingItem === li) return; // 自分自身には入れない
 
-        if (li.dataset.type === 'folder') {
-            // フォルダなら中に入れる
-            li.querySelector('ul').appendChild(draggingItem);
-        } else {
-            // ファイルならその後ろに並べる
-            li.parentNode.insertBefore(draggingItem, li.nextSibling);
-        }
-    });
-
-    // ヘッダー部分（アイコン ＋ 名前 ＋ 削除ボタン）
+    // ドロップの反応エリア（ヘッダー部分）
     var header = document.createElement('div');
     header.style.display = 'flex';
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
+    header.style.padding = '5px 8px';
+
+    header.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        header.style.backgroundColor = '#eef';
+    });
+    header.addEventListener('dragleave', function(e) {
+        header.style.backgroundColor = 'transparent';
+        e.stopPropagation();
+    });
+    header.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        header.style.backgroundColor = 'transparent';
+        if (draggingItem === li) return; 
+
+        if (li.dataset.type === 'folder') {
+            li.querySelector('ul').appendChild(draggingItem);
+        } else {
+            li.parentNode.insertBefore(draggingItem, li.nextSibling);
+        }
+    });
 
     var leftDiv = document.createElement('div');
     leftDiv.style.display = 'flex';
@@ -1477,7 +1490,7 @@ function createListItem(name, type, fileData) {
     var iconSpan = document.createElement('span');
     iconSpan.textContent = type === 'folder' ? '📁 ' : '📄 ';
     
-    // 【名前の変更機能】
+    // 名前の変更機能
     var nameSpan = document.createElement('span');
     nameSpan.className = 'itemName';
     nameSpan.textContent = name;
@@ -1494,30 +1507,144 @@ function createListItem(name, type, fileData) {
     leftDiv.appendChild(iconSpan);
     leftDiv.appendChild(nameSpan);
 
+
+    // ==============================================
+    // 【iPad対応】操作ボタン（右側に並べる）
+    // ==============================================
+    var rightDiv = document.createElement('div');
+    rightDiv.style.display = 'flex';
+    rightDiv.style.alignItems = 'center';
+
+    function createNavBtn(text, title, onClick) {
+        var btn = document.createElement('button');
+        btn.textContent = text;
+        btn.title = title;
+        btn.style.cursor = 'pointer';
+        btn.style.background = '#f0f0f0';
+        btn.style.border = '1px solid #ccc';
+        btn.style.borderRadius = '3px';
+        btn.style.marginRight = '4px';
+        btn.style.padding = '3px 8px';
+        btn.style.fontSize = '12px';
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            onClick();
+        };
+        return btn;
+    }
+
+    // ▲：一つ上に移動
+    var upBtn = createNavBtn('▲', '一つ上に移動', function() {
+        var prev = li.previousElementSibling;
+        if (prev) li.parentNode.insertBefore(li, prev);
+    });
+    
+    // ▼：一つ下に移動
+    var downBtn = createNavBtn('▼', '一つ下に移動', function() {
+        var next = li.nextElementSibling;
+        if (next) li.parentNode.insertBefore(next, li);
+    });
+
+    // ▶：すぐ上のフォルダの中に入れる
+    var inBtn = createNavBtn('▶', 'すぐ上のフォルダの中に入れる', function() {
+        var prev = li.previousElementSibling;
+        if (prev && prev.dataset.type === 'folder') {
+            prev.querySelector('ul').appendChild(li);
+        } else {
+            alert('すぐ上にフォルダがある時だけ、中に入れることができます！\n(▲ボタンでフォルダの下に移動させてから押してください)');
+        }
+    });
+
+    // ◀：いまのフォルダから外に出す
+    var outBtn = createNavBtn('◀', 'いまのフォルダの外に出す', function() {
+        var parentUl = li.parentNode;
+        if (parentUl && parentUl.id !== 'fileList') {
+            var parentFolder = parentUl.parentNode;
+            parentFolder.parentNode.insertBefore(li, parentFolder.nextSibling);
+        }
+    });
+
+    // ✖：削除ボタン
     var delBtn = document.createElement('button');
     delBtn.textContent = '✖';
     delBtn.style.cursor = 'pointer';
     delBtn.style.background = 'transparent';
     delBtn.style.border = 'none';
     delBtn.style.color = '#ff4d4d';
+    delBtn.style.padding = '3px';
+    delBtn.style.marginLeft = '5px';
     delBtn.onclick = function(e) {
         li.remove();
         e.stopPropagation();
     };
 
+    // ボタンを並べる
+    rightDiv.appendChild(outBtn);
+    rightDiv.appendChild(upBtn);
+    rightDiv.appendChild(downBtn);
+    rightDiv.appendChild(inBtn);
+    rightDiv.appendChild(delBtn);
+
     header.appendChild(leftDiv);
-    header.appendChild(delBtn);
+    header.appendChild(rightDiv);
     li.appendChild(header);
 
-    // フォルダの場合は、中身を入れるための透明な箱(ul)をつける
+    // フォルダの場合は中身を入れるための透明な箱(ul)をつける
     if (type === 'folder') {
         var childUl = document.createElement('ul');
         childUl.style.paddingLeft = '20px';
-        childUl.style.marginTop = '5px';
-        childUl.style.minHeight = '15px'; // 空でも入れやすくする
+        childUl.style.marginTop = '0px';
+        childUl.style.minHeight = '10px'; 
         li.appendChild(childUl);
     }
     return li;
+}
+
+// ⑤ フォルダの中身を再帰的にZIPにまとめる関数
+function buildZipTree(zipFolder, ulElement) {
+    var items = ulElement.children;
+    for (var i = 0; i < items.length; i++) {
+        var li = items[i];
+        var name = li.querySelector('.itemName').textContent;
+        if (li.dataset.type === 'folder') {
+            var newFolder = zipFolder.folder(name);
+            buildZipTree(newFolder, li.querySelector('ul')); 
+        } else {
+            zipFolder.file(name, li.fileData); 
+        }
+    }
+}
+
+// ⑥ ダウンロードボタンを押した時の処理（ZIP化して保存）
+var downloadBtn = document.getElementById('download');
+if (downloadBtn) {
+    downloadBtn.addEventListener("click", function() {
+        if (typeof JSZip === 'undefined') {
+            alert("JSZipが読み込まれていません。<head>を確認してください。");
+            return;
+        }
+
+        updateBlocks();
+        
+        var titleInput = document.getElementById("title").value.trim();
+        if (!titleInput) titleInput = "index";
+        titleInput = titleInput.replace(/\.html?$/i, ""); 
+
+        var zip = new JSZip();
+        zip.file(titleInput + ".html", lastGeneratedHtml);
+
+        var mediaFolder = zip.folder("media");
+        buildZipTree(mediaFolder, document.getElementById('fileList'));
+
+        zip.generateAsync({type:"blob"}).then(function(content) {
+            var url = URL.createObjectURL(content);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = titleInput + "_site.zip"; 
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    });
 }
 
 // ⑤ フォルダの中身を再帰的にZIPにまとめる関数
