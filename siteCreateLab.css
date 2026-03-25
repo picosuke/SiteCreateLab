@@ -81,7 +81,6 @@ body {
     width: calc(100% - 20px); /* 100%からmarginの20pxを引く */
     margin-left: 20px;
     border: 8px #4d6277 solid;
-    border-radius: 20px;
     overflow: auto;
     z-index: 2;
     box-sizing: border-box; /* ★枠線も含めて幅を計算させる魔法のコード */
