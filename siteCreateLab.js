@@ -612,7 +612,7 @@ Blockly.defineBlocksWithJsonArray([
             {
                 "type": "field_input",
                 "name": "SRC",
-                "text": "./media/画像名.png"
+                "text": "画像名.png"
             },
             {
                 "type": "input_value",
@@ -1164,8 +1164,13 @@ javascript.javascriptGenerator.forBlock['CHOD'] = function() {
 
 javascript.javascriptGenerator.forBlock['img_block'] = function(block, generator) {
     var src = block.getFieldValue('SRC') || '';
+    
+    // もし入力された文字が「http」や「./」で始まっていなければ ./media/ を付ける
+    if (!src.startsWith('./') && !src.startsWith('http')) {
+        src = './media/' + src;
+    }
+    
     var value_syo = generator.valueToCode(block, 'syo', javascript.Order.NONE) || '';
-    // <img src="./media/〇〇.png" class="xxx"> を作る
     text = text + '\n<img src="' + src + '"' + value_syo + '>';
     return '\n';
 };
@@ -1400,23 +1405,44 @@ function updateBlocks() {
     const code = Blockly.JavaScript.workspaceToCode(workspace);
 
     // ▼ ダウンロード用の本番HTML
-    lastGeneratedHtml = '<!DOCTYPE html>\n<html lang="ja">\n<head>\n    <meta charset="utf-8"/>' + YOMI + '\n    <style>\n' + csstext + '\n    </style>\n    <title>' + title + '</title>\n</head>\n<body id="kekka">\n' + text + '\n    <script>\n' + jstext + '\n    </script>\n</body>';
+    lastGeneratedHtml = '<!DOCTYPE html>\n<html lang="ja">\n<head>\n    <meta charset="utf-8"/>' + YOMI + '\n    <style>\n' + csstext + '\n    </style>\n    <title>' + title + '</title>\n</head>\n<body id="kekka">' + text + '\n    <script>\n' + jstext + '\n    </script>\n</body>';
     
     // ▼ エディタのプレビュー用（右下に追加した画像を見れるようにする魔法の処理）
     var previewText = text;
-    var listItems = document.getElementById('fileList').querySelectorAll('li');
-    listItems.forEach(function(li) {
-        if (li.dataset.type === 'file' && li.fileData) {
-            var fileName = li.querySelector('.itemName').textContent;
-            var targetPath = "./media/" + fileName; // ブロックで入力するパス
+
+    // フォルダの中身を奥までたどってパスを作る関数
+    function replaceFilePaths(ulElement, currentPath) {
+        var items = ulElement.children;
+        for (var i = 0; i < items.length; i++) {
+            var li = items[i];
+            var name = li.querySelector('.itemName').textContent;
             
-            // ブロックで作ったテキストの中に「./media/ファイル名」があったら、仮の画像URLにすり替える
-            if (previewText.indexOf(targetPath) !== -1) {
-                var blobUrl = URL.createObjectURL(li.fileData);
-                previewText = previewText.split(targetPath).join(blobUrl);
+            if (li.dataset.type === 'folder') {
+                // フォルダなら、パスを繋げてさらに中身を探す（例: img/）
+                var nextPath = currentPath ? currentPath + "/" + name : name;
+                var childUl = li.querySelector('ul');
+                if (childUl) {
+                    replaceFilePaths(childUl, nextPath);
+                }
+            } else if (li.dataset.type === 'file' && li.fileData) {
+                // ファイルなら、最終的なパスを作って画像をすり替える（例: img/test.png）
+                var filePath = currentPath ? currentPath + "/" + name : name;
+                var targetPath = "./media/" + filePath; // HTMLに書かれているパス
+                
+                // ブロックで作ったテキストの中にそのパスがあったら、仮の画像URLにすり替える
+                if (previewText.indexOf(targetPath) !== -1) {
+                    var blobUrl = URL.createObjectURL(li.fileData);
+                    previewText = previewText.split(targetPath).join(blobUrl);
+                }
             }
         }
-    });
+    }
+
+    // fileList（一番外側）から画像探しをスタート！
+    var fileList = document.getElementById('fileList');
+    if (fileList) {
+        replaceFilePaths(fileList, "");
+    }
 
     kekka.innerHTML = YOMI + previewText + '<style>\n' + csstext + '\n    </style>\n<script>\n' + jstext + '\n    </script>';
 }
