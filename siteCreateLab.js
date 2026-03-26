@@ -505,6 +505,48 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "",
         "helpUrl": ""
     },
+	{
+        "type": "FW",
+        "message0": "文字の太さを %1 にする",
+        "args0": [
+            {
+                "type": "field_slider",
+                "name": "WEIGHT",
+                "value": 4,
+                "min": 1,
+                "max": 9,
+                "precision": 1
+            }
+        ],
+        "previousStatement": "dou",
+        "nextStatement": "dou",
+        "colour": "#ed5179",
+        "tooltip": "1:細い ～ 9:太い",
+        "helpUrl": ""
+    },
+    {
+        "type": "FF",
+        "message0": "フォントを %1 にする",
+        "args0": [
+            {
+                "type": "field_dropdown",
+                "name": "FONT",
+                "options": [
+                    ["ゴシック体 (標準)", "sans-serif"],
+                    ["明朝体", "serif"],
+                    ["等幅 (プログラミング用)", "monospace"],
+                    ["丸ゴシック", "'Varela Round', sans-serif"],
+                    ["手書き風", "cursive"],
+                    ["装飾・ポップ", "fantasy"]
+                ]
+            }
+        ],
+        "previousStatement": "dou",
+        "nextStatement": "dou",
+        "colour": "#ed5179",
+        "tooltip": "",
+        "helpUrl": ""
+    },
     {
         "type": "TMD",
         "message0": "透明",
@@ -632,7 +674,7 @@ Blockly.defineBlocksWithJsonArray([
         "previousStatement": "body",
         "nextStatement": "body",
         "colour": "#0580ed",
-        "tooltip": "画像を表示します",
+        "tooltip": "",
         "helpUrl": ""
     },
 	
@@ -1154,6 +1196,21 @@ javascript.javascriptGenerator.forBlock['KMS'] = function(block, generator) {
     var value_kado = generator.valueToCode(block, 'doko', javascript.Order.NONE) || '';
     var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
     cssd = cssd + "\n    border" + value_kado + "-radius:" + value_naga + ";";
+    return "\n";
+};
+
+// 文字の太さ（スライダーの数値を100倍にして CSS に変換）
+javascript.javascriptGenerator.forBlock['FW'] = function(block, generator) {
+    var weight = block.getFieldValue('WEIGHT');
+    var finalWeight = weight * 100; // 4なら400になる
+    cssd = cssd + "\n    font-weight: " + finalWeight + ";";
+    return "\n";
+};
+
+// フォントの種類
+javascript.javascriptGenerator.forBlock['FF'] = function(block, generator) {
+    var font = block.getFieldValue('FONT');
+    cssd = cssd + "\n    font-family: " + font + ";";
     return "\n";
 };
 
