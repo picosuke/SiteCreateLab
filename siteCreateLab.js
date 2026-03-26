@@ -480,8 +480,12 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "PDS",
-        "message0": "要素内側の %1 の余白を %2 にする",
+        "message0": "%1 の %2 の余白を %3 にする",
         "args0": [
+		    {"type": "field_dropdown", "name": "name", "options": [
+    			  ["要素内側", "padding"],
+      			  ["要素外側", "margin"]
+    		]},
           { "type": "input_value", "name": "doko", "check": "doko" },
           { "type": "input_value", "name": "naga", "check": "naga" }
         ],
@@ -1189,9 +1193,10 @@ javascript.javascriptGenerator.forBlock['DSS'] = function(block, generator) {
 
 // 【修正】 value_kazu を削除
 javascript.javascriptGenerator.forBlock['PDS'] = function(block, generator) {
+    var name = block.getFieldValue('name');
     var value_kado = generator.valueToCode(block, 'doko', javascript.Order.NONE) || '';
     var value_naga = generator.valueToCode(block, 'naga', javascript.Order.NONE) || '';
-    cssd = cssd + "\n    padding" + value_kado + ":" + value_naga + ";";
+    cssd = cssd + "\n    " + name + value_kado + ":" + value_naga + ";";
     return "\n";
 };
 
