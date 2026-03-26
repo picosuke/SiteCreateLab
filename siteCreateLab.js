@@ -1542,7 +1542,7 @@ function updateBlocks() {
     if (fileList) {
         replaceFilePaths(fileList, "");
     }
-
+	alert(lastGeneratedHtml)
     kekka.innerHTML = YOMI + previewText + '<style>\n' + csstext + '\n    </style>\n<script>\n' + jstext + '\n    </script>';
 }
 
