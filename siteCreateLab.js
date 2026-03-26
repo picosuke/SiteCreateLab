@@ -524,7 +524,7 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "1:細い ～ 9:太い",
         "helpUrl": ""
     },
-    {
+	{
         "type": "FF",
         "message0": "フォントを %1 にする",
         "args0": [
@@ -533,11 +533,15 @@ Blockly.defineBlocksWithJsonArray([
                 "name": "FONT",
                 "options": [
                     ["ゴシック体 (標準)", "sans-serif"],
-                    ["明朝体", "serif"],
-                    ["等幅 (プログラミング用)", "monospace"],
-                    ["丸ゴシック", "'Varela Round', sans-serif"],
-                    ["手書き風", "cursive"],
-                    ["装飾・ポップ", "fantasy"]
+                    ["明朝体 (標準)", "serif"],
+                    ["Noto Sans (すごく綺麗・スマホ最適)", "'Noto Sans JP', sans-serif"],
+                    ["Noto Serif (美しい明朝・高級感)", "'Noto Serif JP', serif"],
+                    ["M PLUS Rounded (かわいい丸字)", "'M PLUS Rounded 1c', sans-serif"],
+                    ["Yusei Magic (油性ペンの手書き)", "'Yusei Magic', sans-serif"],
+                    ["Dela Gothic One (極太インパクト)", "'Dela Gothic One', cursive"],
+                    ["DotGothic16 (レトロ・ドット絵風)", "'DotGothic16', sans-serif"],
+                    ["Hachi Maru Pop (昭和レトロポップ)", "'Hachi Maru Pop', cursive"],
+                    ["等幅 (プログラミング用)", "monospace"]
                 ]
             }
         ],
@@ -1210,6 +1214,27 @@ javascript.javascriptGenerator.forBlock['FW'] = function(block, generator) {
 // フォントの種類
 javascript.javascriptGenerator.forBlock['FF'] = function(block, generator) {
     var font = block.getFieldValue('FONT');
+    
+    // Google Fontsから読み込むためのURL設定
+    var fontLink = "";
+    if (font.indexOf("Noto Sans JP") !== -1) fontLink = "family=Noto+Sans+JP:wght@100..900";
+    else if (font.indexOf("Noto Serif JP") !== -1) fontLink = "family=Noto+Serif+JP:wght@200..900";
+    else if (font.indexOf("M PLUS Rounded 1c") !== -1) fontLink = "family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900";
+    else if (font.indexOf("Yusei Magic") !== -1) fontLink = "family=Yusei+Magic";
+    else if (font.indexOf("Dela Gothic One") !== -1) fontLink = "family=Dela+Gothic+One";
+    else if (font.indexOf("DotGothic16") !== -1) fontLink = "family=DotGothic16";
+    else if (font.indexOf("Hachi Maru Pop") !== -1) fontLink = "family=Hachi+Maru+Pop";
+
+    // 選ばれたフォントがGoogle Fontsで、かつまだHTMLに読み込んでいなければ追加する
+    if (fontLink !== "" && YOMI.indexOf(fontLink) === -1) {
+        // Google Fontsの基本サーバー接続（1回だけ追加）
+        if (YOMI.indexOf("fonts.googleapis.com") === -1) {
+            YOMI += '\n<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
+        }
+        // 実際のフォントのダウンロードURLを追加
+        YOMI += '\n<link href="https://fonts.googleapis.com/css2?' + fontLink + '&display=swap" rel="stylesheet">';
+    }
+
     cssd = cssd + "\n    font-family: " + font + ";";
     return "\n";
 };
