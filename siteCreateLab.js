@@ -1889,15 +1889,29 @@ if (loadBtn && loadInput) {
         zip.loadAsync(file).then(async function(loadedZip) {
             try {
                 // ================================
-                // 1. ブロックの復元
+                // 1. ブロックの復元（フォルダごと圧縮されていても探し出す！）
                 // ================================
-                if (loadedZip.file("blocks.json")) {
-                    var jsonText = await loadedZip.file("blocks.json").async("string");
+                var blocksJsonFile = null;
+                var rootPrefix = ""; // フォルダごと圧縮された場合のフォルダ名（例: "my_project/"）
+
+                // ZIPの中を全部チェックして「blocks.json」を探す
+                for (var path in loadedZip.files) {
+                    if (path.endsWith("blocks.json")) {
+                        blocksJsonFile = loadedZip.files[path];
+                        // フォルダごと圧縮されていた場合、そのフォルダ名を記録する
+                        rootPrefix = path.substring(0, path.length - "blocks.json".length);
+                        break;
+                    }
+                }
+
+                if (blocksJsonFile) {
+                    var jsonText = await blocksJsonFile.async("string");
                     var state = JSON.parse(jsonText);
                     workspace.clear();
                     Blockly.serialization.workspaces.load(state, workspace);
                 } else {
-                    alert("プロジェクトの中にブロックのデータが見つかりませんでした。");
+                    alert("プロジェクトの中にブロックのデータ (blocks.json) が見つかりませんでした。");
+                    return;
                 }
 
                 // ================================
@@ -1907,14 +1921,16 @@ if (loadBtn && loadInput) {
                 fileListUl.innerHTML = ''; // 一旦今のリストを空にする
 
                 var root = { type: 'folder', children: {} };
+                var expectedMediaPrefix = rootPrefix + "media/"; // 探し出すmediaフォルダのパス
 
                 // ZIP内の「media」フォルダの中身を調べて、元の階層（ツリー）を組み立てる
                 for (var relativePath in loadedZip.files) {
-                    if (!relativePath.startsWith("media/")) continue;
-                    if (relativePath === "media/") continue;
+                    // 記録したフォルダパスの中にある media/ の中身だけをターゲットにする
+                    if (!relativePath.startsWith(expectedMediaPrefix)) continue;
+                    if (relativePath === expectedMediaPrefix) continue; // mediaフォルダ自身は無視
 
                     var pathObj = loadedZip.files[relativePath];
-                    var pathParts = relativePath.replace("media/", "").split('/').filter(p => p !== "");
+                    var pathParts = relativePath.replace(expectedMediaPrefix, "").split('/').filter(p => p !== "");
                     
                     var currentDir = root;
                     for (var i = 0; i < pathParts.length; i++) {
