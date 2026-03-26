@@ -405,6 +405,14 @@ Blockly.defineBlocksWithJsonArray([
         "helpUrl": ""
     },
     {
+        "type": "CNB",
+        "message0": "ボディー",
+        "output": "id",
+        "colour": '#298a8f',
+        "tooltip": "",
+        "helpUrl": ""
+    },
+    {
         "type": "CIS",
         "message0": "%1 を %2 にする",
         "args0": [
@@ -1189,6 +1197,10 @@ javascript.javascriptGenerator.forBlock['CNID'] = function(block, generator) {
 javascript.javascriptGenerator.forBlock['CNYD'] = function(block, generator) {
     var value_you = generator.valueToCode(block, 'you', javascript.Order.NONE) || '';
     return ["#kekka " + value_you, javascript.Order.ATOMIC];
+};
+
+javascript.javascriptGenerator.forBlock['CNB'] = function(block, generator) {
+     return ["#kekka", javascript.Order.ATOMIC];
 };
 
 javascript.javascriptGenerator.forBlock['NW'] = function(block, generator) {
