@@ -30,15 +30,10 @@ Blockly.BlockSvg.prototype.initSvg = function() {
 Blockly.defineBlocksWithJsonArray([
 	{
         "type": "FT",
-        "message0": "⚙️ テストチケット %1 %2 %3",
-        "args0": [
-            { "type": "input_dummy" },
-            { "type": "input_value", "name": "VAL1" },
-            { "type": "input_value", "name": "VAL2" }
-        ],
-        "output": "TICKET", // ★ここで TICKET を指定すると、出っ張りが三角形になる！
+        "message0": "チケット",
+        "output": "TICKET",
         "colour": "#ff6b5c",
-        "tooltip": "パッケージ化されたデータ",
+        "tooltip": "オリジナルレンダリング^-^",
         "helpUrl": ""
     },
     {
@@ -88,7 +83,7 @@ Blockly.defineBlocksWithJsonArray([
                 "precision": 1
             },
         ],
-        "tooltip": "",
+        "tooltip": "こんなにたくさんのフィールド　使い道あったら言って",
         "helpUrl": ""
     },
     //フィールドわいわい↑
