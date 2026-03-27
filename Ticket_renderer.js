@@ -2,8 +2,7 @@
 class TicketConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
-        // ここでへこみの半径を指定（20〜30くらいがかっこいいです）
-        this.CUSTOM_TICKET_RADIUS = 20; 
+        this.CUSTOM_TICKET_RADIUS = 10; 
     }
 }
 
