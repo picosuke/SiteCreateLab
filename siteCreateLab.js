@@ -119,7 +119,7 @@ Blockly.defineBlocksWithJsonArray([
         "type": "S",
         "message0": "サイトを作り始める",
         "colour": '#ffbf00',
-        "style": { "hat": "cap" },
+        "hat": "cap",
         "nextStatement": "Sai",
         "tooltip": "",
         "helpUrl": ""
@@ -134,6 +134,42 @@ Blockly.defineBlocksWithJsonArray([
             { "type": "input_statement", "name": "html", "check": "html" },
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "css", "check": "css" },
+            { "type": "input_dummy" },
+            { "type": "input_statement", "name": "js", "check": "js" }
+        ],
+        "tooltip": "",
+        "helpUrl": ""
+    },
+    {
+        "type": "c_html",
+        "message0": "HTML %1 %2",
+        "colour": '#ffbf00',
+        "previousStatement": "Sai",
+        "args0": [
+            { "type": "input_dummy" },
+            { "type": "input_statement", "name": "html", "check": "html" }
+        ],
+        "tooltip": "",
+        "helpUrl": ""
+    },
+    {
+        "type": "c_css",
+        "message0": "CSS %1 %2",
+        "colour": '#ffbf00',
+        "previousStatement": "Sai",
+        "args0": [
+            { "type": "input_dummy" },
+            { "type": "input_statement", "name": "css", "check": "css" }
+        ],
+        "tooltip": "",
+        "helpUrl": ""
+    },
+    {
+        "type": "c_js",
+        "message0": "JavaScript %1 %2",
+        "colour": '#ffbf00',
+        "previousStatement": "Sai",
+        "args0": [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "js", "check": "js" }
         ],
@@ -1139,6 +1175,21 @@ javascript.javascriptGenerator.forBlock['HCJ'] = function(block, generator) {
     generator.statementToCode(block, 'js');
     return '\n';
 };
+
+javascript.javascriptGenerator.forBlock['c_html'] = function(block, generator) {
+    generator.statementToCode(block, 'html');
+    return '\n';
+}
+
+javascript.javascriptGenerator.forBlock['c_css'] = function(block, generator) {
+    generator.statementToCode(block, 'css');
+    return '\n';
+}
+
+javascript.javascriptGenerator.forBlock['c_js'] = function(block, generator) {
+    generator.statementToCode(block, 'js');
+    return '\n';
+}
 
 javascript.javascriptGenerator.forBlock['HSE'] = function(block, generator) {
     generator.statementToCode(block, 'head');
