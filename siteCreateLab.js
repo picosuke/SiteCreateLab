@@ -1976,6 +1976,7 @@ if (loadBtn && loadInput) {
                     var state = JSON.parse(jsonText);
                     workspace.clear();
                     Blockly.serialization.workspaces.load(state, workspace);
+					workspace.setTheme(Blockly.Themes.dark);
                 } else {
                     alert("プロジェクトの中にブロックのデータ (blocks.json) が見つかりませんでした。");
                     return;
@@ -2060,4 +2061,3 @@ if (loadBtn && loadInput) {
 }
 
 workspace.addChangeListener(Blockly.Events.disableOrphans);
-workspace.setTheme(Blockly.Themes.dark);
