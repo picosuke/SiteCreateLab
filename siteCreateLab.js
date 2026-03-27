@@ -12,6 +12,21 @@ function callbackFn ( event ) {
 }
 window.onbeforeunload = callbackFn;
 
+
+Blockly.BlockSvg.prototype.initSvg = function() {
+  // 元の初期化処理を保存して実行
+  var origInitSvg = Blockly.BlockSvg.prototype.initSvg;
+  return function() {
+    origInitSvg.call(this);
+    
+    // もしこのブロックが「上につながらない（previousConnectionがない）」場合、
+    // 強制的に帽子（hat）の属性を追加する！
+    if (!this.previousConnection && this.type === "S") {
+      this.hat = "cap";
+    }
+  };
+}();
+
 Blockly.defineBlocksWithJsonArray([
 	{
         "type": "FT",
