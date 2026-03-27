@@ -68,4 +68,4 @@ class TicketRenderer extends Blockly.zelos.Renderer {
 }
 
 // 登録（上書き）
-Blockly.blockRendering.register('ticket_renderer', TicketRenderer);
+Blockly.blockRendering.register('SCL_renderer', TicketRenderer);
