@@ -19,7 +19,6 @@ class TicketConstants extends Blockly.zelos.ConstantProvider {
         const isTicket = block.outputConnection && 
                          block.outputConnection.getCheck() && 
                          block.outputConnection.getCheck().includes('TICKET');
-
         if (isTicket) {
             // 【TICKETブロック用】半径を大きくし、sweep-flagを0（内曲がり）にする
             const r = this.TICKET_RADIUS;
@@ -27,13 +26,6 @@ class TicketConstants extends Blockly.zelos.ConstantProvider {
             this.TOP_RIGHT_CORNER.path = `a ${r},${r} 0 0,0 ${r},${r}`;
             this.BOTTOM_RIGHT_CORNER.path = `a ${r},${r} 0 0,0 -${r},${r}`;
             this.BOTTOM_LEFT_CORNER.path = `a ${r},${r} 0 0,0 -${r},-${r}`;
-        } else {
-            // 【普通のブロック用】半径を元に戻し、sweep-flagを1（外曲がり）にする
-            const r = this.NORMAL_RADIUS;
-            this.TOP_LEFT_CORNER.path = `a ${r},${r} 0 0,1 ${r},-${r}`;
-            this.TOP_RIGHT_CORNER.path = `a ${r},${r} 0 0,1 ${r},${r}`;
-            this.BOTTOM_RIGHT_CORNER.path = `a ${r},${r} 0 0,1 -${r},${r}`;
-            this.BOTTOM_LEFT_CORNER.path = `a ${r},${r} 0 0,1 -${r},-${r}`;
         }
     }
 }
