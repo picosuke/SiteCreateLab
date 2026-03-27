@@ -2060,4 +2060,23 @@ if (loadBtn && loadInput) {
     });
 }
 
+workspace.addChangeListener(function(e) {
+
+  if (e.type === Blockly.Events.BLOCK_CREATE) {
+
+    for (const id of e.ids) {
+      const block = workspace.getBlockById(id);
+
+      if (block && block.type === "S") {
+
+        block.hat = "cap";   // hatを強制
+        block.render();      // 再描画
+      }
+
+    }
+
+  }
+
+});
+
 workspace.addChangeListener(Blockly.Events.disableOrphans);
