@@ -903,21 +903,50 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "",
         "helpUrl": ""
     },
+
+    {
+        "type": "ks_mutator_container",
+        "message0": "引数の設定 %1 %2",
+        "args0": [
+            { "type": "input_dummy" },
+            { "type": "input_statement", "name": "STACK" }
+        ],
+        "colour": "#8a88bb"
+    },
+    {
+        "type": "ks_mutator_arg",
+        "message0": "引数名 %1",
+        "args0": [
+            { "type": "field_input", "name": "NAME", "text": "x" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#8a88bb"
+    },
+    {
+        "type": "KS_ARG_REPORTER",
+        "message0": "引数 %1",
+        "args0": [
+            { "type": "field_input", "name": "ARG_NAME", "text": "x" }
+        ],
+        "output": null,
+        "colour": "#8a88bb"
+    },
     {
         "type": "KS",
-        "message0": "関数 %1 を %2 %3",
+        "message0": "⚙️ 関数 %1",
         "args0": [
-          { "type": "field_input", "name": "mozi" },
-          { "type": "input_dummy" },
-          { "type": "input_statement", "name": "js", "check": "js" }
+          { "type": "field_input", "name": "mozi" }
         ],
-        "inputsInline": true,
+        "mutator": "ks_mutator", // ★これが歯車を出す魔法の設定
+        "inputsInline": false,
         "previousStatement": "js",
         "nextStatement": "js",
         "colour": "#8a88bb",
-        "tooltip": "",
+        "tooltip": "歯車マークで引数を追加できます",
         "helpUrl": ""
     },
+	
     {
         "type": "MKS",
         "message0": "無名関数 %1 %2",
