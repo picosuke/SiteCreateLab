@@ -2060,5 +2060,4 @@ if (loadBtn && loadInput) {
 }
 
 workspace.addChangeListener(Blockly.Events.disableOrphans);
-workspace.getTopBlocks().forEach(b => b.initSvg());
-
+workspace.setTheme(Blockly.Themes.dark);
