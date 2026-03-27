@@ -1,51 +1,57 @@
 // ==========================================
-// 究極版：へこみ具合を自由に変えられるチケット型レンダラー
+// 決定版：特定のブロック(TICKET)だけをへこませるレンダラー
 // ==========================================
 
-// ① 定数：ここで「へこみの大きさ」を決めます
 class TicketConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
-        // ★ この数値を大きくすると、へこみがどんどん深くなります（例: 15, 20, 30...）
-        this.CORNER_RADIUS = 20; 
+        // 通常の角丸（標準は8）
+        this.NORMAL_RADIUS = 8;
+        // チケットのへこみ具合（ここを好きなだけ大きくできます）
+        this.TICKET_RADIUS = 4; 
     }
-}
 
-// ② 描画：ここが魔法の正体です
-class TicketDrawer extends Blockly.zelos.Drawer {
-    drawOutline_() {
-        // 1. まず普通に描く（この時点では外側に膨らんでいる）
-        super.drawOutline_();
-        
-        // 2. TICKETブロックかどうか判定
-        const isTicket = this.block_.outputConnection && 
-                         this.block_.outputConnection.getCheck() && 
-                         this.block_.outputConnection.getCheck().includes('TICKET');
+    // ★重要：描画の直前に「このブロック専用の形」をセットする
+    beforeUpdateUnit_(block) {
+        super.beforeUpdateUnit_(block);
+
+        // 出力(check)に "TICKET" が含まれているか判定
+        const isTicket = block.outputConnection && 
+                         block.outputConnection.getCheck() && 
+                         block.outputConnection.getCheck().includes('TICKET');
 
         if (isTicket) {
-            // 3. SVGパスを直接改造する！
-            // 「0 0,1（外向き）」という描画命令を、すべて「0 0,0（内向き）」に書き換える
-            // さらに、Zelos特有のReporter丸みを無効化するために、全ての角にこの魔法をかけます。
-            this.outlinePath_ = this.outlinePath_.split('0 0,1').join('0 0,0');
+            // 【TICKETブロック用】半径を大きくし、sweep-flagを0（内曲がり）にする
+            const r = this.TICKET_RADIUS;
+            this.TOP_LEFT_CORNER.path = `a ${r},${r} 0 0,0 ${r},-${r}`;
+            this.TOP_RIGHT_CORNER.path = `a ${r},${r} 0 0,0 ${r},${r}`;
+            this.BOTTOM_RIGHT_CORNER.path = `a ${r},${r} 0 0,0 -${r},${r}`;
+            this.BOTTOM_LEFT_CORNER.path = `a ${r},${r} 0 0,0 -${r},-${r}`;
+        } else {
+            // 【普通のブロック用】半径を元に戻し、sweep-flagを1（外曲がり）にする
+            const r = this.NORMAL_RADIUS;
+            this.TOP_LEFT_CORNER.path = `a ${r},${r} 0 0,1 ${r},-${r}`;
+            this.TOP_RIGHT_CORNER.path = `a ${r},${r} 0 0,1 ${r},${r}`;
+            this.BOTTOM_RIGHT_CORNER.path = `a ${r},${r} 0 0,1 -${r},${r}`;
+            this.BOTTOM_LEFT_CORNER.path = `a ${r},${r} 0 0,1 -${r},-${r}`;
         }
     }
 }
 
-// ③ 情報：Zelosの「自動で楕円にする機能」をオフにする
 class TicketRenderInfo extends Blockly.zelos.RenderInfo {
     finalize_() {
         super.finalize_();
         const isTicket = this.block_.outputConnection && 
                          this.block_.outputConnection.getCheck() && 
                          this.block_.outputConnection.getCheck().includes('TICKET');
+        
         if (isTicket) {
-            // これをfalseにしないと、CORNER_RADIUSを大きくしても無視されてしまいます
+            // TICKETブロックの時だけ、全体を楕円形にする機能をOFFにする
             this.isPill = false; 
         }
     }
 }
 
-// ④ 本体：上記の設定を合体させる
 class TicketRenderer extends Blockly.zelos.Renderer {
     constructor(name) {
         super(name);
@@ -55,9 +61,6 @@ class TicketRenderer extends Blockly.zelos.Renderer {
     }
     makeRenderInfo_(block) {
         return new TicketRenderInfo(this, block);
-    }
-    makeDrawer_(block, info) {
-        return new TicketDrawer(block, info);
     }
 }
 
