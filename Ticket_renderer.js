@@ -1,7 +1,3 @@
-// ==========================================
-// 最終解決版：TICKET専用・超強力へこみレンダラー
-// ==========================================
-
 // ① 定数設定
 class TicketConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
