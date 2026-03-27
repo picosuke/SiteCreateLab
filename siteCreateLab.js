@@ -1046,6 +1046,110 @@ Blockly.defineBlocksWithJsonArray([
     }
 ]);
 
+
+// ==========================================
+// 関数の歯車（ミューテーター）と引数ブロックの処理
+// ==========================================
+Blockly.Extensions.registerMutator(
+  'ks_mutator',
+  {
+    arguments_: [], // 引数の名前を覚えておくリスト
+
+    // セーブデータに引数の数を保存する
+    saveExtraState: function() {
+      return { 'arguments': this.arguments_ };
+    },
+    // セーブデータから引数の数を読み込む
+    loadExtraState: function(state) {
+      this.arguments_ = state['arguments'] || [];
+      this.updateShape_();
+    },
+    // 歯車を開いた時に、現在の引数の数だけブロックを並べておく
+    decompose: function(workspace) {
+      const containerBlock = workspace.newBlock('ks_mutator_container');
+      containerBlock.initSvg();
+      let connection = containerBlock.getInput('STACK').connection;
+      for (let i = 0; i < this.arguments_.length; i++) {
+        const argBlock = workspace.newBlock('ks_mutator_arg');
+        argBlock.initSvg();
+        argBlock.setFieldValue(this.arguments_[i], 'NAME');
+        connection.connect(argBlock.previousConnection);
+        connection = argBlock.nextConnection;
+      }
+      return containerBlock;
+    },
+    // 歯車を閉じた時に、並べられたブロックを読み取って本体に反映する
+    compose: function(containerBlock) {
+      this.arguments_ = [];
+      let clauseBlock = containerBlock.getInputTargetBlock('STACK');
+      while (clauseBlock) {
+        if (clauseBlock.type === 'ks_mutator_arg') {
+          this.arguments_.push(clauseBlock.getFieldValue('NAME'));
+        }
+        clauseBlock = clauseBlock.nextConnection && clauseBlock.nextConnection.targetBlock();
+      }
+      this.updateShape_();
+    },
+    // 本体ブロックの見た目を更新する（取り出せるブロックを生成！）
+    updateShape_: function() {
+      let existingArgs = 0;
+      while (this.getInput('ARG' + existingArgs)) {
+        existingArgs++;
+      }
+      let targetArgs = this.arguments_.length;
+
+      // 減った場合：余分な穴を削除
+      for (let i = targetArgs; i < existingArgs; i++) {
+        this.removeInput('ARG' + i);
+      }
+      // 増えた場合：新しい穴を追加
+      for (let i = existingArgs; i < targetArgs; i++) {
+        let input = this.appendValueInput('ARG' + i).appendField('を引数');
+        // 「処理」の穴より上に移動させる
+        if (this.getInput('js')) {
+          this.moveInputBefore('ARG' + i, 'js');
+        }
+      }
+      // 「処理」の穴がまだ無ければ作る
+      if (!this.getInput('js')) {
+        this.appendStatementInput('js')
+            .setCheck('js')
+            .appendField('で処理');
+      }
+
+      // ★魔法：穴に「取り出して使える引数ブロック（シャドウ）」をはめ込む
+      for (let i = 0; i < targetArgs; i++) {
+        let input = this.getInput('ARG' + i);
+        let target = input.connection.targetBlock();
+        if (!target) {
+          Blockly.Events.disable();
+          try {
+            let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
+            shadow.setShadow(true);
+            shadow.setFieldValue(this.arguments_[i], 'ARG_NAME');
+            // シャドウブロック自体の文字は編集不可にする
+            shadow.getField('ARG_NAME').setEditable(false);
+            shadow.initSvg();
+            shadow.render();
+            input.connection.connect(shadow.outputConnection);
+          } finally {
+            Blockly.Events.enable();
+          }
+        } else if (target.isShadow() && target.type === 'KS_ARG_REPORTER') {
+          // すでにブロックがはまっている場合は、名前だけ更新する
+          target.setFieldValue(this.arguments_[i], 'ARG_NAME');
+        }
+      }
+    }
+  },
+  // ブロックが作られた瞬間に、初期化として updateShape_ を一回呼ぶ
+  function() {
+    this.updateShape_();
+  },
+  ['ks_mutator_arg'] // 歯車の中で使えるブロックを指定
+);
+
+
 // ----------------------------------------------------
 // ジェネレータ定義 (valueToCode と Tuple に修正済み)
 // ----------------------------------------------------
@@ -1421,12 +1525,27 @@ javascript.javascriptGenerator.forBlock['KB'] = function(block, generator) {
     return '\n';
 };
 
-// 【修正】 field_input に対応するように getFieldValue に変更
+// 関数定義ブロック
 javascript.javascriptGenerator.forBlock['KS'] = function(block, generator) {
     var nani = block.getFieldValue('mozi') || '';
+    
+    // 歯車で設定された引数名を集める
+    var args = [];
+    if (block.arguments_) {
+        args = block.arguments_;
+    }
+    
     var js = generator.statementToCode(block, 'js');
-    jstext = jstext + "function " + nani + "() {\n" + js + "}\n";
+    // JSの関数 (引数1, 引数2...) { 処理 } の形に変換
+    jstext = jstext + "function " + nani + "(" + args.join(", ") + ") {\n" + js + "}\n";
     return '\n';
+};
+
+// 取り出して使う引数ブロック
+javascript.javascriptGenerator.forBlock['KS_ARG_REPORTER'] = function(block, generator) {
+    var argName = block.getFieldValue('ARG_NAME');
+    // その引数の名前をそのまま返すだけ
+    return [argName, javascript.Order.ATOMIC];
 };
 
 // 【修正】 field_input に対応するように getFieldValue に変更
