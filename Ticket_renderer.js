@@ -1,58 +1,92 @@
 // ==========================================
-// 究極版：四隅が内側にへこむチケット型レンダラー (Zelosベース)
+// 最終進化版：深くへこむチケット型レンダラー
 // ==========================================
 
-// ① ブロックの輪郭線を描く「Drawer（描画係）」を拡張する
-class TicketDrawer extends Blockly.zelos.Drawer {
-    
-    // 輪郭線を描き出すメソッドをフックする
-    drawOutline_() {
-        // まず、元のZelosの機能で「通常の丸っこいブロック」のパスを完全に描かせる
-        super.drawOutline_();
+// ① 定数（形）の定義
+class TicketConstants extends Blockly.zelos.ConstantProvider {
+    constructor() {
+        super();
+        // ★ ここを大きくすると「へこみ」がもっと強くなります（標準は8）
+        this.TICKET_RADIUS = 16; 
+    }
+
+    // ブロック描画の直前に実行される
+    beforeUpdateUnit_(block) {
+        super.beforeUpdateUnit_(block);
         
-        // このブロックが「TICKET」を出力する特別なブロックかどうかチェック
-        const isTicket = this.block_.outputConnection && 
-                         this.block_.outputConnection.getCheck() && 
-                         this.block_.outputConnection.getCheck().includes('TICKET');
-                         
+        const isTicket = block.outputConnection && 
+                         block.outputConnection.getCheck() && 
+                         block.outputConnection.getCheck().includes('TICKET');
+
         if (isTicket) {
-            // 角の半径（通常は 8）を取得
-            const r = this.constants_.CORNER_RADIUS;
-            
-            // --- 魔法のパス書き換え ---
-            // Zelosが描いた「外側に膨らむ角丸」のコマンドを探し出す
-            const tl_old = `a ${r},${r} 0 0,1 ${r},-${r}`; // 左上
-            const tr_old = `a ${r},${r} 0 0,1 ${r},${r}`;  // 右上
-            const br_old = `a ${r},${r} 0 0,1 -${r},${r}`; // 右下
-            const bl_old = `a ${r},${r} 0 0,1 -${r},-${r}`;// 左下
-            
-            // それを「内側にへこむ角（逆アール）」のコマンドに書き換える（0,1 を 0,0 にするだけ！）
-            const tl_new = `a ${r},${r} 0 0,0 ${r},-${r}`;
-            const tr_new = `a ${r},${r} 0 0,0 ${r},${r}`;
-            const br_new = `a ${r},${r} 0 0,0 -${r},${r}`;
-            const bl_new = `a ${r},${r} 0 0,0 -${r},-${r}`;
-            
-            // ブロックの輪郭線データ（文字列）を直接置換して上書き！
-            this.outlinePath_ = this.outlinePath_
-                .replace(tl_old, tl_new)
-                .replace(tr_old, tr_new)
-                .replace(br_old, br_new)
-                .replace(bl_old, bl_new);
+            const r = this.TICKET_RADIUS;
+            // 角の形を「内側に深く曲がるアール」に上書き！
+            this.TOP_LEFT_CORNER = {
+                width: r, height: r,
+                path: `a ${r},${r} 0 0,0 ${r},-${r}`
+            };
+            this.TOP_RIGHT_CORNER = {
+                width: r, height: r,
+                path: `a ${r},${r} 0 0,0 ${r},${r}`
+            };
+            this.BOTTOM_RIGHT_CORNER = {
+                width: r, height: r,
+                path: `a ${r},${r} 0 0,0 -${r},${r}`
+            };
+            this.BOTTOM_LEFT_CORNER = {
+                width: r, height: r,
+                path: `a ${r},${r} 0 0,0 -${r},-${r}`
+            };
+        } else {
+            // 他のブロックは標準の丸みに戻す
+            const r = this.CORNER_RADIUS; // 標準の8
+            this.TOP_LEFT_CORNER = {
+                width: r, height: r,
+                path: `a ${r},${r} 0 0,1 ${r},-${r}`
+            };
+            this.TOP_RIGHT_CORNER = {
+                width: r, height: r,
+                path: `a ${r},${r} 0 0,1 ${r},${r}`
+            };
+            this.BOTTOM_RIGHT_CORNER = {
+                width: r, height: r,
+                path: `a ${r},${r} 0 0,1 -${r},${r}`
+            };
+            this.BOTTOM_LEFT_CORNER = {
+                width: r, height: r,
+                path: `a ${r},${r} 0 0,1 -${r},-${r}`
+            };
         }
     }
 }
 
-// ② レンダラー本体を拡張して、さっきの描画係（TicketDrawer）を使うように指示
+// ② 計測情報の定義（ここが重要：TICKETブロックの「全体が丸くなる現象」を止める）
+class TicketRenderInfo extends Blockly.zelos.RenderInfo {
+    finalize_() {
+        super.finalize_();
+        const isTicket = this.block_.outputConnection && 
+                         this.block_.outputConnection.getCheck() && 
+                         this.block_.outputConnection.getCheck().includes('TICKET');
+        
+        if (isTicket) {
+            // Zelos特有の「全体をカプセル型にする設定」を強制解除して、定義した角を優先させる
+            this.isPill = false; 
+        }
+    }
+}
+
+// ③ レンダラー本体の定義
 class TicketRenderer extends Blockly.zelos.Renderer {
     constructor(name) {
         super(name);
     }
-    
-    // 描画係を呼び出すメソッド
-    makeDrawer_(block, info) {
-        return new TicketDrawer(block, info);
+    makeConstants_() {
+        return new TicketConstants();
+    }
+    makeRenderInfo_(block) {
+        return new TicketRenderInfo(this, block);
     }
 }
 
-// ③ 「ticket_renderer」としてシステムに登録！
+// 登録！
 Blockly.blockRendering.register('ticket_renderer', TicketRenderer);
