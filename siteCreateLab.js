@@ -1981,6 +1981,11 @@ if (loadBtn && loadInput) {
                 }
 
                 await buildDOM(root, fileListUl); // 復元実行！
+				
+                workspace.getAllBlocks(false).forEach(block => {
+                    block.initSvg();
+                    block.render();
+                });
                 
                 alert("プロジェクト（.scl1）の読み込みが完了しました！");
                 
