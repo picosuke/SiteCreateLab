@@ -13,6 +13,19 @@ function callbackFn ( event ) {
 window.onbeforeunload = callbackFn;
 
 Blockly.defineBlocksWithJsonArray([
+	{
+        "type": "FT",
+        "message0": "⚙️ テストチケット %1 %2 %3",
+        "args0": [
+            { "type": "input_dummy" },
+            { "type": "input_value", "name": "VAL1" },
+            { "type": "input_value", "name": "VAL2" }
+        ],
+        "output": "TICKET", // ★ここで TICKET を指定すると、出っ張りが三角形になる！
+        "colour": "#ff6b5c",
+        "tooltip": "パッケージ化されたデータ",
+        "helpUrl": ""
+    },
     {
         "type": "F",
         "message0": "フィールド大量 %1 %2 %3 %4 %5 %6",
@@ -1452,7 +1465,7 @@ Blockly.Themes.dark = Blockly.Theme.defineTheme('dark', {
 var workspace = Blockly.inject(`blocklyDiv`, {
     toolbox: document.getElementById(`toolbox`),
     theme: Blockly.Themes.dark,
-    renderer: `zelos`,
+    renderer: 'ticket_renderer',
     sounds : false, 
     media: './media/',
     move: {
