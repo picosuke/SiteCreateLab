@@ -925,7 +925,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KS_ARG_REPORTER",
-        "message0": "引数 %1",
+        "message0": "%1",
         "args0": [
             { "type": "field_input", "name": "ARG_NAME", "text": "x" }
         ],
@@ -1127,6 +1127,11 @@ Blockly.Extensions.registerMutator(
             let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
             shadow.setShadow(true);
             shadow.setFieldValue(this.arguments_[i], 'ARG_NAME');
+            
+            // 【修正ポイント】
+            // そもそも setEditable(false) は不要なので消しました。
+            // これで、ユーザーが自由に入力欄（field_input）を書き換えられるようになります！
+            
             shadow.initSvg();
             shadow.render();
             input.connection.connect(shadow.outputConnection);
