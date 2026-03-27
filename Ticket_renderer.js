@@ -7,7 +7,7 @@ class TicketConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
         // ★ ここを大きくすると「へこみ」がもっと強くなります（標準は8）
-        this.TICKET_RADIUS = 16; 
+        this.TICKET_RADIUS = 160; 
     }
 
     // ブロック描画の直前に実行される
