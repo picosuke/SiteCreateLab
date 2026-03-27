@@ -1,10 +1,18 @@
-// ① 定数設定
+// ==========================================
+// サイトクリエイトラボ専用 カスタムレンダラー
+// ==========================================
+
+// ① 定数設定：へこみサイズと帽子のON/OFF
 class SCLConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
-        this.CUSTOM_TICKET_RADIUS = 10; 
+        this.CUSTOM_TICKET_RADIUS = 10; // チケットのへこみ具合
+        
+        // ★ これがないとZelosでは帽子が描かれない！帽子機能のメインスイッチ
+        this.ADD_HATS = true; 
     }
     
+    // ★ どのブロックに帽子を被せるか判定する（Sブロック専用）
     shouldAddHat(block) {
         if (block && block.type === 'S') return true;
         return super.shouldAddHat(block);
@@ -31,7 +39,6 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             const height = this.info_.height;
 
             // --- 魔法のチケットパス生成 ---
-            // 詳しく説明：M(移動) -> a(内向き円弧) -> h(横線) -> a(内向き円弧) ...
             let path = `M 0,${r} `; // 左上スタート
             path += `a ${r},${r} 0 0,0 ${r},-${r} `; // 左上のへこみ
             path += `h ${width - 2 * r} `;           // 上の辺
