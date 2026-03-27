@@ -118,7 +118,7 @@ Blockly.defineBlocksWithJsonArray([
     {
         "type": "S",
         "message0": "サイトを作り始める",
-        "colour": '#ffbf00,
+        "colour": '#ffbf00',
         "style": { "hat": "cap" },
         "nextStatement": "Sai",
         "tooltip": "",
