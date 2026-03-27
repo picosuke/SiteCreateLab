@@ -145,6 +145,7 @@ Blockly.defineBlocksWithJsonArray([
         "message0": "HTML %1 %2",
         "colour": '#ffbf00',
         "previousStatement": "Sai",
+        "nextStatement": "Sai",
         "args0": [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "html", "check": "html" }
@@ -157,6 +158,7 @@ Blockly.defineBlocksWithJsonArray([
         "message0": "CSS %1 %2",
         "colour": '#ffbf00',
         "previousStatement": "Sai",
+        "nextStatement": "Sai",
         "args0": [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "css", "check": "css" }
@@ -169,6 +171,7 @@ Blockly.defineBlocksWithJsonArray([
         "message0": "JavaScript %1 %2",
         "colour": '#ffbf00',
         "previousStatement": "Sai",
+        "nextStatement": "Sai",
         "args0": [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "js", "check": "js" }
