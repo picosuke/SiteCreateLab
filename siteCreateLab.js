@@ -1127,8 +1127,6 @@ Blockly.Extensions.registerMutator(
             let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
             shadow.setShadow(true);
             shadow.setFieldValue(this.arguments_[i], 'ARG_NAME');
-            // シャドウブロック自体の文字は編集不可にする
-            shadow.getField('ARG_NAME').setEditable(false);
             shadow.initSvg();
             shadow.render();
             input.connection.connect(shadow.outputConnection);
