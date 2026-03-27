@@ -1,56 +1,46 @@
 // ==========================================
-// カスタムレンダラー（四隅がへこむチケット型 ＆ 新しいプラグ）
+// カスタムレンダラー（専用の出っ張りと穴の形）
 // ==========================================
 
-// ① 定数プロバイダ（形やサイズを決めるクラス）を拡張する
-class TicketConstants extends Blockly.zelos.ConstantProvider {
+class CustomConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
         
-        // 【1】ブロックの四隅を「内側にへこむ形（チケット型）」に変更！
-        this.CORNER_RADIUS = 8; // へこみの大きさ
-        
-        // ※ SVGの A（Arc）コマンドを使って、丸みを内側にえぐる
-        this.TOP_LEFT_CORNER = 'A ' + this.CORNER_RADIUS + ',' + this.CORNER_RADIUS + ' 0 0,0 ' + this.CORNER_RADIUS + ',-' + this.CORNER_RADIUS + ' ';
-        this.TOP_RIGHT_CORNER = 'A ' + this.CORNER_RADIUS + ',' + this.CORNER_RADIUS + ' 0 0,0 ' + this.CORNER_RADIUS + ',' + this.CORNER_RADIUS + ' ';
-        this.BOTTOM_RIGHT_CORNER = 'A ' + this.CORNER_RADIUS + ',' + this.CORNER_RADIUS + ' 0 0,0 -' + this.CORNER_RADIUS + ',' + this.CORNER_RADIUS + ' ';
-        this.BOTTOM_LEFT_CORNER = 'A ' + this.CORNER_RADIUS + ',' + this.CORNER_RADIUS + ' 0 0,0 -' + this.CORNER_RADIUS + ',-' + this.CORNER_RADIUS + ' ';
-
-        // 【2】新しいOutput（左の出っ張り）の形：三角形（▶）
-        this.TRIANGLE_OUTPUT = {
-            type: 4, // オリジナルの識別番号（1〜3は標準で使われているため4以降にする）
+        // 新しいOutput（出っ張り・穴）の形：カクカクしたリボン型（チケットの切れ端風）
+        this.SHAPES.TICKET = {
+            type: 4, 
             isDynamic: false,
             width: 15,
-            height: 30,
-            connectionOffsetY: 15,
-            connectionPathDown: ' l 15,15 l -15,15 ', // 下に向かって描く三角
-            connectionPathUp: ' l 15,-15 l -15,-15 '  // 上に向かって描く三角
+            height: 36,
+            connectionOffsetY: 18,
+            // 下に向かって描くときの線（斜めに出っ張って、まっすぐ降りて、斜めに戻る）
+            connectionPathDown: ' l 15,10 v 16 l -15,10 ', 
+            // 上に向かって描くときの線
+            connectionPathUp: ' l 15,-10 v -16 l -15,-10 '  
         };
     }
 
-    // 【3】どのブロックの時に、どの出っ張りの形にするかのルール
+    // どのブロックの時に、どの出っ張り（穴）の形にするかのルール
     shapeFor(connection) {
         const checks = connection.getCheck();
-        // ブロックの出力(check)が "TICKET" だった場合、出っ張りを「三角形」にする！
+        // ブロックの出力(check)に "TICKET" が含まれていれば、専用の形にする！
         if (checks && checks.includes('TICKET')) {
-            return this.TRIANGLE_OUTPUT;
+            return this.SHAPES.TICKET;
         }
-        // それ以外はいつものZelosの形
+        // それ以外は、いつもの丸っこい形
         return super.shapeFor(connection);
     }
 }
 
-// ② レンダラー本体（描画エンジン）を拡張する
-class TicketRenderer extends Blockly.zelos.Renderer {
+class CustomRenderer extends Blockly.zelos.Renderer {
     constructor(name) {
         super(name);
     }
-
-    // 新しく作った「形の設定（TicketConstants）」を呼び出す
+    // カスタムした形の設定を呼び出す
     makeConstants_() {
-        return new TicketConstants();
+        return new CustomConstants();
     }
 }
 
-// ③ 完成したオリジナルレンダラーを「ticket_renderer」という名前で登録！
+// 登録！
 Blockly.blockRendering.register('ticket_renderer', TicketRenderer);
