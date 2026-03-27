@@ -1554,25 +1554,6 @@ Blockly.ContextMenuRegistry.registry.unregister('blockComment');
 
 Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'),workspace);
 
-workspace.addChangeListener(function(e) {
-
-  if (e.type === Blockly.Events.BLOCK_CREATE) {
-
-    for (const id of e.ids) {
-      const block = workspace.getBlockById(id);
-
-      if (block && block.type === "S") {
-        block.setPreviousStatement(false);
-        block.render();
-      }
-    }
-
-  }
-
-});
-
-Blockly.blockRendering.ConstantProvider.prototype.ADD_START_HATS = true;
-
 var kekka = document.getElementById("kekka");
 var run = document.getElementById('run');
 var lastGeneratedHtml = "";
