@@ -1504,6 +1504,8 @@ javascript.javascriptGenerator.forBlock['p_if_mozi_reporter'] = function(block, 
 
 // ============================================
 
+Blockly.blockRendering.ConstantProvider.prototype.ADD_START_HATS = true;
+
 Blockly.Themes.dark = Blockly.Theme.defineTheme('dark', {
     'base': Blockly.Themes.Classic,
     'componentStyles': {
@@ -2059,24 +2061,5 @@ if (loadBtn && loadInput) {
         loadInput.value = ''; // 連続で同じファイルを読み込めるようにリセット
     });
 }
-
-workspace.addChangeListener(function(e) {
-
-  if (e.type === Blockly.Events.BLOCK_CREATE) {
-
-    for (const id of e.ids) {
-      const block = workspace.getBlockById(id);
-
-      if (block && block.type === "S") {
-
-        block.hat = "cap";   // hatを強制
-        block.render();      // 再描画
-      }
-
-    }
-
-  }
-
-});
 
 workspace.addChangeListener(Blockly.Events.disableOrphans);
