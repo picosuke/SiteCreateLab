@@ -1504,16 +1504,16 @@ javascript.javascriptGenerator.forBlock['p_if_mozi_reporter'] = function(block, 
 
 // ============================================
 
-const TicketRenderer = Blockly.blockRendering.renderers['SCL_renderer'];
+const SCL_renderer = Blockly.blockRendering.renderers['SCL_renderer'];
 
-class TicketHatConstants extends TicketRenderer.prototype.makeConstants_().constructor {
+class TicketHatConstants extends SCL_renderer.prototype.makeConstants_().constructor {
   constructor() {
     super();
     this.ADD_START_HATS = true;
   }
 }
 
-TicketRenderer.prototype.makeConstants_ = function () {
+SCL_renderer.prototype.makeConstants_ = function () {
   return new TicketHatConstants();
 };
 
