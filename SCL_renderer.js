@@ -1,8 +1,13 @@
 // ① 定数設定
-class TicketConstants extends Blockly.zelos.ConstantProvider {
+class SCLConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
         this.CUSTOM_TICKET_RADIUS = 10; 
+    }
+    
+    shouldAddHat(block) {
+        if (block && block.type === 'S') return true;
+        return super.shouldAddHat(block);
     }
 }
 
@@ -62,7 +67,7 @@ class TicketRenderer extends Blockly.zelos.Renderer {
     constructor(name) {
         super(name);
     }
-    makeConstants_() { return new TicketConstants(); }
+    makeConstants_() { return new SCLConstants(); }
     makeRenderInfo_(block) { return new TicketRenderInfo(this, block); }
     makeDrawer_(block, info) { return new TicketDrawer(block, info); }
 }
