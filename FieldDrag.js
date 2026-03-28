@@ -56,19 +56,18 @@ class FieldDragArg extends Blockly.FieldLabel {
             newBlock.initSvg();
             newBlock.render();
 
-            // 2. マウスの現在位置（クリックした場所）に新しいブロックを瞬間移動させる
-            const svgPoint = workspace.getParentSvg().createSVGPoint();
-            svgPoint.x = e.clientX;
-            svgPoint.y = e.clientY;
-            const ctm = workspace.getInjectionDiv().getScreenCTM().inverse();
-            const pt = svgPoint.matrixTransform(ctm);
-            newBlock.moveBy(pt.x - 20, pt.y - 10);
+            // 2. ★エラー修正箇所：超安全な座標計算！
+            // 今この文字がくっついている「親の関数ブロック」のワークスペース上の座標を取得
+            const blockXY = this.sourceBlock_.getRelativeToSurfaceXY();
+            
+            // 親ブロックの少し右下にクローンを瞬間移動させる
+            newBlock.moveBy(blockXY.x + 15, blockXY.y + 15);
             
         } finally {
             Blockly.Events.enable();
         }
 
-        // 3. ここが魔法の核心：新しいブロックのドラッグを強制的にスタートさせる！
+        // 3. 新しいブロックのドラッグを強制的にスタートさせる！
         const gesture = new Blockly.Gesture(e, workspace);
         workspace.currentGesture_ = gesture; // Blocklyのシステムに登録
         gesture.setTargetBlock(newBlock);
