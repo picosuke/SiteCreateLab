@@ -903,7 +903,15 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "",
         "helpUrl": ""
     },
-
+	{
+        "type": "KS_ARG_REPORTER",
+        "message0": "%1",
+        "args0": [
+            { "type": "field_label", "name": "ARG_NAME", "text": "x" }
+        ],
+        "output": null,
+        "colour": "#ff6b5c"
+    },
     {
         "type": "ks_mutator_container",
         "message0": "引数の設定 %1 %2",
@@ -921,15 +929,6 @@ Blockly.defineBlocksWithJsonArray([
         ],
         "previousStatement": null,
         "nextStatement": null,
-        "colour": "#8a88bb"
-    },
-    {
-        "type": "KS_ARG_REPORTER",
-        "message0": "引数 %1",
-        "args0": [
-            { "type": "field_variable", "name": "ARG_NAME", "variable": "x" }
-        ],
-        "output": null,
         "colour": "#8a88bb"
     },
     {
@@ -1047,20 +1046,93 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 // ==========================================
-// 関数の歯車（ミューテーター）と引数ブロックの処理（ExtForge完全再現版）
+// ★ 究極の魔法：ドラッグでクローンを生み出す専用フィールド
+// ==========================================
+class FieldDragArg extends Blockly.FieldLabel {
+    constructor(value) {
+        super(value);
+        this.CURSOR = 'grab'; // マウスを乗せると「掴める手」になる
+    }
+
+    initView() {
+        // フィールドの背景（角丸の枠）を作る
+        this.borderRect_ = Blockly.utils.dom.createSvgElement(
+            'rect',
+            {
+                'rx': 12, 'ry': 12, 
+                'fill': '#ff6b5c',  // 引数ブロックの色に合わせる
+                'stroke': '#cc4a3d',
+                'stroke-width': 1
+            },
+            this.fieldGroup_
+        );
+
+        super.initView();
+
+        // 文字色を白にして太字にする
+        this.textElement_.setAttribute('fill', '#ffffff');
+        this.textElement_.style.fontWeight = 'bold';
+
+        // マウスクリックを検知する（エラーの出ない公式の書き方）
+        Blockly.browserEvents.bind(this.getSvgRoot(), 'mousedown', this, this.onMouseDown_);
+    }
+
+    updateSize_() {
+        super.updateSize_();
+        if (this.borderRect_) {
+            const width = this.size_.width + 20;
+            const height = this.size_.height + 8;
+            this.borderRect_.setAttribute('width', width);
+            this.borderRect_.setAttribute('height', height);
+            this.borderRect_.setAttribute('y', -4);
+            this.textElement_.setAttribute('x', 10);
+            this.size_.width = width;
+        }
+    }
+
+    onMouseDown_(e) {
+        if (e.button !== 0) return; // 左クリック以外は無視
+        e.stopPropagation();
+
+        const workspace = this.sourceBlock_.workspace;
+        
+        Blockly.Events.disable();
+        let newBlock;
+        try {
+            // 1. 取り出して使えるレポーターブロックを生成
+            newBlock = workspace.newBlock('KS_ARG_REPORTER');
+            newBlock.setFieldValue(this.getValue(), 'ARG_NAME');
+            newBlock.initSvg();
+            newBlock.render();
+
+            // 2. 親ブロックの少し右下にクローンを瞬間移動させる
+            const blockXY = this.sourceBlock_.getRelativeToSurfaceXY();
+            newBlock.moveBy(blockXY.x + 15, blockXY.y + 15);
+            
+        } finally {
+            Blockly.Events.enable();
+        }
+
+        // 3. 新しいブロックのドラッグを強制的にスタートさせる！
+        const gesture = new Blockly.Gesture(e, workspace);
+        workspace.currentGesture_ = gesture;
+        gesture.setStartBlock(newBlock);
+        gesture.setTargetBlock(newBlock);
+        gesture.doStart(e);
+    }
+}
+Blockly.fieldRegistry.register('field_drag_arg', FieldDragArg);
+
+// ==========================================
+// 関数の歯車（ミューテーター）の処理
 // ==========================================
 Blockly.Extensions.registerMutator(
   'ks_mutator',
   {
     arguments_: [], 
 
-    saveExtraState: function() {
-      return { 'arguments': this.arguments_ };
-    },
-    loadExtraState: function(state) {
-      this.arguments_ = state['arguments'] || [];
-      this.updateShape_();
-    },
+    saveExtraState: function() { return { 'arguments': this.arguments_ }; },
+    loadExtraState: function(state) { this.arguments_ = state['arguments'] || []; this.updateShape_(); },
     decompose: function(workspace) {
       const containerBlock = workspace.newBlock('ks_mutator_container');
       containerBlock.initSvg();
@@ -1085,30 +1157,29 @@ Blockly.Extensions.registerMutator(
       }
       this.updateShape_();
     },
-    
     updateShape_: function() {
-      // 古い引数の入力をすべて消す
       let existingArgs = 0;
       while (this.getInput('ARG' + existingArgs)) {
         this.removeInput('ARG' + existingArgs);
         existingArgs++;
       }
 
-      // 歯車で設定された引数の数だけ、新しく追加する
+      // 歯車で設定された引数の数だけ、魔法のフィールドを追加する
       for (let i = 0; i < this.arguments_.length; i++) {
         let argName = this.arguments_[i];
         
-        // ★ここでさっき作った「魔法のフィールド」を呼び出す！
+        let varField = new FieldDragArg(argName);
+        varField.SERIALIZABLE = true; 
+
         this.appendDummyInput('ARG' + i)
-            .appendField(new FieldDragArg(argName), 'VAR' + i);
+            .appendField('引数')
+            .appendField(varField, 'VAR' + i);
             
-        // 「処理」の穴より上に移動させる
         if (this.getInput('js')) {
           this.moveInputBefore('ARG' + i, 'js');
         }
       }
 
-      // 「処理」の穴がまだ無ければ作る
       if (!this.getInput('js')) {
         this.appendStatementInput('js')
             .setCheck('js')
@@ -1116,9 +1187,7 @@ Blockly.Extensions.registerMutator(
       }
     }
   },
-  function() {
-    this.updateShape_();
-  },
+  function() { this.updateShape_(); },
   ['ks_mutator_arg']
 );
 
@@ -1513,10 +1582,8 @@ javascript.javascriptGenerator.forBlock['KS'] = function(block, generator) {
     return '\n';
 };
 
-// ▼ 追加・修正：取り出した引数ブロックは、そのまま名前を返す！
 javascript.javascriptGenerator.forBlock['KS_ARG_REPORTER'] = function(block) {
-    // 歯車で作った変数の名前を取得する
-    var argName = block.getField('ARG_NAME').getText();
+    var argName = block.getFieldValue('ARG_NAME');
     return [argName, javascript.Order.ATOMIC];
 };
 
