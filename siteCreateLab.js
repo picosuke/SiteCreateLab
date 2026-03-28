@@ -925,9 +925,9 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KS_ARG_REPORTER",
-        "message0": "引数 %1",
+        "message0": "%1",
         "args0": [
-            { "type": "field_label", "name": "ARG_NAME", "text": "x" } 
+            { "type": "field_variable", "name": "ARG_NAME", "variable": "x" }
         ],
         "output": null,
         "colour": "#8a88bb"
@@ -1046,16 +1046,14 @@ Blockly.defineBlocksWithJsonArray([
     }
 ]);
 
+// ==========================================
+// 関数の歯車（ミューテーター）と引数ブロックの処理（ExtForge完全再現版！）
+// ==========================================
 
-// ==========================================
-// 関数の歯車（ミューテーター）と引数ブロックの処理（安全・バグなし版）
-// ==========================================
 Blockly.Extensions.registerMutator(
   'ks_mutator',
   {
     arguments_: [], // 引数の名前リスト
-    // 前回生成した引数ブロックを覚えておくリスト
-    argBlocks_: [], 
 
     saveExtraState: function() {
       return { 'arguments': this.arguments_ };
@@ -1090,70 +1088,80 @@ Blockly.Extensions.registerMutator(
     },
     
     updateShape_: function() {
-      // 1. 本体の「文字表示」を更新する
-      let existingArgs = 0;
-      while (this.getInput('ARG' + existingArgs)) {
-        existingArgs++;
-      }
-      let targetArgs = this.arguments_.length;
-
-      // 減った場合：余分な「〜を引数」の文字を消す
-      for (let i = targetArgs; i < existingArgs; i++) {
+      // 1. 今ある「引数」の入力をすべて消す（お掃除）
+      let i = 0;
+      while (this.getInput('ARG' + i)) {
         this.removeInput('ARG' + i);
+        i++;
       }
-      // 増えた場合：「〜を引数」の文字を追加する
-      for (let i = existingArgs; i < targetArgs; i++) {
-        let input = this.appendDummyInput('ARG' + i)
-                        .appendField('引数 [')
-                        .appendField(new Blockly.FieldLabel(''), 'LBL' + i)
-                        .appendField('] で');
+
+      // 2. 引数がある場合、横並び（DummyInput）で「変数ラベル」を追加する
+      for (let j = 0; j < this.arguments_.length; j++) {
+        let argName = this.arguments_[j];
+        
+        // ★ 魔法：Blockly公式の「変数を表示するだけのフィールド」を作る
+        let varField = new Blockly.FieldVariable(argName);
+        
+        // これを追加することで、フィールドの文字をドラッグできるようになる！
+        varField.SERIALIZABLE = true; 
+        
+        let input = this.appendDummyInput('ARG' + j)
+                        .appendField('引数')
+                        .appendField(varField, 'VAR' + j);
+                        
+        // 「処理」の穴より上に移動させる
         if (this.getInput('js')) {
-          this.moveInputBefore('ARG' + i, 'js');
+          this.moveInputBefore('ARG' + j, 'js');
+        }
+
+        // ==========================================
+        // ★ 極秘ハック：フィールドからブロックを生み出す
+        // ==========================================
+        // フィールドがクリックされてドラッグが始まった時、
+        // 変数ラベルを編集させるのではなく、「引数レポーターブロック」を生成して手に持たせる！
+        let svgGroup = varField.getSvgRoot();
+        if (svgGroup) {
+            svgGroup.style.cursor = 'grab'; // マウスカーソルを「掴める手」にする
+            
+            // mousedown を乗っ取る（イベントの競合を防ぐため、元の処理を止める）
+            svgGroup.onmousedown = (e) => {
+                if (e.button !== 0) return; // 左クリック以外は無視
+                e.stopPropagation();
+                e.preventDefault();
+                
+                Blockly.Events.disable();
+                try {
+                    // 1. 「取り出して使える引数ブロック（レポーター）」を新しく生成
+                    let clone = this.workspace.newBlock('KS_ARG_REPORTER');
+                    clone.setFieldValue(argName, 'ARG_NAME');
+                    clone.initSvg();
+                    clone.render();
+                    
+                    // 2. マウスの現在位置にコピーを移動する
+                    let xy = this.getRelativeToSurfaceXY();
+                    clone.moveBy(xy.x + 50, xy.y + 20); // 少しずらして生成
+                    
+                    // 3. マウスのドラッグイベントにこのクローンを渡す
+                    let gesture = this.workspace.getGesture(e);
+                    if (!gesture) {
+                        // 新しいドラッグジェスチャーを作る
+                        gesture = new Blockly.Gesture(e, this.workspace);
+                    }
+                    gesture.setTargetBlock(clone);
+                    gesture.handleBlockStart(e, clone);
+
+                } finally {
+                    Blockly.Events.enable();
+                }
+            };
         }
       }
-      
-      // 引数の名前ラベルを更新する
-      for (let i = 0; i < targetArgs; i++) {
-        this.setFieldValue(this.arguments_[i], 'LBL' + i);
-      }
 
-      // 「処理」の穴がなければ作る
+      // 「処理」の穴がまだ無ければ作る
       if (!this.getInput('js')) {
         this.appendStatementInput('js')
             .setCheck('js')
-            .appendField('処理');
-      }
-
-      // ==========================================
-      // 2. ワークスペースに「取り出して使える引数ブロック」を自動生成する
-      // ==========================================
-      
-      // まず、前回自動生成した「余った引数ブロック」があればお掃除する
-      for (let i = 0; i < this.argBlocks_.length; i++) {
-          let b = this.argBlocks_[i];
-          // どこにも繋がっていない（放置されている）ブロックだけを消す
-          if (b && b.workspace && !b.getParent()) {
-              b.dispose();
-          }
-      }
-      this.argBlocks_ = [];
-
-      // 歯車で設定された引数の数だけ、新しくブロックを生成して横に並べてあげる
-      let myX = this.getRelativeToSurfaceXY().x;
-      let myY = this.getRelativeToSurfaceXY().y;
-      
-      for (let i = 0; i < targetArgs; i++) {
-          // 新しい引数レポーターブロックを生成
-          let argBlock = this.workspace.newBlock('KS_ARG_REPORTER');
-          argBlock.setFieldValue(this.arguments_[i], 'ARG_NAME');
-          argBlock.initSvg();
-          argBlock.render();
-          
-          // 本体ブロックの少し右下に、綺麗に並べて配置する
-          argBlock.moveBy(myX + 150, myY + 50 + (i * 40));
-          
-          // 次回のお掃除対象としてリストに覚えておく
-          this.argBlocks_.push(argBlock);
+            .appendField('で処理');
       }
     }
   },
@@ -1556,8 +1564,8 @@ javascript.javascriptGenerator.forBlock['KS'] = function(block, generator) {
 
 // ▼ 追加・修正：取り出した引数ブロックは、そのまま名前を返す！
 javascript.javascriptGenerator.forBlock['KS_ARG_REPORTER'] = function(block) {
-    var argName = block.getFieldValue('ARG_NAME');
-    // クォーテーション（" "）で囲まず、そのまま変数名として返す
+    // 歯車で作った変数の名前を取得する
+    var argName = block.getField('ARG_NAME').getText();
     return [argName, javascript.Order.ATOMIC];
 };
 
