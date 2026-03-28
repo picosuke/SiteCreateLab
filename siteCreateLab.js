@@ -925,7 +925,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KS_ARG_REPORTER",
-        "message0": "%1",
+        "message0": "aaa %1",
         "args0": [
             { "type": "field_variable", "name": "ARG_NAME", "variable": "x" }
         ],
