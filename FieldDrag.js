@@ -1,3 +1,6 @@
+// ==========================================
+// ★ 究極の魔法：ドラッグでクローンを生み出す専用フィールド（完全版）
+// ==========================================
 class FieldDragArg extends Blockly.FieldLabel {
     constructor(value) {
         super(value);
@@ -5,13 +8,13 @@ class FieldDragArg extends Blockly.FieldLabel {
     }
 
     initView() {
-        // フィールドの背景（ExtForgeのような角丸の枠）を作る
+        // フィールドの背景（角丸の枠）を作る
         this.borderRect_ = Blockly.utils.dom.createSvgElement(
             'rect',
             {
-                'rx': 12, 'ry': 12, // 綺麗な角丸
-                'fill': '#ff6b5c',  // 背景色（少し明るい赤）
-                'stroke': '#cc4a3d',// 枠線
+                'rx': 12, 'ry': 12, 
+                'fill': '#ff6b5c', 
+                'stroke': '#cc4a3d',
                 'stroke-width': 1
             },
             this.fieldGroup_
@@ -23,14 +26,14 @@ class FieldDragArg extends Blockly.FieldLabel {
         this.textElement_.setAttribute('fill', '#ffffff');
         this.textElement_.style.fontWeight = 'bold';
 
-        // マウスダウン（ドラッグ開始）のイベントを捕まえる
-        this.getSvgRoot().addEventListener('mousedown', (e) => this.onMouseDown_(e));
+        // ★ エラー修正箇所1：addEventListener をやめて、Blocklyのシステムに登録！
+        // （これでクリックが2回反応するバグが消えます）
+        Blockly.browserEvents.bind(this.getSvgRoot(), 'mousedown', this, this.onMouseDown_);
     }
 
     updateSize_() {
         super.updateSize_();
         if (this.borderRect_) {
-            // 文字の長さに合わせて背景の枠をピッタリ広げる
             const width = this.size_.width + 20;
             const height = this.size_.height + 8;
             this.borderRect_.setAttribute('width', width);
@@ -41,9 +44,10 @@ class FieldDragArg extends Blockly.FieldLabel {
         }
     }
 
+    // ★ エラー修正箇所2：安全で確実なドラッグの開始処理
     onMouseDown_(e) {
         if (e.button !== 0) return; // 左クリック以外は無視
-        e.stopPropagation(); // ★重要：親の関数ブロックを一緒に掴まないようにする
+        e.stopPropagation(); // 親の関数ブロックを一緒に掴まないようにする
 
         const workspace = this.sourceBlock_.workspace;
         
@@ -56,22 +60,25 @@ class FieldDragArg extends Blockly.FieldLabel {
             newBlock.initSvg();
             newBlock.render();
 
-            // 2. ★エラー修正箇所：超安全な座標計算！
-            // 今この文字がくっついている「親の関数ブロック」のワークスペース上の座標を取得
+            // 2. 親ブロックの少し右下にクローンを瞬間移動させる
             const blockXY = this.sourceBlock_.getRelativeToSurfaceXY();
-            
-            // 親ブロックの少し右下にクローンを瞬間移動させる
             newBlock.moveBy(blockXY.x + 15, blockXY.y + 15);
             
         } finally {
             Blockly.Events.enable();
         }
 
-        // 3. 新しいブロックのドラッグを強制的にスタートさせる！
+        // 3. 【重要】Blockly(v10)の正しいドラッグ開始ジェスチャー！
+        // 前のコードは「start workspace is undefined」というエラーが出ていたので、正しく引数を渡します
         const gesture = new Blockly.Gesture(e, workspace);
-        workspace.currentGesture_ = gesture; // Blocklyのシステムに登録
+        workspace.currentGesture_ = gesture;
+        
+        // ジェスチャーに「今マウスで触っているのはこの新しいブロックだ」と教える
+        gesture.setStartBlock(newBlock);
         gesture.setTargetBlock(newBlock);
-        gesture.doStart(e); // ドラッグ開始！
+        
+        // エラーを出さずにスムーズにドラッグを開始する
+        gesture.doStart(e);
     }
 }
 // この魔法のフィールドをシステムに登録
