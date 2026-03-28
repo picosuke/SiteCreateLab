@@ -903,15 +903,6 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "",
         "helpUrl": ""
     },
-	{
-        "type": "KS_ARG_REPORTER",
-        "message0": "%1",
-        "args0": [
-            { "type": "field_label", "name": "ARG_NAME", "text": "x" }
-        ],
-        "output": null,
-        "colour": "#ff6b5c"
-    },
     {
         "type": "ks_mutator_container",
         "message0": "引数の設定 %1 %2",
@@ -1045,99 +1036,30 @@ Blockly.defineBlocksWithJsonArray([
     }
 ]);
 
-// ==========================================
-// ★ 究極の魔法：ドラッグでクローンを生み出す専用フィールド（2重クリック防止版）
-// ==========================================
-class FieldDragArg extends Blockly.FieldLabel {
-    constructor(value) {
-        super(value);
-        this.CURSOR = 'grab';
-        // ▼ 追加：イベントが登録されたかどうかを覚えておくフラグ
-        this.clickEventBound_ = false;
-    }
 
-    initView() {
-        this.borderRect_ = Blockly.utils.dom.createSvgElement(
-            'rect',
-            {
-                'rx': 12, 'ry': 12, 
-                'fill': '#ff6b5c',  
-                'stroke': '#cc4a3d',
-                'stroke-width': 1
-            },
-            this.fieldGroup_
-        );
-
-        super.initView();
-
-        this.textElement_.setAttribute('fill', '#ffffff');
-        this.textElement_.style.fontWeight = 'bold';
-
-        // ▼ 修正：initViewが何回呼ばれても、クリックの登録は1回だけにする！
-        if (!this.clickEventBound_) {
-            Blockly.browserEvents.bind(this.getSvgRoot(), 'mousedown', this, this.onMouseDown_);
-            this.clickEventBound_ = true;
-        }
-    }
-
-    updateSize_() {
-        super.updateSize_();
-        if (this.borderRect_) {
-            const width = this.size_.width + 20;
-            const height = this.size_.height + 8;
-            this.borderRect_.setAttribute('width', width);
-            this.borderRect_.setAttribute('height', height);
-            this.borderRect_.setAttribute('y', -4);
-            this.textElement_.setAttribute('x', 10);
-            this.size_.width = width;
-        }
-    }
-
-    onMouseDown_(e) {
-        if (e.button !== 0) return; // 左クリック以外は無視
-        
-        // ▼ 修正：親ブロック（関数本体）のドラッグ処理を止める魔法
-        e.stopPropagation(); 
-        
-        // 既にジェスチャー（ドラッグ）が始まっていたら無視する（2重生成防止）
-        const workspace = this.sourceBlock_.workspace;
-        if (workspace.currentGesture_) {
-            return;
-        }
-        
-        Blockly.Events.disable();
-        let newBlock;
-        try {
-            newBlock = workspace.newBlock('KS_ARG_REPORTER');
-            newBlock.setFieldValue(this.getValue(), 'ARG_NAME');
-            newBlock.initSvg();
-            newBlock.render();
-
-            const blockXY = this.sourceBlock_.getRelativeToSurfaceXY();
-            newBlock.moveBy(blockXY.x + 15, blockXY.y + 15);
-            
-        } finally {
-            Blockly.Events.enable();
-        }
-
-        // ▼ 修正：最新版のBlocklyで安全にドラッグを開始する書き方
-        const gesture = new Blockly.Gesture(e, workspace);
-        workspace.currentGesture_ = gesture;
-        
-        // TargetとStartの両方に新しいブロックをセットして、ドラッグ開始
-        gesture.setTargetBlock(newBlock);
-        gesture.setStartBlock(newBlock);
-        
-        // doStart を呼ぶ前にマウスの開始位置をリセットする（エラー対策）
-        gesture.handleWsStart(e, workspace);
-        gesture.doStart(e);
-    }
-}
-Blockly.fieldRegistry.register('field_drag_arg', FieldDragArg);
 
 // ==========================================
-// 関数の歯車（ミューテーター）の処理
+// 関数の歯車（ミューテーター）と引数ブロック（ExtForge完全再現版）
 // ==========================================
+
+// ① 共有しない引数レポーターブロックの定義（Scratch風の丸いブロック）
+Blockly.Blocks['KS_ARG_REPORTER'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldLabel(""), "ARG_NAME");
+    this.setOutput(true, null);
+    this.setColour('#ff6b5c'); 
+  }
+};
+
+// ② ジェネレータ
+javascript.javascriptGenerator.forBlock['KS_ARG_REPORTER'] = function(block) {
+    var argName = block.getFieldValue('ARG_NAME');
+    return [argName, javascript.Order.ATOMIC];
+};
+
+
+// ③ ミューテーター本体：ExtForge方式で「穴(input_value)」に「シャドウ」をはめる
 Blockly.Extensions.registerMutator(
   'ks_mutator',
   {
@@ -1169,39 +1091,143 @@ Blockly.Extensions.registerMutator(
       }
       this.updateShape_();
     },
+    
     updateShape_: function() {
+      // 古い穴をすべて消す
       let existingArgs = 0;
       while (this.getInput('ARG' + existingArgs)) {
         this.removeInput('ARG' + existingArgs);
         existingArgs++;
       }
 
-      // 歯車で設定された引数の数だけ、魔法のフィールドを追加する
+      // 歯車で設定された数だけ、新しい穴(input_value)を作る
       for (let i = 0; i < this.arguments_.length; i++) {
         let argName = this.arguments_[i];
         
-        let varField = new FieldDragArg(argName);
-        varField.SERIALIZABLE = true; 
+        // ★ ExtForge方式：appendValueInput で穴を作り、右寄せにする
+        let input = this.appendValueInput('ARG' + i)
+                        .setAlign(Blockly.inputs.Align.RIGHT);
+                        
+        // 一番最初の引数の時だけ「〜を引数」というラベルをつける（お好みで調整可能）
+        if (i === 0) {
+            input.appendField("引数");
+        }
 
-        this.appendDummyInput('ARG' + i)
-            .appendField('引数')
-            .appendField(varField, 'VAR' + i);
-            
         if (this.getInput('js')) {
           this.moveInputBefore('ARG' + i, 'js');
+        }
+
+        // 穴の中に「シャドウブロック」としてはめ込む
+        Blockly.Events.disable();
+        try {
+            let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
+            shadow.setShadow(true);
+            shadow.setFieldValue(argName, 'ARG_NAME');
+            shadow.initSvg();
+            shadow.render();
+            input.connection.connect(shadow.outputConnection);
+        } finally {
+            Blockly.Events.enable();
         }
       }
 
       if (!this.getInput('js')) {
         this.appendStatementInput('js')
             .setCheck('js')
-            .appendField('で処理');
+            .appendField('処理');
       }
     }
   },
   function() { this.updateShape_(); },
   ['ks_mutator_arg']
 );
+
+// ==========================================
+// ★ 究極のハック：シャドウブロックを掴むとクローンになる＆名前の自動同期
+// ==========================================
+const origOnMouseDown = Blockly.BlockSvg.prototype.onMouseDown_;
+
+Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
+    // もし今クリックしたのが「関数の引数として埋まっているシャドウブロック」だったら
+    if (this.isShadow() && this.type === 'KS_ARG_REPORTER') {
+        const workspace = this.workspace;
+        
+        // 左クリックの時だけ発動
+        if (e.button === 0) {
+            e.stopPropagation(); // 親ブロックを掴まないようにする
+            
+            Blockly.Events.disable();
+            let clone;
+            try {
+                // 1. 全く同じ名前を持つ「取り出し用クローン」を生成する
+                clone = workspace.newBlock('KS_ARG_REPORTER');
+                clone.setFieldValue(this.getFieldValue('ARG_NAME'), 'ARG_NAME');
+                
+                // ★ 連動機能：元の関数ブロックの「どの穴（何番目）」から生まれたかを覚えさせる
+                const parentInputName = this.outputConnection.targetConnection.getParentInput().name; // 例: "ARG0"
+                const parentFunctionBlock = this.getParent(); // 親のKSブロック
+                
+                // クローンに隠しプロパティを持たせる
+                clone.syncWithParent_ = parentFunctionBlock;
+                clone.syncInputName_ = parentInputName;
+
+                clone.initSvg();
+                clone.render();
+                
+                // 2. クリックしたシャドウブロックの少し下に瞬間移動
+                const xy = this.getRelativeToSurfaceXY();
+                clone.moveBy(xy.x, xy.y + 20);
+            } finally {
+                Blockly.Events.enable();
+            }
+            
+            // 3. Blocklyの正規のドラッグ処理に「クローン」を渡してスタート！
+            const gesture = new Blockly.Gesture(e, workspace);
+            workspace.currentGesture_ = gesture;
+            gesture.setStartBlock(clone);
+            gesture.setTargetBlock(clone);
+            gesture.handleWsStart(e, workspace);
+            gesture.doStart(e);
+            
+            return; // ここで止める（元のシャドウブロックはドラッグさせない）
+        }
+    }
+    // それ以外のブロックは、普通に処理させる
+    origOnMouseDown.call(this, e);
+};
+
+// ==========================================
+// ★ 名前連動システム：歯車で名前が変わったら、取り出したクローンも更新する
+// ==========================================
+workspace.addChangeListener(function(e) {
+    // ブロックの中身（名前など）が変わったイベントを検知
+    if (e.type === Blockly.Events.BLOCK_CHANGE) {
+        const changedBlock = workspace.getBlockById(e.blockId);
+        
+        // もし変更されたのが、関数の引数として埋まっているシャドウブロックだったら
+        if (changedBlock && changedBlock.isShadow() && changedBlock.type === 'KS_ARG_REPORTER') {
+            const newName = changedBlock.getFieldValue('ARG_NAME');
+            const parentInputName = changedBlock.outputConnection.targetConnection.getParentInput().name;
+            const parentFunctionBlock = changedBlock.getParent();
+
+            // ワークスペース上のすべての「取り出された引数ブロック」を探す
+            const allBlocks = workspace.getAllBlocks(false);
+            for (let i = 0; i < allBlocks.length; i++) {
+                let target = allBlocks[i];
+                // 「自分を生み出した親関数」と「穴の位置」が一致するクローンを見つけたら
+                if (target.type === 'KS_ARG_REPORTER' && 
+                    target.syncWithParent_ === parentFunctionBlock && 
+                    target.syncInputName_ === parentInputName) {
+                    
+                    // 名前を新しいものに更新する！
+                    target.setFieldValue(newName, 'ARG_NAME');
+                }
+            }
+        }
+    }
+});
+
+
 
 // ----------------------------------------------------
 // ジェネレータ定義 (valueToCode と Tuple に修正済み)
@@ -1592,11 +1618,6 @@ javascript.javascriptGenerator.forBlock['KS'] = function(block, generator) {
     // JSの関数 function 〇〇 (引数1, 引数2...) { 処理 } にする
     jstext = jstext + "function " + nani + "(" + args.join(", ") + ") {\n" + js + "}\n";
     return '\n';
-};
-
-javascript.javascriptGenerator.forBlock['KS_ARG_REPORTER'] = function(block) {
-    var argName = block.getFieldValue('ARG_NAME');
-    return [argName, javascript.Order.ATOMIC];
 };
 
 // 【修正】 field_input に対応するように getFieldValue に変更
