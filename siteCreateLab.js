@@ -1047,13 +1047,12 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 // ==========================================
-// 関数の歯車（ミューテーター）と引数ブロックの処理（ExtForge完全再現版！）
+// 関数の歯車（ミューテーター）と引数ブロックの処理（ExtForge完全再現版）
 // ==========================================
-
 Blockly.Extensions.registerMutator(
   'ks_mutator',
   {
-    arguments_: [], // 引数の名前リスト
+    arguments_: [], 
 
     saveExtraState: function() {
       return { 'arguments': this.arguments_ };
@@ -1088,72 +1087,24 @@ Blockly.Extensions.registerMutator(
     },
     
     updateShape_: function() {
-      // 1. 今ある「引数」の入力をすべて消す（お掃除）
-      let i = 0;
-      while (this.getInput('ARG' + i)) {
-        this.removeInput('ARG' + i);
-        i++;
+      // 古い引数の入力をすべて消す
+      let existingArgs = 0;
+      while (this.getInput('ARG' + existingArgs)) {
+        this.removeInput('ARG' + existingArgs);
+        existingArgs++;
       }
 
-      // 2. 引数がある場合、横並び（DummyInput）で「変数ラベル」を追加する
-      for (let j = 0; j < this.arguments_.length; j++) {
-        let argName = this.arguments_[j];
+      // 歯車で設定された引数の数だけ、新しく追加する
+      for (let i = 0; i < this.arguments_.length; i++) {
+        let argName = this.arguments_[i];
         
-        // ★ 魔法：Blockly公式の「変数を表示するだけのフィールド」を作る
-        let varField = new Blockly.FieldVariable(argName);
-        
-        // これを追加することで、フィールドの文字をドラッグできるようになる！
-        varField.SERIALIZABLE = true; 
-        
-        let input = this.appendDummyInput('ARG' + j)
-                        .appendField('引数')
-                        .appendField(varField, 'VAR' + j);
-                        
+        // ★ここでさっき作った「魔法のフィールド」を呼び出す！
+        this.appendDummyInput('ARG' + i)
+            .appendField(new FieldDragArg(argName), 'VAR' + i);
+            
         // 「処理」の穴より上に移動させる
         if (this.getInput('js')) {
-          this.moveInputBefore('ARG' + j, 'js');
-        }
-
-        // ==========================================
-        // ★ 極秘ハック：フィールドからブロックを生み出す
-        // ==========================================
-        // フィールドがクリックされてドラッグが始まった時、
-        // 変数ラベルを編集させるのではなく、「引数レポーターブロック」を生成して手に持たせる！
-        let svgGroup = varField.getSvgRoot();
-        if (svgGroup) {
-            svgGroup.style.cursor = 'grab'; // マウスカーソルを「掴める手」にする
-            
-            // mousedown を乗っ取る（イベントの競合を防ぐため、元の処理を止める）
-            svgGroup.onmousedown = (e) => {
-                if (e.button !== 0) return; // 左クリック以外は無視
-                e.stopPropagation();
-                e.preventDefault();
-                
-                Blockly.Events.disable();
-                try {
-                    // 1. 「取り出して使える引数ブロック（レポーター）」を新しく生成
-                    let clone = this.workspace.newBlock('KS_ARG_REPORTER');
-                    clone.setFieldValue(argName, 'ARG_NAME');
-                    clone.initSvg();
-                    clone.render();
-                    
-                    // 2. マウスの現在位置にコピーを移動する
-                    let xy = this.getRelativeToSurfaceXY();
-                    clone.moveBy(xy.x + 50, xy.y + 20); // 少しずらして生成
-                    
-                    // 3. マウスのドラッグイベントにこのクローンを渡す
-                    let gesture = this.workspace.getGesture(e);
-                    if (!gesture) {
-                        // 新しいドラッグジェスチャーを作る
-                        gesture = new Blockly.Gesture(e, this.workspace);
-                    }
-                    gesture.setTargetBlock(clone);
-                    gesture.handleBlockStart(e, clone);
-
-                } finally {
-                    Blockly.Events.enable();
-                }
-            };
+          this.moveInputBefore('ARG' + i, 'js');
         }
       }
 
