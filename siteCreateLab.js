@@ -1046,21 +1046,22 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 // ==========================================
-// ★ 究極の魔法：ドラッグでクローンを生み出す専用フィールド
+// ★ 究極の魔法：ドラッグでクローンを生み出す専用フィールド（2重クリック防止版）
 // ==========================================
 class FieldDragArg extends Blockly.FieldLabel {
     constructor(value) {
         super(value);
-        this.CURSOR = 'grab'; // マウスを乗せると「掴める手」になる
+        this.CURSOR = 'grab';
+        // ▼ 追加：イベントが登録されたかどうかを覚えておくフラグ
+        this.clickEventBound_ = false;
     }
 
     initView() {
-        // フィールドの背景（角丸の枠）を作る
         this.borderRect_ = Blockly.utils.dom.createSvgElement(
             'rect',
             {
                 'rx': 12, 'ry': 12, 
-                'fill': '#ff6b5c',  // 引数ブロックの色に合わせる
+                'fill': '#ff6b5c',  
                 'stroke': '#cc4a3d',
                 'stroke-width': 1
             },
@@ -1069,12 +1070,14 @@ class FieldDragArg extends Blockly.FieldLabel {
 
         super.initView();
 
-        // 文字色を白にして太字にする
         this.textElement_.setAttribute('fill', '#ffffff');
         this.textElement_.style.fontWeight = 'bold';
 
-        // マウスクリックを検知する（エラーの出ない公式の書き方）
-        Blockly.browserEvents.bind(this.getSvgRoot(), 'mousedown', this, this.onMouseDown_);
+        // ▼ 修正：initViewが何回呼ばれても、クリックの登録は1回だけにする！
+        if (!this.clickEventBound_) {
+            Blockly.browserEvents.bind(this.getSvgRoot(), 'mousedown', this, this.onMouseDown_);
+            this.clickEventBound_ = true;
+        }
     }
 
     updateSize_() {
@@ -1092,20 +1095,24 @@ class FieldDragArg extends Blockly.FieldLabel {
 
     onMouseDown_(e) {
         if (e.button !== 0) return; // 左クリック以外は無視
-        e.stopPropagation();
-
+        
+        // ▼ 修正：親ブロック（関数本体）のドラッグ処理を止める魔法
+        e.stopPropagation(); 
+        
+        // 既にジェスチャー（ドラッグ）が始まっていたら無視する（2重生成防止）
         const workspace = this.sourceBlock_.workspace;
+        if (workspace.currentGesture_) {
+            return;
+        }
         
         Blockly.Events.disable();
         let newBlock;
         try {
-            // 1. 取り出して使えるレポーターブロックを生成
             newBlock = workspace.newBlock('KS_ARG_REPORTER');
             newBlock.setFieldValue(this.getValue(), 'ARG_NAME');
             newBlock.initSvg();
             newBlock.render();
 
-            // 2. 親ブロックの少し右下にクローンを瞬間移動させる
             const blockXY = this.sourceBlock_.getRelativeToSurfaceXY();
             newBlock.moveBy(blockXY.x + 15, blockXY.y + 15);
             
@@ -1113,11 +1120,16 @@ class FieldDragArg extends Blockly.FieldLabel {
             Blockly.Events.enable();
         }
 
-        // 3. 新しいブロックのドラッグを強制的にスタートさせる！
+        // ▼ 修正：最新版のBlocklyで安全にドラッグを開始する書き方
         const gesture = new Blockly.Gesture(e, workspace);
         workspace.currentGesture_ = gesture;
-        gesture.setStartBlock(newBlock);
+        
+        // TargetとStartの両方に新しいブロックをセットして、ドラッグ開始
         gesture.setTargetBlock(newBlock);
+        gesture.setStartBlock(newBlock);
+        
+        // doStart を呼ぶ前にマウスの開始位置をリセットする（エラー対策）
+        gesture.handleWsStart(e, workspace);
         gesture.doStart(e);
     }
 }
