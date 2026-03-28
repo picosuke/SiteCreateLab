@@ -1048,12 +1048,14 @@ Blockly.defineBlocksWithJsonArray([
 
 
 // ==========================================
-// 関数の歯車（ミューテーター）と引数ブロックの処理（クローン対応・バグ修正版）
+// 関数の歯車（ミューテーター）と引数ブロックの処理（安全・バグなし版）
 // ==========================================
 Blockly.Extensions.registerMutator(
   'ks_mutator',
   {
-    arguments_: [], 
+    arguments_: [], // 引数の名前リスト
+    // 前回生成した引数ブロックを覚えておくリスト
+    argBlocks_: [], 
 
     saveExtraState: function() {
       return { 'arguments': this.arguments_ };
@@ -1088,87 +1090,70 @@ Blockly.Extensions.registerMutator(
     },
     
     updateShape_: function() {
+      // 1. 本体の「文字表示」を更新する
       let existingArgs = 0;
       while (this.getInput('ARG' + existingArgs)) {
         existingArgs++;
       }
       let targetArgs = this.arguments_.length;
 
+      // 減った場合：余分な「〜を引数」の文字を消す
       for (let i = targetArgs; i < existingArgs; i++) {
         this.removeInput('ARG' + i);
       }
+      // 増えた場合：「〜を引数」の文字を追加する
       for (let i = existingArgs; i < targetArgs; i++) {
-        let input = this.appendValueInput('ARG' + i).appendField('を引数');
+        let input = this.appendDummyInput('ARG' + i)
+                        .appendField('引数 [')
+                        .appendField(new Blockly.FieldLabel(''), 'LBL' + i)
+                        .appendField('] で');
         if (this.getInput('js')) {
           this.moveInputBefore('ARG' + i, 'js');
         }
       }
+      
+      // 引数の名前ラベルを更新する
+      for (let i = 0; i < targetArgs; i++) {
+        this.setFieldValue(this.arguments_[i], 'LBL' + i);
+      }
+
+      // 「処理」の穴がなければ作る
       if (!this.getInput('js')) {
         this.appendStatementInput('js')
             .setCheck('js')
-            .appendField('で処理');
+            .appendField('処理');
       }
 
       // ==========================================
-      // ★ 魔法：クリックするとクローン（コピー）が生まれる引数ブロック
+      // 2. ワークスペースに「取り出して使える引数ブロック」を自動生成する
       // ==========================================
-      for (let i = 0; i < targetArgs; i++) {
-        let input = this.getInput('ARG' + i);
-        let target = input.connection.targetBlock();
-        
-        if (!target) {
-          Blockly.Events.disable();
-          try {
-            // 親ブロックにはまる「分身の元」となるブロックを作る
-            let argBlock = this.workspace.newBlock('KS_ARG_REPORTER');
-            argBlock.setFieldValue(this.arguments_[i], 'ARG_NAME');
-            
-            // はまっているブロック自体は動かせない・消せないようにする
-            argBlock.setMovable(false);  
-            argBlock.setDeletable(false);
-
-            // ★ ここがエラー解決の鍵！イベントを「上書き」するのではなく「追加」する
-            // ユーザーがブロックをクリック（マウスダウン）した時に発動
-            argBlock.tooltip = "ドラッグして引数を取り出します";
-            
-            // mousedownイベントを独自にリッスンしてクローンを作る
-            argBlock.getSvgRoot().addEventListener('mousedown', function(e) {
-                // 左クリックの時だけ反応
-                if (e.button === 0) {
-                    Blockly.Events.disable();
-                    try {
-                        // 1. まったく同じ名前を持つ「自由なコピー」を新しく作る
-                        var clone = argBlock.workspace.newBlock('KS_ARG_REPORTER');
-                        clone.setFieldValue(argBlock.getFieldValue('ARG_NAME'), 'ARG_NAME');
-                        clone.initSvg();
-                        clone.render();
-                        
-                        // 2. コピーをマウスの場所（元のブロックの場所）に移動
-                        var xy = argBlock.getRelativeToSurfaceXY();
-                        clone.moveBy(xy.x, xy.y);
-                        
-                        // 3. Blocklyのドラッグ操作に、元のブロックではなく「コピー」を渡す！
-                        var gesture = argBlock.workspace.getGesture(e);
-                        if (gesture) {
-                            gesture.setTargetBlock(clone);
-                        }
-                    } finally {
-                        Blockly.Events.enable();
-                    }
-                }
-            });
-
-            argBlock.initSvg();
-            argBlock.render();
-            input.connection.connect(argBlock.outputConnection);
-
-          } finally {
-            Blockly.Events.enable();
+      
+      // まず、前回自動生成した「余った引数ブロック」があればお掃除する
+      for (let i = 0; i < this.argBlocks_.length; i++) {
+          let b = this.argBlocks_[i];
+          // どこにも繋がっていない（放置されている）ブロックだけを消す
+          if (b && b.workspace && !b.getParent()) {
+              b.dispose();
           }
-        } else if (target.type === 'KS_ARG_REPORTER') {
-          // 歯車で名前が変わった時、はまっているブロックの名前も更新する
-          target.setFieldValue(this.arguments_[i], 'ARG_NAME');
-        }
+      }
+      this.argBlocks_ = [];
+
+      // 歯車で設定された引数の数だけ、新しくブロックを生成して横に並べてあげる
+      let myX = this.getRelativeToSurfaceXY().x;
+      let myY = this.getRelativeToSurfaceXY().y;
+      
+      for (let i = 0; i < targetArgs; i++) {
+          // 新しい引数レポーターブロックを生成
+          let argBlock = this.workspace.newBlock('KS_ARG_REPORTER');
+          argBlock.setFieldValue(this.arguments_[i], 'ARG_NAME');
+          argBlock.initSvg();
+          argBlock.render();
+          
+          // 本体ブロックの少し右下に、綺麗に並べて配置する
+          argBlock.moveBy(myX + 150, myY + 50 + (i * 40));
+          
+          // 次回のお掃除対象としてリストに覚えておく
+          this.argBlocks_.push(argBlock);
       }
     }
   },
@@ -1177,7 +1162,6 @@ Blockly.Extensions.registerMutator(
   },
   ['ks_mutator_arg']
 );
-
 
 // ----------------------------------------------------
 // ジェネレータ定義 (valueToCode と Tuple に修正済み)
