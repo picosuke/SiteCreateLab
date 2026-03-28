@@ -1048,23 +1048,21 @@ Blockly.defineBlocksWithJsonArray([
 
 
 // ==========================================
-// 関数の歯車（ミューテーター）と引数ブロックの処理
+// 関数の歯車（ミューテーター）と引数ブロックの処理（Scratch風 決定版）
 // ==========================================
 Blockly.Extensions.registerMutator(
   'ks_mutator',
   {
     arguments_: [], // 引数の名前を覚えておくリスト
 
-    // セーブデータに引数の数を保存する
     saveExtraState: function() {
       return { 'arguments': this.arguments_ };
     },
-    // セーブデータから引数の数を読み込む
     loadExtraState: function(state) {
       this.arguments_ = state['arguments'] || [];
       this.updateShape_();
     },
-    // 歯車を開いた時に、現在の引数の数だけブロックを並べておく
+    // 歯車を開いた時
     decompose: function(workspace) {
       const containerBlock = workspace.newBlock('ks_mutator_container');
       containerBlock.initSvg();
@@ -1078,7 +1076,7 @@ Blockly.Extensions.registerMutator(
       }
       return containerBlock;
     },
-    // 歯車を閉じた時に、並べられたブロックを読み取って本体に反映する
+    // 歯車を閉じた時
     compose: function(containerBlock) {
       this.arguments_ = [];
       let clauseBlock = containerBlock.getInputTargetBlock('STACK');
@@ -1090,7 +1088,8 @@ Blockly.Extensions.registerMutator(
       }
       this.updateShape_();
     },
-    // 本体ブロックの見た目を更新する（取り出せるブロックを生成！）
+    
+    // 本体ブロックの見た目を更新する
     updateShape_: function() {
       let existingArgs = 0;
       while (this.getInput('ARG' + existingArgs)) {
@@ -1098,60 +1097,87 @@ Blockly.Extensions.registerMutator(
       }
       let targetArgs = this.arguments_.length;
 
-      // 減った場合：余分な穴を削除
+      // 余分な穴を削除
       for (let i = targetArgs; i < existingArgs; i++) {
         this.removeInput('ARG' + i);
       }
-      // 増えた場合：新しい穴を追加
+      // 新しい穴を追加
       for (let i = existingArgs; i < targetArgs; i++) {
         let input = this.appendValueInput('ARG' + i).appendField('を引数');
-        // 「処理」の穴より上に移動させる
         if (this.getInput('js')) {
           this.moveInputBefore('ARG' + i, 'js');
         }
       }
-      // 「処理」の穴がまだ無ければ作る
+      // 「処理」の穴がなければ作る
       if (!this.getInput('js')) {
         this.appendStatementInput('js')
             .setCheck('js')
             .appendField('で処理');
       }
 
-      // ★魔法：穴に「取り出して使える引数ブロック（シャドウ）」をはめ込む
+      // ==========================================
+      // ★ 魔法：Scratch風の「取り出せる引数ブロック」を生成する
+      // ==========================================
       for (let i = 0; i < targetArgs; i++) {
         let input = this.getInput('ARG' + i);
         let target = input.connection.targetBlock();
+        
         if (!target) {
           Blockly.Events.disable();
           try {
-            let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
-            shadow.setShadow(true);
-            shadow.setFieldValue(this.arguments_[i], 'ARG_NAME');
+            // 【重要】 setShadow(true) を使わず、普通のブロックとしてはめ込む！
+            let argBlock = this.workspace.newBlock('KS_ARG_REPORTER');
+            argBlock.setFieldValue(this.arguments_[i], 'ARG_NAME');
             
-            // 【修正ポイント】
-            // そもそも setEditable(false) は不要なので消しました。
-            // これで、ユーザーが自由に入力欄（field_input）を書き換えられるようになります！
+            // 【重要】 「取り出せない」のではなく、「動かせないけどコピーできる」状態にする
+            argBlock.setMovable(false);  // 親から切り離して動かすのを禁止
+            argBlock.setDeletable(false); // ゴミ箱に捨てるのを禁止
+
+            argBlock.initSvg();
+            argBlock.render();
+            input.connection.connect(argBlock.outputConnection);
             
-            shadow.initSvg();
-            shadow.render();
-            input.connection.connect(shadow.outputConnection);
+            // ★ Scratch風マジック：ドラッグした時に「自分自身」ではなく「自分のコピー」を手に持たせる
+            argBlock.mixin({
+                onMouseDown_: function(e) {
+                    // 左クリックでドラッグが始まったら
+                    if (e.button === 0) {
+                        // 自分のコピーを作る
+                        var xml = Blockly.Xml.blockToDom(this);
+                        var clone = Blockly.Xml.domToBlock(xml, this.workspace);
+                        // コピーは自由に動かせて消せるようにする
+                        clone.setMovable(true);
+                        clone.setDeletable(true);
+                        
+                        // コピーをマウスの現在位置に移動し、強制的にドラッグ状態にする
+                        var metrics = this.workspace.getMetrics();
+                        var xy = this.getRelativeToSurfaceXY();
+                        clone.moveBy(xy.x, xy.y);
+                        
+                        // ちょっとした裏技：Blocklyのドラッグシステムにコピーを渡す
+                        var gesture = this.workspace.getGesture(e);
+                        if (gesture) {
+                            gesture.setTargetBlock(clone);
+                        }
+                    }
+                }
+            });
+
           } finally {
             Blockly.Events.enable();
           }
-        } else if (target.isShadow() && target.type === 'KS_ARG_REPORTER') {
+        } else if (target.type === 'KS_ARG_REPORTER') {
           // すでにブロックがはまっている場合は、名前だけ更新する
           target.setFieldValue(this.arguments_[i], 'ARG_NAME');
         }
       }
     }
   },
-  // ブロックが作られた瞬間に、初期化として updateShape_ を一回呼ぶ
   function() {
     this.updateShape_();
   },
-  ['ks_mutator_arg'] // 歯車の中で使えるブロックを指定
+  ['ks_mutator_arg']
 );
-
 
 // ----------------------------------------------------
 // ジェネレータ定義 (valueToCode と Tuple に修正済み)
