@@ -1143,55 +1143,58 @@ Blockly.Extensions.registerMutator(
 );
 
 // ==========================================
-// ★ 完全版：名前連動システム（歯車で名前が変わったらクローンも更新）
+// ★ 究極のハック：シャドウブロックを掴むとクローンになる＆名前の自動同期
 // ==========================================
-workspace.addChangeListener(function(e) {
-    // もしイベントが「ブロックの変更（BLOCK_CHANGE）」だったら
-    if (e.type === Blockly.Events.BLOCK_CHANGE) {
-        
-        // 変更されたブロックを取得
-        const changedBlock = workspace.getBlockById(e.blockId);
-        if (!changedBlock) return;
+const origOnMouseDown = Blockly.BlockSvg.prototype.onMouseDown_;
 
-        // 1. 【本体が更新された場合】関数ブロック（KS）の歯車が閉じられて、引数が再生成された時
-        if (changedBlock.type === 'KS' && changedBlock.arguments_) {
+Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
+    // もし今クリックしたのが「関数の引数として埋まっているシャドウブロック」だったら
+    if (this.isShadow() && this.type === 'KS_ARG_REPORTER') {
+        const workspace = this.workspace;
+        
+        // 左クリックの時だけ発動
+        if (e.button === 0) {
+            e.stopPropagation(); // 親ブロックを掴まないようにする
             
-            // ワークスペース上の「すべての引数クローン」を探す
-            const allBlocks = workspace.getAllBlocks(false);
-            for (let i = 0; i < allBlocks.length; i++) {
-                let clone = allBlocks[i];
+            Blockly.Events.disable();
+            let clone;
+            try {
+                // 1. 全く同じ名前を持つ「取り出し用クローン」を生成する
+                clone = workspace.newBlock('KS_ARG_REPORTER');
+                clone.setFieldValue(this.getFieldValue('ARG_NAME'), 'ARG_NAME');
                 
-                // もしそれがクローン（KS_ARG_REPORTER で、親情報 data がある）なら
-                if (clone.type === 'KS_ARG_REPORTER' && clone.data) {
-                    try {
-                        let cloneData = JSON.parse(clone.data);
-                        
-                        // 「自分を生み出した関数ブロック」が、今回変更されたブロックだったら
-                        if (cloneData.parentId === changedBlock.id) {
-                            
-                            // 自分のいた穴（例：ARG0）が、新しい引数リストの何番目か調べる
-                            let argIndex = parseInt(cloneData.inputName.replace('ARG', ''));
-                            
-                            // もしその番号の引数がまだ存在していれば、新しい名前に更新する！
-                            if (argIndex >= 0 && argIndex < changedBlock.arguments_.length) {
-                                let newName = changedBlock.arguments_[argIndex];
-                                
-                                // 名前が変わっていたら更新し、記憶データも書き換える
-                                if (clone.getFieldValue('ARG_NAME') !== newName) {
-                                    clone.setFieldValue(newName, 'ARG_NAME');
-                                    cloneData.originalName = newName;
-                                    clone.data = JSON.stringify(cloneData);
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        // dataがJSONじゃなかった場合は無視
-                    }
-                }
+                // ★ 連動機能：元の関数ブロックの「どの穴（何番目）」から生まれたかを覚えさせる
+                const parentInputName = this.outputConnection.targetConnection.getParentInput().name; // 例: "ARG0"
+                const parentFunctionBlock = this.getParent(); // 親のKSブロック
+                
+                // クローンに隠しプロパティを持たせる
+                clone.syncWithParent_ = parentFunctionBlock;
+                clone.syncInputName_ = parentInputName;
+
+                clone.initSvg();
+                clone.render();
+                
+                // 2. クリックしたシャドウブロックの少し下に瞬間移動
+                const xy = this.getRelativeToSurfaceXY();
+                clone.moveBy(xy.x, xy.y + 20);
+            } finally {
+                Blockly.Events.enable();
             }
+            
+            // 3. Blocklyの正規のドラッグ処理に「クローン」を渡してスタート！
+            const gesture = new Blockly.Gesture(e, workspace);
+            workspace.currentGesture_ = gesture;
+            gesture.setStartBlock(clone);
+            gesture.setTargetBlock(clone);
+            gesture.handleWsStart(e, workspace);
+            gesture.doStart(e);
+            
+            return; // ここで止める（元のシャドウブロックはドラッグさせない）
         }
     }
-});
+    // それ以外のブロックは、普通に処理させる
+    origOnMouseDown.call(this, e);
+};
 
 // ----------------------------------------------------
 // ジェネレータ定義 (valueToCode と Tuple に修正済み)
@@ -1749,36 +1752,55 @@ Blockly.ContextMenuRegistry.registry.unregister('blockComment');
 Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'),workspace);
 
 // ==========================================
-// ★ 名前連動システム：歯車で名前が変わったら、取り出したクローンも更新する
+// ★ 完全版：名前連動システム（歯車で名前が変わったらクローンも更新）
 // ==========================================
 workspace.addChangeListener(function(e) {
-    // ブロックの中身（名前など）が変わったイベントを検知
+    // もしイベントが「ブロックの変更（BLOCK_CHANGE）」だったら
     if (e.type === Blockly.Events.BLOCK_CHANGE) {
-        const changedBlock = workspace.getBlockById(e.blockId);
         
-        // もし変更されたのが、関数の引数として埋まっているシャドウブロックだったら
-        if (changedBlock && changedBlock.isShadow() && changedBlock.type === 'KS_ARG_REPORTER') {
-            const newName = changedBlock.getFieldValue('ARG_NAME');
-            const parentInputName = changedBlock.outputConnection.targetConnection.getParentInput().name;
-            const parentFunctionBlock = changedBlock.getParent();
+        // 変更されたブロックを取得
+        const changedBlock = workspace.getBlockById(e.blockId);
+        if (!changedBlock) return;
 
-            // ワークスペース上のすべての「取り出された引数ブロック」を探す
+        // 1. 【本体が更新された場合】関数ブロック（KS）の歯車が閉じられて、引数が再生成された時
+        if (changedBlock.type === 'KS' && changedBlock.arguments_) {
+            
+            // ワークスペース上の「すべての引数クローン」を探す
             const allBlocks = workspace.getAllBlocks(false);
             for (let i = 0; i < allBlocks.length; i++) {
-                let target = allBlocks[i];
-                // 「自分を生み出した親関数」と「穴の位置」が一致するクローンを見つけたら
-                if (target.type === 'KS_ARG_REPORTER' && 
-                    target.syncWithParent_ === parentFunctionBlock && 
-                    target.syncInputName_ === parentInputName) {
-                    
-                    // 名前を新しいものに更新する！
-                    target.setFieldValue(newName, 'ARG_NAME');
+                let clone = allBlocks[i];
+                
+                // もしそれがクローン（KS_ARG_REPORTER で、親情報 data がある）なら
+                if (clone.type === 'KS_ARG_REPORTER' && clone.data) {
+                    try {
+                        let cloneData = JSON.parse(clone.data);
+                        
+                        // 「自分を生み出した関数ブロック」が、今回変更されたブロックだったら
+                        if (cloneData.parentId === changedBlock.id) {
+                            
+                            // 自分のいた穴（例：ARG0）が、新しい引数リストの何番目か調べる
+                            let argIndex = parseInt(cloneData.inputName.replace('ARG', ''));
+                            
+                            // もしその番号の引数がまだ存在していれば、新しい名前に更新する！
+                            if (argIndex >= 0 && argIndex < changedBlock.arguments_.length) {
+                                let newName = changedBlock.arguments_[argIndex];
+                                
+                                // 名前が変わっていたら更新し、記憶データも書き換える
+                                if (clone.getFieldValue('ARG_NAME') !== newName) {
+                                    clone.setFieldValue(newName, 'ARG_NAME');
+                                    cloneData.originalName = newName;
+                                    clone.data = JSON.stringify(cloneData);
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        // dataがJSONじゃなかった場合は無視
+                    }
                 }
             }
         }
     }
 });
-
 
 
 
