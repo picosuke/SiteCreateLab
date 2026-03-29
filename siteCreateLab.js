@@ -1163,13 +1163,19 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
                 clone = workspace.newBlock('KS_ARG_REPORTER');
                 clone.setFieldValue(this.getFieldValue('ARG_NAME'), 'ARG_NAME');
                 
-                // ★ 連動機能：元の関数ブロックの「どの穴（何番目）」から生まれたかを覚えさせる
-                const parentInputName = this.outputConnection.targetConnection.getParentInput().name; // 例: "ARG0"
-                const parentFunctionBlock = this.getParent(); // 親のKSブロック
-                
-                // クローンに隠しプロパティを持たせる
-                clone.syncWithParent_ = parentFunctionBlock;
-                clone.syncInputName_ = parentInputName;
+                // ★ 修正箇所：親関数の情報（IDと穴の位置）をJSONにして clone.data に記憶させる！
+                // これがないと、あとで名前を変えた時に連動しません。
+                const targetConn = this.outputConnection.targetConnection;
+                if (targetConn) {
+                    const parentInputName = targetConn.getParentInput().name; // 例: "ARG0"
+                    const parentFunctionBlock = this.getParent(); // 親のKSブロック
+                    
+                    clone.data = JSON.stringify({
+                        parentId: parentFunctionBlock.id,
+                        inputName: parentInputName,
+                        originalName: this.getFieldValue('ARG_NAME')
+                    });
+                }
 
                 clone.initSvg();
                 clone.render();
