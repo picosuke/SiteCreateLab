@@ -1196,39 +1196,6 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
     origOnMouseDown.call(this, e);
 };
 
-// ==========================================
-// ★ 名前連動システム：歯車で名前が変わったら、取り出したクローンも更新する
-// ==========================================
-workspace.addChangeListener(function(e) {
-    // ブロックの中身（名前など）が変わったイベントを検知
-    if (e.type === Blockly.Events.BLOCK_CHANGE) {
-        const changedBlock = workspace.getBlockById(e.blockId);
-        
-        // もし変更されたのが、関数の引数として埋まっているシャドウブロックだったら
-        if (changedBlock && changedBlock.isShadow() && changedBlock.type === 'KS_ARG_REPORTER') {
-            const newName = changedBlock.getFieldValue('ARG_NAME');
-            const parentInputName = changedBlock.outputConnection.targetConnection.getParentInput().name;
-            const parentFunctionBlock = changedBlock.getParent();
-
-            // ワークスペース上のすべての「取り出された引数ブロック」を探す
-            const allBlocks = workspace.getAllBlocks(false);
-            for (let i = 0; i < allBlocks.length; i++) {
-                let target = allBlocks[i];
-                // 「自分を生み出した親関数」と「穴の位置」が一致するクローンを見つけたら
-                if (target.type === 'KS_ARG_REPORTER' && 
-                    target.syncWithParent_ === parentFunctionBlock && 
-                    target.syncInputName_ === parentInputName) {
-                    
-                    // 名前を新しいものに更新する！
-                    target.setFieldValue(newName, 'ARG_NAME');
-                }
-            }
-        }
-    }
-});
-
-
-
 // ----------------------------------------------------
 // ジェネレータ定義 (valueToCode と Tuple に修正済み)
 // ----------------------------------------------------
@@ -1783,6 +1750,45 @@ Blockly.ContextMenuRegistry.registry.unregister('blockDisable');
 Blockly.ContextMenuRegistry.registry.unregister('blockComment');
 
 Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'),workspace);
+
+// ==========================================
+// ★ 名前連動システム：歯車で名前が変わったら、取り出したクローンも更新する
+// ==========================================
+workspace.addChangeListener(function(e) {
+    // ブロックの中身（名前など）が変わったイベントを検知
+    if (e.type === Blockly.Events.BLOCK_CHANGE) {
+        const changedBlock = workspace.getBlockById(e.blockId);
+        
+        // もし変更されたのが、関数の引数として埋まっているシャドウブロックだったら
+        if (changedBlock && changedBlock.isShadow() && changedBlock.type === 'KS_ARG_REPORTER') {
+            const newName = changedBlock.getFieldValue('ARG_NAME');
+            const parentInputName = changedBlock.outputConnection.targetConnection.getParentInput().name;
+            const parentFunctionBlock = changedBlock.getParent();
+
+            // ワークスペース上のすべての「取り出された引数ブロック」を探す
+            const allBlocks = workspace.getAllBlocks(false);
+            for (let i = 0; i < allBlocks.length; i++) {
+                let target = allBlocks[i];
+                // 「自分を生み出した親関数」と「穴の位置」が一致するクローンを見つけたら
+                if (target.type === 'KS_ARG_REPORTER' && 
+                    target.syncWithParent_ === parentFunctionBlock && 
+                    target.syncInputName_ === parentInputName) {
+                    
+                    // 名前を新しいものに更新する！
+                    target.setFieldValue(newName, 'ARG_NAME');
+                }
+            }
+        }
+    }
+});
+
+
+
+
+
+
+
+
 
 var kekka = document.getElementById("kekka");
 var run = document.getElementById('run');
