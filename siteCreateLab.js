@@ -1130,6 +1130,7 @@ Blockly.Extensions.registerMutator(
             let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
             shadow.setShadow(true);
             shadow.setFieldValue(argName, 'ARG_NAME');
+            shadow.setMovable(true); 
             shadow.initSvg();
             shadow.render();
             input.connection.connect(shadow.outputConnection);
