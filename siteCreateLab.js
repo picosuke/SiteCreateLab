@@ -1150,65 +1150,61 @@ Blockly.Extensions.registerMutator(
 );
 
 // ==========================================
-// ★ 究極のハック：シャドウブロックを掴むとクローンになる＆名前の自動同期
+// ★ 究極のハック：ジェスチャーをジャックして「ドラッグ開始時」にクローンを生み出す
 // ==========================================
-const origOnMouseDown = Blockly.BlockSvg.prototype.onMouseDown_;
 
-Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
-    // もし今クリックしたのが「関数の引数として埋まっているシャドウブロック」だったら
-    if (this.isShadow() && this.type === 'KS_ARG_REPORTER') {
-        const workspace = this.workspace;
+// Blocklyの純正ジェスチャーの「ドラッグが実際に始まる瞬間」を横取りする
+const origStartDraggingBlock = Blockly.Gesture.prototype.startDraggingBlock;
+
+Blockly.Gesture.prototype.startDraggingBlock = function() {
+    const block = this.targetBlock_;
+
+    // もし今からドラッグしようとしているのが「関数の引数として埋まっているシャドウブロック」だったら…
+    if (block && block.isShadow() && block.type === 'KS_ARG_REPORTER') {
+        const workspace = this.creatorWorkspace_;
         
-        // 左クリックの時だけ発動
-        if (e.button === 0) {
-            e.stopPropagation(); // 親ブロックを掴まないようにする
+        Blockly.Events.disable();
+        let clone;
+        try {
+            // 1. 全く同じ名前を持つ「取り出し用クローン」を生成する
+            clone = workspace.newBlock('KS_ARG_REPORTER');
+            clone.setFieldValue(block.getFieldValue('ARG_NAME'), 'ARG_NAME');
             
-            Blockly.Events.disable();
-            let clone;
-            try {
-                // 1. 全く同じ名前を持つ「取り出し用クローン」を生成する
-                clone = workspace.newBlock('KS_ARG_REPORTER');
-                clone.setFieldValue(this.getFieldValue('ARG_NAME'), 'ARG_NAME');
+            // ★ 連動機能：元の関数ブロックの「どの穴（何番目）」から生まれたかを覚えさせる
+            const targetConn = block.outputConnection.targetConnection;
+            if (targetConn) {
+                const parentInputName = targetConn.getParentInput().name;
+                const parentFunctionBlock = block.getParent();
                 
-                // ★ 修正箇所：親関数の情報（IDと穴の位置）をJSONにして clone.data に記憶させる！
-                // これがないと、あとで名前を変えた時に連動しません。
-                const targetConn = this.outputConnection.targetConnection;
-                if (targetConn) {
-                    const parentInputName = targetConn.getParentInput().name; // 例: "ARG0"
-                    const parentFunctionBlock = this.getParent(); // 親のKSブロック
-                    
-                    clone.data = JSON.stringify({
-                        parentId: parentFunctionBlock.id,
-                        inputName: parentInputName,
-                        originalName: this.getFieldValue('ARG_NAME')
-                    });
-                }
-
-                clone.initSvg();
-                clone.render();
-                
-                // 2. クリックしたシャドウブロックの少し下に瞬間移動
-                const xy = this.getRelativeToSurfaceXY();
-                clone.moveBy(xy.x, xy.y + 20);
-            } finally {
-                Blockly.Events.enable();
+                clone.data = JSON.stringify({
+                    parentId: parentFunctionBlock.id,
+                    inputName: parentInputName,
+                    originalName: block.getFieldValue('ARG_NAME')
+                });
             }
-            
-            // 3. Blocklyの正規のドラッグ処理に「クローン」を渡してスタート！
-            const gesture = new Blockly.Gesture(e, workspace);
-            workspace.currentGesture_ = gesture;
-            gesture.setStartBlock(clone);
-            gesture.setTargetBlock(clone);
-            gesture.handleWsStart(e, workspace);
-            gesture.doStart(e);
-            
-            return; // ここで止める（元のシャドウブロックはドラッグさせない）
-        }
-    }
-    // それ以外のブロックは、普通に処理させる
-    origOnMouseDown.call(this, e);
-};
 
+            clone.initSvg();
+            clone.render();
+            
+            // 2. マウスの現在位置（ドラッグを始めた場所）にクローンを瞬間移動
+            const xy = block.getRelativeToSurfaceXY();
+            clone.moveBy(xy.x, xy.y);
+            
+        } finally {
+            Blockly.Events.enable();
+        }
+        
+        // 3. ドラッグのターゲットを「元のシャドウ」から「今作ったクローン」にすり替える！
+        this.targetBlock_ = clone;
+        
+        // 4. すり替えたクローンを使って、本来のドラッグ開始処理を続ける
+        origStartDraggingBlock.call(this);
+        return;
+    }
+    
+    // それ以外の普通のブロックは、いつも通りドラッグを開始する
+    origStartDraggingBlock.call(this);
+};
 // ----------------------------------------------------
 // ジェネレータ定義 (valueToCode と Tuple に修正済み)
 // ----------------------------------------------------
