@@ -956,7 +956,14 @@ Blockly.defineBlocksWithJsonArray([
         "message0": "%1 %2 %3",
         "args0": [
             { "type": "input_value", "name": "A", "check": ["text", "jkazu"] },
-            { "type": "field_dropdown", "name": "OP", "options": [["=", "EQ"], [">", "GT"], ["<", "LT"]] },
+            { "type": "field_dropdown", "name": "OP", "options": [
+				["=", "=="],
+				["≠","!="],
+				[">", ">"],
+				["<", "<"],
+				["≦", "<="],
+				["≧", ">="],
+			]},
             { "type": "input_value", "name": "B", "check": ["text", "jkazu"] }
         ],
         "output": "Boolean",
@@ -1577,7 +1584,7 @@ javascript.javascriptGenerator.forBlock['KB'] = function(block, generator) {
     return '\n';
 };
 
-// 関数定義ブロック
+// 関数定義ブロック（中身が漏れない完全版）
 javascript.javascriptGenerator.forBlock['KS'] = function(block, generator) {
     var nani = block.getFieldValue('mozi') || '';
     
@@ -1587,21 +1594,34 @@ javascript.javascriptGenerator.forBlock['KS'] = function(block, generator) {
         args = block.arguments_;
     }
     
-    var js = generator.statementToCode(block, 'js');
-    // JSの関数 function 〇〇 (引数1, 引数2...) { 処理 } にする
-    jstext = jstext + "function " + nani + "(" + args.join(", ") + ") {\n" + js + "}\n";
+    // ▼ ifブロックなどと同じ仕組み：今のjstextを保存して中身だけを抽出する
+    var currentJS = jstext;
+    jstext = ""; 
+    generator.statementToCode(block, 'js');
+    var branch = jstext;
+    
+    // 保存しておいたものと合体させて、関数の外枠で包み込む
+    jstext = currentJS + "function " + nani + "(" + args.join(", ") + ") {\n" + branch + "}\n";
     return '\n';
+};
+
+// 無名関数ブロック（こちらも中身が漏れないように修正）
+javascript.javascriptGenerator.forBlock['MKS'] = function(block, generator) {
+    // 中身だけを抽出する
+    var currentJS = jstext;
+    jstext = "";
+    generator.statementToCode(block, 'js');
+    var branch = jstext;
+    jstext = currentJS; // グローバル変数を元の状態に戻す
+    
+    // 無名関数は穴にはめ込むブロック（output）なので、文字として返す
+    return ["function() {\n" + branch + "}", javascript.Order.ATOMIC];
 };
 
 // 【修正】 field_input に対応するように getFieldValue に変更
 javascript.javascriptGenerator.forBlock['KA'] = function(block, generator) {
     var txt = block.getFieldValue('mozi') || '';
     return [txt + "()", javascript.Order.ATOMIC];
-};
-
-javascript.javascriptGenerator.forBlock['MKS'] = function(block, generator) {
-    var js = generator.statementToCode(block, 'js');
-    return ["function() {\n" + js + "}", javascript.Order.ATOMIC];
 };
 
 javascript.javascriptGenerator.forBlock['HAD['] = function(block, generator) {
@@ -1654,6 +1674,15 @@ javascript.javascriptGenerator.forBlock['p_if_mozi_select'] = function(block, ge
     // 三項演算子を使ってHTMLテキストに結合する
     text += '" + (' + condition + ' ? ' + valA + ' : ' + valB + ') + "';
     return '';
+};
+
+// 比較演算子（=, >, <）のコード生成
+javascript.javascriptGenerator.forBlock['p_logic_compare'] = function(block, generator) {
+    var operator = block.getFieldValue('OP');    
+    var argument0 = generator.valueToCode(block, 'A', javascript.Order.NONE) || '0';
+    var argument1 = generator.valueToCode(block, 'B', javascript.Order.NONE) || '0';
+    var code = argument0 + ' ' + operator + ' ' + argument1;
+    return [code, javascript.Order.NONE];
 };
 
 javascript.javascriptGenerator.forBlock['p_control_if'] = function(block, generator) {
