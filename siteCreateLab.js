@@ -903,6 +903,15 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "",
         "helpUrl": ""
     },
+	{
+        "type": "KS_ARG_REPORTER",
+        "message0": "%1",
+        "args0": [
+            { "type": "field_label", "name": "ARG_NAME", "text": "x" }
+        ],
+        "output": null,
+        "colour": "#ff6b5c"
+    },
     {
         "type": "ks_mutator_container",
         "message0": "引数の設定 %1 %2",
