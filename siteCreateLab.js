@@ -1009,7 +1009,7 @@ Blockly.defineBlocksWithJsonArray([
       "message0": "でなければ",
       "previousStatement": null,
       "colour": "#124d99"
-    }
+    },
     {
         "type": "p_control_repeat",
         "message0": "%1 回繰り返す %2 %3",
