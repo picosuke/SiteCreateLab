@@ -870,6 +870,28 @@ Blockly.defineBlocksWithJsonArray([
         "helpUrl": ""
     },
     {
+        "type": "NTW",
+        "message0": "%1 で %2 を作り %3 にする",
+        "previousStatement": "js",
+        "nextStatement": "js",
+        "args0": [
+            {
+              "type": "field_dropdown",
+              "name": "name",
+              "options": [
+    [ "ブロック内で定数", "const" ], 
+    [ "ブロック内で変数", "let" ], 
+    [ "全体で共有する変数", "var" ]
+              ]
+            },
+            { "type": "input_value", "name": "NANI", "check": "HEN" },
+            { "type": "input_value", "name": "DOU", "check": [ "text", "jkazu", "HEN", "hai{", "hai[" ] }
+        ],
+        "colour": '#fe9f3d',
+        "tooltip": "",
+        "helpUrl": ""
+    },
+    {
         "type": "HD",
         "message0": "変数 %1",
         "args0": [
@@ -1544,6 +1566,14 @@ javascript.javascriptGenerator.forBlock['NW'] = function(block, generator) {
     var value_NANI = generator.valueToCode(block, 'NANI', javascript.Order.NONE) || '""';
     var value_DOU = generator.valueToCode(block, 'DOU', javascript.Order.NONE) || '""';
     jstext = jstext + value_NANI + ' = ' + value_DOU + ';\n';
+    return '\n';
+};
+
+javascript.javascriptGenerator.forBlock['NTW'] = function(block, generator) {
+    var name = block.getFieldValue('name');
+    var value_NANI = generator.valueToCode(block, 'NANI', javascript.Order.NONE) || '""';
+    var value_DOU = generator.valueToCode(block, 'DOU', javascript.Order.NONE) || '""';
+    jstext = jstext + name + " " + value_NANI + ' = ' + value_DOU + ';\n';
     return '\n';
 };
 
