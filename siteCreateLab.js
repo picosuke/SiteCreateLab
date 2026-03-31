@@ -1109,6 +1109,12 @@ Blockly.Extensions.registerMutator(
         let input = this.appendValueInput('ARG' + i)
                         .setAlign(Blockly.inputs.Align.RIGHT);
                         
+        // ==========================================
+        // ★ 魔法のロック：この穴には「絶対に存在しない型（NO_CONNECTION）」しか入らないようにする
+        // これで、取り出したクローンが元の場所に戻るのを完全に防ぎます！
+        // ==========================================
+        input.setCheck('NO_CONNECTION');
+                        
         if (i === 0) {
             input.appendField("引数");
         }
@@ -1117,7 +1123,7 @@ Blockly.Extensions.registerMutator(
           this.moveInputBefore('ARG' + i, 'js');
         }
 
-        // 穴にシャドウブロックをはめ込む（安全な標準機能）
+        // 穴にシャドウブロックをはめ込む
         Blockly.Events.disable();
         try {
             let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
@@ -1125,7 +1131,13 @@ Blockly.Extensions.registerMutator(
             shadow.setFieldValue(argName, 'ARG_NAME');
             shadow.initSvg();
             shadow.render();
+            
+            // ★ シャドウブロックをはめ込む時だけ、一時的にロックを解除して接続する
+            input.setCheck(null);
             input.connection.connect(shadow.outputConnection);
+            // 接続が終わったら、再びロックをかける！
+            input.setCheck('NO_CONNECTION');
+            
         } finally {
             Blockly.Events.enable();
         }
@@ -1141,7 +1153,6 @@ Blockly.Extensions.registerMutator(
   function() { this.updateShape_(); },
   ['ks_mutator_arg']
 );
-
 // ==========================================
 // ★ ExtForge方式：シャドウブロックのクリック判定を横取りする
 // ==========================================
