@@ -1153,6 +1153,7 @@ Blockly.Extensions.registerMutator(
   function() { this.updateShape_(); },
   ['ks_mutator_arg']
 );
+
 // ==========================================
 // ★ ExtForge方式：シャドウブロックのクリック判定を横取りする
 // ==========================================
