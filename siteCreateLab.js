@@ -879,9 +879,9 @@ Blockly.defineBlocksWithJsonArray([
               "type": "field_dropdown",
               "name": "name",
               "options": [
-    [ "ブロック内で定数", "const" ], 
-    [ "ブロック内で変数", "let" ], 
-    [ "全体で共有する変数", "var" ]
+    			[ "定数", "const" ], 
+    			[ "ローカル変数", "let" ], 
+    			[ "グローバル変数", "var" ]
               ]
             },
             { "type": "input_value", "name": "NANI", "check": "HEN" },
