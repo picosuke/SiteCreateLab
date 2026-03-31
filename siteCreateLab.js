@@ -1211,6 +1211,35 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
     origOnMouseDown.call(this, e);
 };
 
+// ==========================================
+// ★ 究極のハック２：関数の引数穴へのドロップを【絶対に】禁止する
+// ==========================================
+const origCanConnectWithReason = Blockly.Connection.prototype.canConnectWithReason;
+
+Blockly.Connection.prototype.canConnectWithReason = function(target) {
+    // 1. 自分が「穴（INPUT）」で、相手が「出っ張り（OUTPUT）」の場合のチェック
+    if (this.type === Blockly.INPUT_VALUE && target.type === Blockly.OUTPUT_VALUE) {
+        
+        // 2. もし自分がいるブロックが「関数（KS）」で、
+        // かつ、自分の穴の名前が「ARG0, ARG1...」だったら
+        const myBlock = this.getSourceBlock();
+        if (myBlock && myBlock.type === 'KS') {
+            const myInput = this.getParentInput();
+            if (myInput && myInput.name.startsWith('ARG')) {
+                
+                // 3. 相手のブロックがシャドウ（裏で作った丸薬）じゃない限り、
+                // 「絶対に接続させない！」というエラー（1）を返す
+                if (!target.getSourceBlock().isShadow()) {
+                    return 1; // Blockly.Connection.REASON_CHECKS_FAILED のこと
+                }
+            }
+        }
+    }
+    
+    // それ以外の場合は、いつものように接続チェックを行う
+    return origCanConnectWithReason.call(this, target);
+};
+
 // ----------------------------------------------------
 // ジェネレータ定義 (valueToCode と Tuple に修正済み)
 // ----------------------------------------------------
