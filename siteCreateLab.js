@@ -990,32 +990,6 @@ Blockly.defineBlocksWithJsonArray([
         ],
         "output": "Boolean",
         "colour": "#59c059"
-    },    
-    {
-        "type": "p_control_if",
-        "message0": "もし %1 なら %2 %3",
-        "args0": [
-            { "type": "input_value", "name": "IF", "check": "Boolean" },
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "DO", "check": "js" }
-        ],
-        "previousStatement": "js",
-        "nextStatement": "js",
-        "colour": "#124d99"
-    },
-    {
-        "type": "p_control_if_else",
-        "message0": "もし %1 なら %2 %3 でなければ %4 %5",
-        "args0": [
-            { "type": "input_value", "name": "IF", "check": "Boolean" },
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "DO", "check": "js" },
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "ELSE", "check": "js" }
-        ],
-        "previousStatement": "js",
-        "nextStatement": "js",
-        "colour": "#124d99"
     },
     {
         "type": "p_control_repeat",
@@ -1044,8 +1018,32 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 // ==========================================
-// 共有しない（固定文字の）引数レポーターブロック
+// プラスマイナス対応：最強の「もし〜なら」ブロック
 // ==========================================
+Blockly.Blocks['p_control_if'] = {
+  init: function() {
+    this.setColour('#124d99');
+    this.setPreviousStatement(true, 'js');
+    this.setNextStatement(true, 'js');
+    
+    // プラスマイナスの状態を記憶する変数（最初は else if も else も 0）
+    this.elseifCount_ = 0;
+    this.elseCount_ = 0;
+
+    // 最初の基本パーツ（もし 〜 なら）
+    this.appendValueInput('IF0')
+        .setCheck('Boolean')
+        .appendField('もし');
+    this.appendStatementInput('DO0')
+        .setCheck('js')
+        .appendField('なら');
+        
+    // ★ プラス・マイナス機能（ミューテーター）をセット！
+    // ※ 'controls_if_mutator' はプラグインが用意してくれた神機能です
+    Blockly.Extensions.apply('controls_if_mutator', this, false);
+  }
+};
+
 Blockly.Blocks['KS_ARG_REPORTER'] = {
   init: function() {
     this.appendDummyInput()
@@ -1668,35 +1666,53 @@ javascript.javascriptGenerator.forBlock['p_logic_compare'] = function(block, gen
     return [code, javascript.Order.NONE];
 };
 
+// ==========================================
+// プラスマイナス対応：「もし〜なら」ジェネレータ
+// ==========================================
 javascript.javascriptGenerator.forBlock['p_control_if'] = function(block, generator) {
-    var condition = generator.valueToCode(block, 'IF', javascript.Order.NONE) || 'false';
-    // Bbtnと同じ仕組み：今のjstextを保存して中身だけを抽出する
-    var currentJS = jstext;
-    jstext = ""; 
-    generator.statementToCode(block, 'DO');
-    var branch = jstext;
-    // 保存しておいたものと合体させる
-    jstext = currentJS + 'if (' + condition + ') {\n' + branch + '}\n';
-    return '';
-};
+  let code = ''; // 今回生成するコードの塊
+  let branchCode, conditionCode;
+  
+  // 1. メインの「もし（IF0）〜 なら（DO0）」
+  conditionCode = generator.valueToCode(block, 'IF0', javascript.Order.NONE) || 'false';
+  
+  let currentJS = jstext; // グローバル変数の退避
+  jstext = "";
+  generator.statementToCode(block, 'DO0');
+  branchCode = jstext;
+  jstext = currentJS; // 復元
+  
+  code += 'if (' + conditionCode + ') {\n' + branchCode + '}';
 
-javascript.javascriptGenerator.forBlock['p_control_if_else'] = function(block, generator) {
-    var condition = generator.valueToCode(block, 'IF', javascript.Order.NONE) || 'false';
-    var currentJS = jstext;
+  // 2. 増やされた「でなければもし（elseif）」の数だけ繰り返す
+  for (let i = 1; i <= block.elseifCount_; i++) {
+    conditionCode = generator.valueToCode(block, 'IF' + i, javascript.Order.NONE) || 'false';
     
-    // DO部分
+    currentJS = jstext;
     jstext = "";
-    generator.statementToCode(block, 'DO');
-    var branchDo = jstext;
+    generator.statementToCode(block, 'DO' + i);
+    branchCode = jstext;
+    jstext = currentJS;
     
-    // ELSE部分
+    code += ' else if (' + conditionCode + ') {\n' + branchCode + '}';
+  }
+
+  // 3. もし「でなければ（else）」が追加されていたら
+  if (block.elseCount_) {
+    currentJS = jstext;
     jstext = "";
     generator.statementToCode(block, 'ELSE');
-    var branchElse = jstext;
+    branchCode = jstext;
+    jstext = currentJS;
     
-    jstext = currentJS + 'if (' + condition + ') {\n' + branchDo + '} else {\n' + branchElse + '}\n';
-    return '';
+    code += ' else {\n' + branchCode + '}';
+  }
+
+  // 最後に改行をつけて、グローバル変数に足し込む
+  jstext += currentJS + code + '\n';
+  return '';
 };
+
 
 javascript.javascriptGenerator.forBlock['p_control_repeat'] = function(block, generator) {
     var times = generator.valueToCode(block, 'TIMES', javascript.Order.NONE) || '0';
