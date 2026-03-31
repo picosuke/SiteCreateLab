@@ -992,12 +992,6 @@ Blockly.defineBlocksWithJsonArray([
         "colour": "#59c059"
     },
     {
-      "type": "p_control_if_if",
-      "message0": "もし",
-      "nextStatement": null,
-      "colour": "#124d99"
-    },
-    {
       "type": "p_control_elseif",
       "message0": "でなければもし",
       "previousStatement": null,
@@ -1011,17 +1005,17 @@ Blockly.defineBlocksWithJsonArray([
       "colour": "#124d99"
     },
     {
-      "type": "p_control_if",
-      "message0": "もし %1 なら %2 %3",
-      "args0": [
-        { "type": "input_value", "name": "IF0", "check": "Boolean" },
-        { "type": "input_dummy" },
-        { "type": "input_statement", "name": "DO0", "check": "js" }
-      ],
-      "previousStatement": "js",
-      "nextStatement": "js",
-      "colour": "#124d99",
-      "mutator": "p_control_if_mutator" // ★ ここでさっき作った歯車機能（拡張機能）を呼び出す！
+        "type": "p_control_if",
+        "message0": "もし %1 なら %2 %3",
+        "args0": [
+            { "type": "input_value", "name": "IF0", "check": "Boolean" },
+            { "type": "input_dummy" },
+            { "type": "input_statement", "name": "DO0", "check": "js" }
+        ],
+        "previousStatement": "js",
+        "nextStatement": "js",
+        "colour": "#124d99",
+        "mutator": "controls_if_mutator"
     },
     {
         "type": "p_control_repeat",
@@ -1066,116 +1060,6 @@ javascript.javascriptGenerator.forBlock['KS_ARG_REPORTER'] = function(block) {
 // ==========================================
 // ==========================================
 
-
-Blockly.Extensions.registerMutator(
-  'p_control_if_mutator',
-  {
-    // === 保存・復元・展開・合成のルール ===
-    saveExtraState: function() {
-      return {
-        'elseIfCount': this.elseifCount_,
-        'hasElse': this.elseCount_ > 0,
-      };
-    },
-    loadExtraState: function(state) {
-      this.elseifCount_ = state['elseIfCount'] || 0;
-      this.elseCount_ = state['hasElse'] ? 1 : 0;
-      this.updateShape_();
-    },
-    decompose: function(workspace) {
-      const containerBlock = workspace.newBlock('p_control_if_if');
-      containerBlock.initSvg();
-      let connection = containerBlock.nextConnection;
-      
-      for (let i = 1; i <= this.elseifCount_; i++) {
-        const elseifBlock = workspace.newBlock('p_control_elseif');
-        elseifBlock.initSvg();
-        connection.connect(elseifBlock.previousConnection);
-        connection = elseifBlock.nextConnection;
-      }
-      if (this.elseCount_) {
-        const elseBlock = workspace.newBlock('p_control_else');
-        elseBlock.initSvg();
-        connection.connect(elseBlock.previousConnection);
-      }
-      return containerBlock;
-    },
-    compose: function(containerBlock) {
-      let clauseBlock = containerBlock.nextConnection.targetBlock();
-      this.elseifCount_ = 0;
-      this.elseCount_ = 0;
-      
-      // 今繋がっているブロックを一旦避難させる
-      let valueConnections = [null];
-      let statementConnections = [null];
-      let elseStatementConnection = null;
-      
-      if (this.getInputTargetBlock('ELSE')) {
-        elseStatementConnection = this.getInput('ELSE').connection.targetConnection;
-      }
-      for (let i = 1; i <= this.elseifCount_; i++) {
-        valueConnections.push(this.getInputTargetBlock('IF' + i) ? this.getInput('IF' + i).connection.targetConnection : null);
-        statementConnections.push(this.getInputTargetBlock('DO' + i) ? this.getInput('DO' + i).connection.targetConnection : null);
-      }
-
-      // ユーザーが組んだ形をカウント
-      while (clauseBlock) {
-        if (clauseBlock.type === 'p_control_elseif') {
-          this.elseifCount_++;
-        } else if (clauseBlock.type === 'p_control_else') {
-          this.elseCount_ = 1;
-        }
-        clauseBlock = clauseBlock.nextConnection && clauseBlock.nextConnection.targetBlock();
-      }
-      
-      // 形を更新！
-      this.updateShape_();
-
-      // 避難させていたブロックを新しい穴に戻す
-      for (let i = 1; i <= this.elseifCount_; i++) {
-        Blockly.MutatorIcon.reconnect(valueConnections[i], this, 'IF' + i);
-        Blockly.MutatorIcon.reconnect(statementConnections[i], this, 'DO' + i);
-      }
-      Blockly.MutatorIcon.reconnect(elseStatementConnection, this, 'ELSE');
-    },
-    
-    // === 実際の穴の増減処理 ===
-    updateShape_: function() {
-      // 一旦お掃除
-      let i = 1;
-      while (this.getInput('IF' + i)) {
-        this.removeInput('IF' + i);
-        this.removeInput('DO' + i);
-        i++;
-      }
-      if (this.getInput('ELSE')) {
-        this.removeInput('ELSE');
-      }
-      // 新しく追加
-      for (let j = 1; j <= this.elseifCount_; j++) {
-        this.appendValueInput('IF' + j)
-            .setCheck('Boolean')
-            .appendField('でなければもし');
-        this.appendStatementInput('DO' + j)
-            .setCheck('js')
-            .appendField('なら');
-      }
-      if (this.elseCount_) {
-        this.appendStatementInput('ELSE')
-            .setCheck('js')
-            .appendField('でなければ');
-      }
-    }
-  },
-  // 初期化関数
-  function() {
-    this.elseifCount_ = 0;
-    this.elseCount_ = 0;
-    this.updateShape_();
-  },
-  // 歯車内で使うブロックの名前
-  ['p_control_elseif', 'p_control_else']
-);
 
 Blockly.Extensions.registerMutator(
   'ks_mutator',
