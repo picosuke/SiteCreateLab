@@ -1061,7 +1061,7 @@ javascript.javascriptGenerator.forBlock['KS_ARG_REPORTER'] = function(block) {
 };
 
 // ==========================================
-// 関数の歯車（ミューテーター）
+// 関数の歯車（ミューテーター）と引数ブロック（完全・最終決定版）
 // ==========================================
 Blockly.Extensions.registerMutator(
   'ks_mutator',
@@ -1105,15 +1105,12 @@ Blockly.Extensions.registerMutator(
       for (let i = 0; i < this.arguments_.length; i++) {
         let argName = this.arguments_[i];
         
-        // 穴を作る
         let input = this.appendValueInput('ARG' + i)
                         .setAlign(Blockly.inputs.Align.RIGHT);
                         
-        // ==========================================
-        // ★ 魔法のロック：この穴には「絶対に存在しない型（NO_CONNECTION）」しか入らないようにする
-        // これで、取り出したクローンが元の場所に戻るのを完全に防ぎます！
-        // ==========================================
-        input.setCheck('NO_CONNECTION');
+        // ★【最強のロック】この穴には、どんなブロックも絶対に接続できないようにする！
+        // （後でシャドウをはめ込む時だけ、こっそり解除します）
+        input.connection.setCheck('NO_CONNECTION');
                         
         if (i === 0) {
             input.appendField("引数");
@@ -1123,20 +1120,75 @@ Blockly.Extensions.registerMutator(
           this.moveInputBefore('ARG' + i, 'js');
         }
 
-        // 穴にシャドウブロックをはめ込む
         Blockly.Events.disable();
         try {
+            // ★【重要】ここは「シャドウブロック（影）」として作ります！
+            // （実体にすると、Blocklyのシステムが混乱するため）
             let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
             shadow.setShadow(true);
             shadow.setFieldValue(argName, 'ARG_NAME');
+            
+            // シャドウブロックの「削除」と「移動」を完全に禁止する
+            shadow.setDeletable(false);
+            shadow.setMovable(false);
+
+            // ==========================================
+            // ★【究極のハック】シャドウブロック自身に「クローン生成機能」を持たせる
+            // ==========================================
+            shadow.mixin({
+                onMouseDown_: function(e) {
+                    if (e.button !== 0) return; // 左クリックのみ
+                    e.stopPropagation(); // 親の関数ブロックが一緒に動くのを防ぐ！
+                    
+                    const workspace = this.workspace;
+                    
+                    Blockly.Events.disable();
+                    let clone;
+                    try {
+                        // 1. 全く同じ名前を持つ「取り出し用クローン（実体）」を生成する
+                        clone = workspace.newBlock('KS_ARG_REPORTER');
+                        clone.setFieldValue(this.getFieldValue('ARG_NAME'), 'ARG_NAME');
+                        
+                        // ★ 連動機能：元の関数ブロックの「どの穴」から生まれたかを覚えさせる
+                        const targetConn = this.outputConnection.targetConnection;
+                        if (targetConn) {
+                            const parentInputName = targetConn.getParentInput().name;
+                            const parentFunctionBlock = this.getParent();
+                            clone.data = JSON.stringify({
+                                parentId: parentFunctionBlock.id,
+                                inputName: parentInputName,
+                                originalName: this.getFieldValue('ARG_NAME')
+                            });
+                        }
+
+                        clone.initSvg();
+                        clone.render();
+                        
+                        // 2. マウスの現在位置にクローンを移動
+                        const xy = this.getRelativeToSurfaceXY();
+                        clone.moveBy(xy.x, xy.y);
+                        
+                    } finally {
+                        Blockly.Events.enable();
+                    }
+                    
+                    // 3. Blocklyのシステムに「この新しいクローンをドラッグしてね」と渡す
+                    const gesture = workspace.getGesture(e);
+                    if (gesture) {
+                        gesture.setTargetBlock(clone);
+                        gesture.handleWsStart(e, workspace);
+                    }
+                }
+            });
+
             shadow.initSvg();
             shadow.render();
             
-            // ★ シャドウブロックをはめ込む時だけ、一時的にロックを解除して接続する
-            input.setCheck(null);
+            // ★ シャドウブロックをはめ込む一瞬だけ、ロックを解除する！
+            input.connection.setCheck(null);
             input.connection.connect(shadow.outputConnection);
-            // 接続が終わったら、再びロックをかける！
-            input.setCheck('NO_CONNECTION');
+            // はめ込んだら、すぐにまた「絶対に入らない鍵」をかける！
+            input.connection.setCheck('NO_CONNECTION');
             
         } finally {
             Blockly.Events.enable();
@@ -1153,7 +1205,6 @@ Blockly.Extensions.registerMutator(
   function() { this.updateShape_(); },
   ['ks_mutator_arg']
 );
-
 // ==========================================
 // ★ ExtForge方式：シャドウブロックのクリック判定を横取りする
 // ==========================================
