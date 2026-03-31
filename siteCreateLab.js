@@ -924,7 +924,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KS",
-        "message0": "⚙️ 関数 %1",
+        "message0": "関数 %1",
         "args0": [
           { "type": "field_input", "name": "mozi" }
         ],
@@ -1140,7 +1140,6 @@ Blockly.Extensions.registerMutator(
       if (!this.getInput('js')) {
         this.appendStatementInput('js')
             .setCheck('js')
-            .appendField('で処理');
       }
     }
   },
