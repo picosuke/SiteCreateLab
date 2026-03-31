@@ -1011,6 +1011,19 @@ Blockly.defineBlocksWithJsonArray([
       "colour": "#124d99"
     },
     {
+      "type": "p_control_if",
+      "message0": "もし %1 なら %2 %3",
+      "args0": [
+        { "type": "input_value", "name": "IF0", "check": "Boolean" },
+        { "type": "input_dummy" },
+        { "type": "input_statement", "name": "DO0", "check": "js" }
+      ],
+      "previousStatement": "js",
+      "nextStatement": "js",
+      "colour": "#124d99",
+      "mutator": "p_control_if_mutator" // ★ ここでさっき作った歯車機能（拡張機能）を呼び出す！
+    },
+    {
         "type": "p_control_repeat",
         "message0": "%1 回繰り返す %2 %3",
         "args0": [
@@ -1035,24 +1048,6 @@ Blockly.defineBlocksWithJsonArray([
         "inputsInline": true
     }
 ]);
-Blockly.Blocks['p_control_if'] = {
-  init: function() {
-    this.setColour('#124d99');
-    this.setPreviousStatement(true, 'js');
-    this.setNextStatement(true, 'js');
-    
-    // 最初の基本パーツ（IF0とDO0）
-    this.appendValueInput('IF0')
-        .setCheck('Boolean')
-        .appendField('もし');
-    this.appendStatementInput('DO0')
-        .setCheck('js')
-        .appendField('なら');
-
-    // ★ 最新の安全な書き方：文字列で呼び出す（エラーが出ません！）
-    this.setMutator(new Blockly.icons.MutatorIcon(['p_control_elseif', 'p_control_else'], this));
-  }
-};
 
 Blockly.Blocks['KS_ARG_REPORTER'] = {
   init: function() {
@@ -1069,31 +1064,24 @@ javascript.javascriptGenerator.forBlock['KS_ARG_REPORTER'] = function(block) {
 };
 
 // ==========================================
-// ミューテーター
 // ==========================================
 
 
-// ③ 歯車の中身（拡張機能）を登録する！
 Blockly.Extensions.registerMutator(
-  'p_control_if_mutator', // 名前
+  'p_control_if_mutator',
   {
-    elseifCount_: 0,
-    elseCount_: 0,
-    
-    // セーブデータに形を保存
+    // === 保存・復元・展開・合成のルール ===
     saveExtraState: function() {
       return {
         'elseIfCount': this.elseifCount_,
         'hasElse': this.elseCount_ > 0,
       };
     },
-    // セーブデータから形を復元
     loadExtraState: function(state) {
       this.elseifCount_ = state['elseIfCount'] || 0;
       this.elseCount_ = state['hasElse'] ? 1 : 0;
       this.updateShape_();
     },
-    // 歯車を開いた時の処理
     decompose: function(workspace) {
       const containerBlock = workspace.newBlock('p_control_if_if');
       containerBlock.initSvg();
@@ -1105,7 +1093,6 @@ Blockly.Extensions.registerMutator(
         connection.connect(elseifBlock.previousConnection);
         connection = elseifBlock.nextConnection;
       }
-      
       if (this.elseCount_) {
         const elseBlock = workspace.newBlock('p_control_else');
         elseBlock.initSvg();
@@ -1113,7 +1100,6 @@ Blockly.Extensions.registerMutator(
       }
       return containerBlock;
     },
-    // 歯車を閉じた時の処理
     compose: function(containerBlock) {
       let clauseBlock = containerBlock.nextConnection.targetBlock();
       this.elseifCount_ = 0;
@@ -1132,7 +1118,7 @@ Blockly.Extensions.registerMutator(
         statementConnections.push(this.getInputTargetBlock('DO' + i) ? this.getInput('DO' + i).connection.targetConnection : null);
       }
 
-      // 形をカウント
+      // ユーザーが組んだ形をカウント
       while (clauseBlock) {
         if (clauseBlock.type === 'p_control_elseif') {
           this.elseifCount_++;
@@ -1142,6 +1128,7 @@ Blockly.Extensions.registerMutator(
         clauseBlock = clauseBlock.nextConnection && clauseBlock.nextConnection.targetBlock();
       }
       
+      // 形を更新！
       this.updateShape_();
 
       // 避難させていたブロックを新しい穴に戻す
@@ -1151,7 +1138,8 @@ Blockly.Extensions.registerMutator(
       }
       Blockly.MutatorIcon.reconnect(elseStatementConnection, this, 'ELSE');
     },
-    // 実際の穴の増減処理
+    
+    // === 実際の穴の増減処理 ===
     updateShape_: function() {
       // 一旦お掃除
       let i = 1;
@@ -1181,14 +1169,13 @@ Blockly.Extensions.registerMutator(
   },
   // 初期化関数
   function() {
+    this.elseifCount_ = 0;
+    this.elseCount_ = 0;
     this.updateShape_();
   },
-  // ヘルパーブロックの指定
+  // 歯車内で使うブロックの名前
   ['p_control_elseif', 'p_control_else']
 );
-
-// ④ 本体ブロックにミューテーターを適用する
-Blockly.Extensions.apply('p_control_if_mutator', Blockly.Blocks['p_control_if'], false);
 
 Blockly.Extensions.registerMutator(
   'ks_mutator',
