@@ -90,46 +90,47 @@
 				this.hasElse_ = t.hasElse || !1;
 				this.updateShape_()
 			},
-updateShape_: function() {
-            // 一旦消す
-            if (this.getInput('ELSE')) this.removeInput('ELSE');
-            let i = 1;
-            while (this.getInput('IF' + i)) {
-                this.removeInput('IF' + i);
-                this.removeInput('DO' + i);
-                i++;
-            }
+			updateShape_: function() {
+                // 一旦消す
+                if (this.getInput('ELSE')) this.removeInput('ELSE');
+                let i = 1;
+                while (this.getInput('IF' + i)) {
+                    // ダミー入力（改行用）も忘れずに消す
+                    this.removeInput('DUMMY' + i);
+                    this.removeInput('DO' + i);
+                    i++;
+                }
 
-            // 「でなければもし」の追加
-            for (let j = 1; j <= this.elseIfCount_; j++) {
-                // ★ 魔法の書き方：1つの穴（IF）にボタンも文字も全部乗せる！
-                this.appendValueInput('IF' + j)
-                    .setCheck('Boolean')
-                    .appendField(createMinusField('IF' + j))
-                    .appendField('でなければもし');
+                // 「でなければもし」の追加
+                for (let j = 1; j <= this.elseIfCount_; j++) {
+                    // 1行目：ボタンと「でなければもし」の文字、そして条件の穴
+                    this.appendValueInput('IF' + j)
+                        .setCheck('Boolean')
+                        .appendField(createMinusField('IF' + j))
+                        .appendField('でなければもし');
                 
-                // ★ そして次の穴（DO）には、「なら」という文字だけ乗せて横にくっつける！
-                this.appendStatementInput('DO' + j)
-                    .setCheck('js')
-                    .appendField('なら');
-            }
+                    // 2行目の頭（改行用ダミー）
+                    this.appendDummyInput('DUMMY' + j);
 
-            // 「でなければ」の追加
-            if (this.hasElse_) {
-                this.appendStatementInput('ELSE')
-                    .setCheck('js')
-                    .appendField(createMinusField('ELSE'))
-                    .appendField('でなければ');
-            }
+                    // 3行目：「なら」の文字と、コの字の穴
+                    this.appendStatementInput('DO' + j)
+                        .setCheck('js')
+                        .appendField('なら');
+                }
 
-            // プラスボタンの設置
-            if (this.getInput('IF0') && !this.getField('PLUS')) {
-                this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
+                // 「でなければ」の追加
+                if (this.hasElse_) {
+                    this.appendStatementInput('ELSE')
+                        .setCheck('js')
+                        .appendField(createMinusField('ELSE'))
+                        .appendField('でなければ');
+                }
+
+                // プラスボタンの設置
+                if (this.getInput('IF0') && !this.getField('PLUS')) {
+                    this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
+                }
             }
-            
-            // ★ 超重要：増えた時も「横並び（インライン）」を維持しなさい、と命令する
-            this.setInputsInline(true);
-        }
 			plus: function() {
 				if (!this.hasElse_) {
 					this.hasElse_ = !0
