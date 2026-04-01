@@ -1,58 +1,99 @@
-/**
- * @license
- * Copyright 2020 Google LLC
- * SPDX-License-Identifier: Apache-2.0
- */
-
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('blockly/core')) :
     typeof define === 'function' && define.amd ? define(['exports', 'blockly/core'], factory) :
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.BlocklyBlockPlusMinus = {}, global.Blockly));
 }(this, (function (exports, Blockly) { 'use strict';
 
-    // ==========================================
-    // Site Create Lab 専用：完全日本語版 プラスマイナスプラグイン
-    // ==========================================
+    // プラスとマイナスの画像データ
+    const plusImage = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTBoLTR2LTRjMC0xLjEwNC0uODk2LTItMi0ycy0yIC44OTYtMiAybC4wNzEgNGgtNC4wNzFjLTEuMTA0IDAtMiAuODk2LTIgMnMyIC44OTYgMiAybDQuMDcxLS4wNzEtLjA3MSA0LjA3MWMwIDEuMTA0Ljg5NiAyIDIgMnMyLS44OTYgMi0ydi00LjA3MWw0IC4wNzFjMS4xMDQgMCAyLS44OTYgMi0ycy0uODk2LTItMi0yeiIgZmlsbD0id2hpdGUiIC8+PC9zdmc+Cg==";
+    const minusImage = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTFoLTEyYy0xLjEwNCAwLTIgLjg5Ni0yIDJzLjg5NiAyIDIgMmgxMmMxLjEwNCAwIDItLjg5NiAyLTJzLS44OTYtMi0yLTJ6IiBmaWxsPSJ3aGl0ZSIgLz48L3N2Zz4K";
 
-    const plusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTBoLTR2LTRjMC0xLjEtLjktMi0yLTJzLTIgLjktMiAybDRWMTRINmMtMS4xIDAtMiAuOS0yIDJzLjkgMiAyIDJoNHY0YzAgMS4xLjkgMiAyIDJzMi0uOSAyLTJ2LTRoNGMxLjEgMCAyLS45IDItMnMtLjktMi0yLTJ6IiBmaWxsPSJ3aGl0ZSIgLz48L3N2Zz4K';
-    const minusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTExSDZjLTEuMSAwLTIgLjktMiAycy45IDIgMiAyaDEyYzEuMSAwIDItLjkgMi0ycy0uOS0yLTItMnoiIGZpbGw9IndoaXRlIiAvPjwvc3ZnPgo=';
+    // ボタンを作る関数（クリックされたら中身の形を更新する）
+    function createPlusField() {
+        const plusField = new Blockly.FieldImage(plusImage, 15, 15, '+');
+        plusField.onClick_ = function(e) {
+            const block = this.getSourceBlock();
+            if (block.isInFlyout) return;
+            Blockly.Events.setGroup(true);
+            const oldMutation = block.mutationToDom ? Blockly.Xml.domToText(block.mutationToDom()) : "";
+            block.plus(); // プラスの動作を呼ぶ
+            const newMutation = block.mutationToDom ? Blockly.Xml.domToText(block.mutationToDom()) : "";
+            if (oldMutation !== newMutation) {
+                Blockly.Events.fire(new Blockly.Events.BlockChange(block, "mutation", null, oldMutation, newMutation));
+            }
+            Blockly.Events.setGroup(false);
+        };
+        return plusField;
+    }
 
-    // ★ エラー回避：公式プラグインと同じように「クラス」として機能を作る
-    const controlsIfMutator = {
-        elseifCount_: 0,
-        elseCount_: 0,
+    function createMinusField(args) {
+        const minusField = new Blockly.FieldImage(minusImage, 15, 15, '-');
+        minusField.onClick_ = function(e) {
+            const block = this.getSourceBlock();
+            if (block.isInFlyout) return;
+            Blockly.Events.setGroup(true);
+            const oldMutation = block.mutationToDom ? Blockly.Xml.domToText(block.mutationToDom()) : "";
+            block.minus(args); // マイナスの動作を呼ぶ
+            const newMutation = block.mutationToDom ? Blockly.Xml.domToText(block.mutationToDom()) : "";
+            if (oldMutation !== newMutation) {
+                Blockly.Events.fire(new Blockly.Events.BlockChange(block, "mutation", null, oldMutation, newMutation));
+            }
+            Blockly.Events.setGroup(false);
+        };
+        return minusField;
+    }
 
+    // ★ 公式と同じ必須関数を全て備えた「最強のミューテーター」
+    const customIfMutator = {
+        elseIfCount_: 0,
+        hasElse_: false,
+
+        // 【重要】エラーを防ぐための必須関数たち
+        mutationToDom: function() {
+            if (!this.elseIfCount_ && !this.hasElse_) return null;
+            const container = Blockly.utils.xml.createElement('mutation');
+            if (this.elseIfCount_) container.setAttribute('elseif', this.elseIfCount_);
+            if (this.hasElse_) container.setAttribute('else', 1);
+            return container;
+        },
+        domToMutation: function(xmlElement) {
+            this.elseIfCount_ = parseInt(xmlElement.getAttribute('elseif'), 10) || 0;
+            this.hasElse_ = !!parseInt(xmlElement.getAttribute('else'), 10);
+            this.updateShape_();
+        },
         saveExtraState: function() {
-            return {
-                'elseIfCount': this.elseifCount_,
-                'hasElse': this.elseCount_ > 0,
-            };
+            if (!this.elseIfCount_ && !this.hasElse_) return null;
+            const state = Object.create(null);
+            if (this.elseIfCount_) state['elseIfCount'] = this.elseIfCount_;
+            if (this.hasElse_) state['hasElse'] = true;
+            return state;
         },
         loadExtraState: function(state) {
-            this.elseifCount_ = state['elseIfCount'] || 0;
-            this.elseCount_ = state['hasElse'] ? 1 : 0;
+            this.elseIfCount_ = state['elseIfCount'] || 0;
+            this.hasElse_ = state['hasElse'] || false;
             this.updateShape_();
         },
 
+        // 【ご要望の増え方】
         plus: function() {
-            if (this.elseCount_ === 0) {
-                this.elseCount_ = 1;
+            if (!this.hasElse_) {
+                this.hasElse_ = true; // 1回目は「でなければ」を追加
             } else {
-                this.elseifCount_++;
+                this.elseIfCount_++;  // 次からは「でなければもし」を追加
             }
             this.updateShape_();
         },
-
-        minus: function(id) {
-            if (this.elseCount_ > 0 && id === 'ELSE') {
-                this.elseCount_ = 0;
+        minus: function(inputId) {
+            if (inputId === 'ELSE') {
+                this.hasElse_ = false;
             } else {
-                this.elseifCount_--;
+                this.elseIfCount_--;
             }
             this.updateShape_();
         },
 
         updateShape_: function() {
+            // 一旦消す
             if (this.getInput('ELSE')) this.removeInput('ELSE');
             let i = 1;
             while (this.getInput('IF' + i)) {
@@ -61,74 +102,37 @@
                 i++;
             }
 
-            for (let j = 1; j <= this.elseifCount_; j++) {
+            // 「でなければもし」の追加
+            for (let j = 1; j <= this.elseIfCount_; j++) {
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
-                    // ★ 美しい日本語に書き換え！
                     .appendField(createMinusField('IF' + j))
                     .appendField('でなければもし');
-                
                 this.appendStatementInput('DO' + j)
                     .setCheck('js')
                     .appendField('なら');
             }
 
-            if (this.elseCount_) {
+            // 「でなければ」の追加
+            if (this.hasElse_) {
                 this.appendStatementInput('ELSE')
                     .setCheck('js')
-                    // ★ 美しい日本語に書き換え！
                     .appendField(createMinusField('ELSE'))
                     .appendField('でなければ');
             }
-            
+
+            // プラスボタンの設置
             if (this.getInput('IF0') && !this.getField('PLUS')) {
                 this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
             }
         }
     };
 
-    function createPlusField() {
-        const plusField = new Blockly.FieldImage(plusImage, 15, 15, '+');
-        plusField.onClick_ = function(e) {
-            const block = this.getSourceBlock();
-            if (block && block.plus) {
-                block.plus();
-            }
-        };
-        return plusField;
-    }
-
-    function createMinusField(inputId) {
-        const minusField = new Blockly.FieldImage(minusImage, 15, 15, '-');
-        minusField.onClick_ = function(e) {
-            const block = this.getSourceBlock();
-            if (block && block.minus) {
-                block.minus(inputId);
-            }
-        };
-        return minusField;
-    }
-
-    // ==========================================
-    // ★ エラー回避：Blockly公式と「全く同じ方法」で登録する
-    // （registerMutatorではなく、registerとcompose/decomposeのダミーを使う）
-    // ==========================================
+    // 拡張機能をシステムに登録
     Blockly.Extensions.registerMutator(
-      "scl_if_mutator",
-      {
-        mutationToDom: function () {
-          const container = Blockly.utils.xml.createElement("mutation");
-          container.setAttribute("elseif", this.elseifCount_ || 0);
-          container.setAttribute("else", this.elseCount_ || 0);
-          return container;
-        },
-
-        domToMutation: function (xmlElement) {
-          this.elseifCount_ = parseInt(xmlElement.getAttribute("elseif"), 10) || 0;
-          this.elseCount_ = parseInt(xmlElement.getAttribute("else"), 10) || 0;
-          this.updateShape_();
-        }
-      }
+        "p_control_if_mutator", 
+        customIfMutator, 
+        function() { this.updateShape_(); }
     );
-                                      
+
 })));
