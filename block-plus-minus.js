@@ -11,20 +11,20 @@
 }(this, (function (exports, Blockly) { 'use strict';
 
     // ==========================================
-    // Site Create Lab 専用魔改造プラグイン
+    // Site Create Lab 専用魔改造プラグイン (v10 エラー回避版)
     // ==========================================
 
     const plusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTBoLTR2LTRjMC0xLjEtLjktMi0yLTJzLTIgLjktMiAybDRWMTRINmMtMS4xIDAtMiAuOS0yIDJzLjkgMiAyIDJoNHY0YzAgMS4xLjkgMiAyIDJzMi0uOSAyLTJ2LTRoNGMxLjEgMCAyLS45IDItMnMtLjktMi0yLTJ6IiBmaWxsPSJ3aGl0ZSIgLz48L3N2Zz4K';
-    const minusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTFINmMtMS4xIDAtMiAuOS0yIDJzLjkgMiAyIDJoMTJjMS4xIDAgMi0uOSAyLTJzLS45LTItMi0yeiIgZmlsbD0id2hpdGUiIC8+PC9zdmc+Cg==';
+    const minusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTExSDZjLTEuMSAwLTIgLjktMiAycy45IDIgMiAyaDEyYzEuMSAwIDItLjkgMi0ycy0uOS0yLTItMnoiIGZpbGw9IndoaXRlIiAvPjwvc3ZnPgo=';
 
-    // ----------------------------------------------------
-    // 【重要】文字（ラベル）の日本語化と、増え方のカスタマイズ
-    // ----------------------------------------------------
     const controlsIfMutator = {
         elseifCount_: 0,
         elseCount_: 0,
 
-        
+        // ★ エラー回避の魔法：Blocklyに「これはUIを持ったミューテーターだ」と勘違いさせるためのダミー関数
+        decompose: function(workspace) { return null; },
+        compose: function(topBlock) {},
+
         saveExtraState: function() {
             return {
                 'elseIfCount': this.elseifCount_,
@@ -37,20 +37,15 @@
             this.updateShape_();
         },
 
-        // 【＋】ボタンを押した時の動作（理想の増え方にする）
         plus: function(workspace) {
-            // まだ「でなければ（else）」がなければ、それを追加する
             if (this.elseCount_ === 0) {
                 this.elseCount_ = 1;
-            } 
-            // すでに「でなければ」があるなら、その間に「でなければもし（else if）」を追加する
-            else {
+            } else {
                 this.elseifCount_++;
             }
             this.updateShape_();
         },
 
-        // 【−】ボタンを押した時の動作（減らし方）
         minus: function(id) {
             if (this.elseCount_ > 0 && id === 'ELSE') {
                 this.elseCount_ = 0;
@@ -60,9 +55,7 @@
             this.updateShape_();
         },
 
-        // 形を作る（ここで日本語の文字を指定する！）
         updateShape_: function() {
-            // 一旦、追加分の穴をすべて消す（初期化）
             if (this.getInput('ELSE')) this.removeInput('ELSE');
             let i = 1;
             while (this.getInput('IF' + i)) {
@@ -71,11 +64,9 @@
                 i++;
             }
 
-            // 1. 「でなければもし（else if）」の穴を作る
             for (let j = 1; j <= this.elseifCount_; j++) {
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
-                    // ★ ここが日本語化のポイント！
                     .appendField(createMinusField('IF' + j))
                     .appendField('でなければもし');
                 
@@ -84,25 +75,19 @@
                     .appendField('なら');
             }
 
-            // 2. 「でなければ（else）」の穴を作る
             if (this.elseCount_) {
                 this.appendStatementInput('ELSE')
                     .setCheck('js')
-                    // ★ ここが日本語化のポイント！
                     .appendField(createMinusField('ELSE'))
                     .appendField('でなければ');
             }
             
-            // 3. 一番最初の「もし」の横に「＋」ボタンをつける
             if (this.getInput('IF0') && !this.getField('PLUS')) {
                 this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
             }
         }
     };
 
-    // ----------------------------------------------------
-    // ボタンを作る便利関数
-    // ----------------------------------------------------
     function createPlusField() {
         const plusField = new Blockly.FieldImage(plusImage, 15, 15, '+');
         plusField.onClick_ = function(e) {
@@ -128,14 +113,16 @@
     // ----------------------------------------------------
     // Site Create Lab 専用に拡張機能を登録
     // ----------------------------------------------------
+    // ★ エラー回避の魔法：第4引数（空の配列）を渡して、Blocklyの厳しいチェックをすり抜ける！
     Blockly.Extensions.registerMutator(
-        'scl_if_mutator', // 名前は元のままで上書きする
+        'scl_if_mutator', 
         controlsIfMutator,
         function() {
             this.elseifCount_ = 0;
             this.elseCount_ = 0;
             this.updateShape_();
-        }
+        },
+        [] // ← ここが最も重要！「UI（歯車ブロック）は使わないよ」という宣言です
     );
 
 })));
