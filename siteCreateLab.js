@@ -1023,7 +1023,7 @@ Blockly.defineBlocksWithJsonArray([
         "previousStatement": "js",
         "nextStatement": "js",
         "colour": "#124d99",
-        "mutator": "p_control_if_mutator" // ★ ここでプラグインを呼び出す！
+        "mutator": "scl_if_mutator"
     },
     {
         "type": "p_control_repeat",
