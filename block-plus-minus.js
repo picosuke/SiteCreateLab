@@ -130,7 +130,7 @@
                 if (this.getInput('IF0') && !this.getField('PLUS')) {
                     this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
                 }
-            }
+            },
 			plus: function() {
 				if (!this.hasElse_) {
 					this.hasElse_ = !0
@@ -148,7 +148,6 @@
 				this.updateShape_()
 			}
 		};
-	// --- カスタマイズここまで ---
 
 	i.Extensions.isRegistered("controls_if_mutator") && i.Extensions.unregister("controls_if_mutator"), i.Extensions.registerMutator("controls_if_mutator", _, function() {
 		this.getInput("IF0").insertFieldAt(0, u(), "PLUS")
