@@ -11,19 +11,16 @@
 }(this, (function (exports, Blockly) { 'use strict';
 
     // ==========================================
-    // Site Create Lab 専用魔改造プラグイン (v10 エラー回避版)
+    // Site Create Lab 専用：完全日本語版 プラスマイナスプラグイン
     // ==========================================
 
     const plusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTBoLTR2LTRjMC0xLjEtLjktMi0yLTJzLTIgLjktMiAybDRWMTRINmMtMS4xIDAtMiAuOS0yIDJzLjkgMiAyIDJoNHY0YzAgMS4xLjkgMiAyIDJzMi0uOSAyLTJ2LTRoNGMxLjEgMCAyLS45IDItMnMtLjktMi0yLTJ6IiBmaWxsPSJ3aGl0ZSIgLz48L3N2Zz4K';
     const minusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTExSDZjLTEuMSAwLTIgLjktMiAycy45IDIgMiAyaDEyYzEuMSAwIDItLjkgMi0ycy0uOS0yLTItMnoiIGZpbGw9IndoaXRlIiAvPjwvc3ZnPgo=';
 
+    // ★ エラー回避：公式プラグインと同じように「クラス」として機能を作る
     const controlsIfMutator = {
         elseifCount_: 0,
         elseCount_: 0,
-
-        // ★ エラー回避の魔法：Blocklyに「これはUIを持ったミューテーターだ」と勘違いさせるためのダミー関数
-        decompose: function(workspace) { return null; },
-        compose: function(topBlock) {},
 
         saveExtraState: function() {
             return {
@@ -37,7 +34,7 @@
             this.updateShape_();
         },
 
-        plus: function(workspace) {
+        plus: function() {
             if (this.elseCount_ === 0) {
                 this.elseCount_ = 1;
             } else {
@@ -67,6 +64,7 @@
             for (let j = 1; j <= this.elseifCount_; j++) {
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
+                    // ★ 美しい日本語に書き換え！
                     .appendField(createMinusField('IF' + j))
                     .appendField('でなければもし');
                 
@@ -78,6 +76,7 @@
             if (this.elseCount_) {
                 this.appendStatementInput('ELSE')
                     .setCheck('js')
+                    // ★ 美しい日本語に書き換え！
                     .appendField(createMinusField('ELSE'))
                     .appendField('でなければ');
             }
@@ -93,7 +92,7 @@
         plusField.onClick_ = function(e) {
             const block = this.getSourceBlock();
             if (block && block.plus) {
-                block.plus(block.workspace);
+                block.plus();
             }
         };
         return plusField;
@@ -110,19 +109,27 @@
         return minusField;
     }
 
-    // ----------------------------------------------------
-    // Site Create Lab 専用に拡張機能を登録
-    // ----------------------------------------------------
-    // ★ エラー回避の魔法：第4引数（空の配列）を渡して、Blocklyの厳しいチェックをすり抜ける！
-    Blockly.Extensions.registerMutator(
-        'scl_if_mutator', 
-        controlsIfMutator,
+    // ==========================================
+    // ★ エラー回避：Blockly公式と「全く同じ方法」で登録する
+    // （registerMutatorではなく、registerとcompose/decomposeのダミーを使う）
+    // ==========================================
+    Blockly.Extensions.register(
+        'scl_if_mutator', // 名前
         function() {
+            // この関数が、ブロックが作られた瞬間に走る
             this.elseifCount_ = 0;
             this.elseCount_ = 0;
+            
+            // ブロックにメソッド（機能）を直接追加する（Mixin）
+            this.saveExtraState = controlsIfMutator.saveExtraState;
+            this.loadExtraState = controlsIfMutator.loadExtraState;
+            this.plus = controlsIfMutator.plus;
+            this.minus = controlsIfMutator.minus;
+            this.updateShape_ = controlsIfMutator.updateShape_;
+            
+            // 初回の形を作る
             this.updateShape_();
-        },
-        [] // ← ここが最も重要！「UI（歯車ブロック）は使わないよ」という宣言です
+        }
     );
 
 })));
