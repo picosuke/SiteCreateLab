@@ -1014,17 +1014,16 @@ Blockly.defineBlocksWithJsonArray([
         "colour": "#59c059"
     },
     {
-      "type": "p_control_elseif",
-      "message0": "でなければもし",
-      "previousStatement": null,
-      "nextStatement": null,
-      "colour": "#124d99"
-    },
-    {
-      "type": "p_control_else",
-      "message0": "でなければ",
-      "previousStatement": null,
-      "colour": "#124d99"
+        "type": "p_control_if",
+        "message0": "もし %1 なら %2",
+        "args0": [
+            { "type": "input_value", "name": "IF0", "check": "Boolean" },
+            { "type": "input_statement", "name": "DO0", "check": "js" }
+        ],
+        "previousStatement": "js",
+        "nextStatement": "js",
+        "colour": "#124d99",
+        "mutator": "p_control_if_mutator" // ★ ここでプラグインを呼び出す！
     },
     {
         "type": "p_control_repeat",
@@ -1051,21 +1050,6 @@ Blockly.defineBlocksWithJsonArray([
         "inputsInline": true
     }
 ]);
-
-
-Blockly.Blocks['p_control_if'] = {
-  init: function() {
-    this.setColour('#124d99');
-    this.setPreviousStatement(true, 'js');
-    this.setNextStatement(true, 'js');
-    
-    this.appendValueInput('IF0').setCheck('Boolean').appendField('もし');
-    this.appendStatementInput('DO0').setCheck('js').appendField('なら');
-        
-    // ★ これでエラーなく適用されます！
-    Blockly.Extensions.apply('scl_if_mutator', this, false);
-  }
-};
 
 Blockly.Blocks['KS_ARG_REPORTER'] = {
   init: function() {
@@ -1698,37 +1682,41 @@ javascript.javascriptGenerator.forBlock['p_logic_compare'] = function(block, gen
     return [code, javascript.Order.NONE];
 };
 
-// ==========================================
 // プラスマイナス対応：「もし〜なら」ジェネレータ
-// ==========================================
 javascript.javascriptGenerator.forBlock['p_control_if'] = function(block, generator) {
-  let code = ''; // 今回生成するコードの塊
+  let code = ''; 
   let branchCode, conditionCode;
   
-  // 1. メインの「もし（IF0）〜 なら（DO0）」
   conditionCode = generator.valueToCode(block, 'IF0', javascript.Order.NONE) || 'false';
-  
-  let currentJS = jstext; // グローバル変数の退避
+  let currentJS = jstext; 
   jstext = "";
   generator.statementToCode(block, 'DO0');
   branchCode = jstext;
-  jstext = currentJS; // 復元
-  
+  jstext = currentJS; 
   code += 'if (' + conditionCode + ') {\n' + branchCode + '}';
 
-  // 2. 増やされた「でなければもし（elseif）」の数だけ繰り返す
   for (let i = 1; i <= block.elseifCount_; i++) {
     conditionCode = generator.valueToCode(block, 'IF' + i, javascript.Order.NONE) || 'false';
-    
     currentJS = jstext;
     jstext = "";
     generator.statementToCode(block, 'DO' + i);
     branchCode = jstext;
     jstext = currentJS;
-    
     code += ' else if (' + conditionCode + ') {\n' + branchCode + '}';
   }
 
+  if (block.hasElse_) {
+    currentJS = jstext;
+    jstext = "";
+    generator.statementToCode(block, 'ELSE');
+    branchCode = jstext;
+    jstext = currentJS;
+    code += ' else {\n' + branchCode + '}';
+  }
+
+  jstext += currentJS + code + '\n';
+  return '';
+};
   // 3. もし「でなければ（else）」が追加されていたら
   if (block.elseCount_) {
     currentJS = jstext;
