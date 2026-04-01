@@ -1024,7 +1024,7 @@ Blockly.defineBlocksWithJsonArray([
         "previousStatement": "js",
         "nextStatement": "js",
         "colour": "#124d99",
-        "mutator": "scl_if_mutator",
+        "mutator": "controls_if_mutator",
         "inputsInline": true
     },
     {
