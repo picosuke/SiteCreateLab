@@ -1682,55 +1682,52 @@ javascript.javascriptGenerator.forBlock['p_logic_compare'] = function(block, gen
     return [code, javascript.Order.NONE];
 };
 
+// ==========================================
 // プラスマイナス対応：「もし〜なら」ジェネレータ
+// ==========================================
 javascript.javascriptGenerator.forBlock['p_control_if'] = function(block, generator) {
-  let code = ''; 
-  let branchCode, conditionCode;
+    let code = ''; 
+    let branchCode, conditionCode;
   
-  conditionCode = generator.valueToCode(block, 'IF0', javascript.Order.NONE) || 'false';
-  let currentJS = jstext; 
-  jstext = "";
-  generator.statementToCode(block, 'DO0');
-  branchCode = jstext;
-  jstext = currentJS; 
-  code += 'if (' + conditionCode + ') {\n' + branchCode + '}';
-
-  for (let i = 1; i <= block.elseifCount_; i++) {
-    conditionCode = generator.valueToCode(block, 'IF' + i, javascript.Order.NONE) || 'false';
-    currentJS = jstext;
+    // 1. メインの「もし（IF0）〜 なら（DO0）」
+    conditionCode = generator.valueToCode(block, 'IF0', javascript.Order.NONE) || 'false';
+  
+    let currentJS = jstext; 
     jstext = "";
-    generator.statementToCode(block, 'DO' + i);
+    generator.statementToCode(block, 'DO0');
     branchCode = jstext;
-    jstext = currentJS;
-    code += ' else if (' + conditionCode + ') {\n' + branchCode + '}';
-  }
+    jstext = currentJS; 
+  
+    code += 'if (' + conditionCode + ') {\n' + branchCode + '}';
 
-  if (block.hasElse_) {
-    currentJS = jstext;
-    jstext = "";
-    generator.statementToCode(block, 'ELSE');
-    branchCode = jstext;
-    jstext = currentJS;
-    code += ' else {\n' + branchCode + '}';
-  }
+    // 2. 増やされた「でなければもし（elseIf）」の数だけ繰り返す
+    for (let i = 1; i <= block.elseIfCount_; i++) {
+        conditionCode = generator.valueToCode(block, 'IF' + i, javascript.Order.NONE) || 'false';
+        
+        currentJS = jstext;
+        jstext = "";
+        generator.statementToCode(block, 'DO' + i);
+        branchCode = jstext;
+        jstext = currentJS;
+        
+        code += ' else if (' + conditionCode + ') {\n' + branchCode + '}';
+    }
 
-  jstext += currentJS + code + '\n';
-  return '';
-};
-  // 3. もし「でなければ（else）」が追加されていたら
-  if (block.elseCount_) {
-    currentJS = jstext;
-    jstext = "";
-    generator.statementToCode(block, 'ELSE');
-    branchCode = jstext;
-    jstext = currentJS;
+    // 3. もし「でなければ（else）」が追加されていたら
+    if (block.hasElse_) {
+        currentJS = jstext;
+        jstext = "";
+        generator.statementToCode(block, 'ELSE');
+        branchCode = jstext;
+        jstext = currentJS;
+        
+        code += ' else {\n' + branchCode + '}';
+    }
+
+    // 最後に改行をつけて、グローバル変数に足し込む
+    jstext += currentJS + code + '\n';
     
-    code += ' else {\n' + branchCode + '}';
-  }
-
-  // 最後に改行をつけて、グローバル変数に足し込む
-  jstext += currentJS + code + '\n';
-  return '';
+    return '';
 };
 
 
