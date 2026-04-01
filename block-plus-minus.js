@@ -131,7 +131,7 @@
     // Site Create Lab 専用に拡張機能を登録
     // ----------------------------------------------------
     Blockly.Extensions.registerMutator(
-        'controls_if_mutator', // 名前は元のままで上書きする
+        'scl_if_mutator', // 名前は元のままで上書きする
         controlsIfMutator,
         function() {
             this.elseifCount_ = 0;
