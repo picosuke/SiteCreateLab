@@ -113,23 +113,22 @@
     // ★ エラー回避：Blockly公式と「全く同じ方法」で登録する
     // （registerMutatorではなく、registerとcompose/decomposeのダミーを使う）
     // ==========================================
-    Blockly.Extensions.register(
-        'scl_if_mutator', // 名前
-        function() {
-            // この関数が、ブロックが作られた瞬間に走る
-            this.elseifCount_ = 0;
-            this.elseCount_ = 0;
-            
-            // ブロックにメソッド（機能）を直接追加する（Mixin）
-            this.saveExtraState = controlsIfMutator.saveExtraState;
-            this.loadExtraState = controlsIfMutator.loadExtraState;
-            this.plus = controlsIfMutator.plus;
-            this.minus = controlsIfMutator.minus;
-            this.updateShape_ = controlsIfMutator.updateShape_;
-            
-            // 初回の形を作る
-            this.updateShape_();
-        }
-    );
+    Blockly.Extensions.registerMutator(
+      "scl_if_mutator",
+      {
+        mutationToDom: function () {
+          const container = Blockly.utils.xml.createElement("mutation");
+          container.setAttribute("elseif", this.elseifCount_ || 0);
+          container.setAttribute("else", this.elseCount_ || 0);
+          return container;
+        },
 
+        domToMutation: function (xmlElement) {
+          this.elseifCount_ = parseInt(xmlElement.getAttribute("elseif"), 10) || 0;
+          this.elseCount_ = parseInt(xmlElement.getAttribute("else"), 10) || 0;
+          this.updateShape_();
+        }
+      }
+    );
+                                      
 })));
