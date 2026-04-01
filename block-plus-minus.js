@@ -91,21 +91,47 @@
 				this.updateShape_()
 			},
 			updateShape_: function() {
-				if (this.getInput("ELSE")) this.removeInput("ELSE");
-				let t = 1;
-				while (this.getInput("IF" + t)) {
-					this.removeInput("IF" + t);
-					this.removeInput("DO" + t);
-					t++
-				}
-				for (let t = 1; t <= this.elseIfCount_; t++) {
-					this.appendValueInput("IF" + t).setCheck("Boolean").appendField(a(t), "MINUS" + t).appendField("でなければもし");
-					this.appendStatementInput("DO" + t).appendField("なら")
-				}
-				if (this.hasElse_) {
-					this.appendStatementInput("ELSE").appendField(a("ELSE"), "MINUS_ELSE").appendField("でなければ")
-				}
-			},
+            // 一旦消す
+            if (this.getInput('ELSE')) this.removeInput('ELSE');
+            let i = 1;
+            while (this.getInput('IF' + i)) {
+                this.removeInput('IF' + i);
+                this.removeInput('DUMMY' + i); // ダミーも消す
+                this.removeInput('DO' + i);
+                i++;
+            }
+
+            // 「でなければもし」の追加
+            for (let j = 1; j <= this.elseIfCount_; j++) {
+                // ★ 1行目：【−】ボタン ＋「でなければもし」＋ 条件の穴 ＋「なら」を全部乗せる！
+                this.appendValueInput('IF' + j)
+                    .setCheck('Boolean')
+                    .appendField(createMinusField('IF' + j))
+                    .appendField('でなければもし')
+                    .appendField('なら'); // ★ 条件の穴の後ろに「なら」が来る魔法
+                
+                // ★ 1行目の終わりに改行を入れる
+                this.appendDummyInput('DUMMY' + j);
+
+                // ★ 2行目：文字なしの、ただの「処理の穴」を作る
+                this.appendStatementInput('DO' + j)
+                    .setCheck('js');
+            }
+
+            // 「でなければ」の追加
+            if (this.hasElse_) {
+                // elseは条件の穴がないので、そのまま文字と処理の穴を繋げる
+                this.appendStatementInput('ELSE')
+                    .setCheck('js')
+                    .appendField(createMinusField('ELSE'))
+                    .appendField('でなければ');
+            }
+
+            // プラスボタンの設置
+            if (this.getInput('IF0') && !this.getField('PLUS')) {
+                this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
+            }
+        },
 			plus: function() {
 				if (!this.hasElse_) {
 					this.hasElse_ = !0
