@@ -1059,16 +1059,10 @@ Blockly.Blocks['p_control_if'] = {
     this.setPreviousStatement(true, 'js');
     this.setNextStatement(true, 'js');
     
-    // 最初の基本パーツ
-    this.appendValueInput('IF0')
-        .setCheck('Boolean')
-        .appendField('もし');
-    this.appendStatementInput('DO0')
-        .setCheck('js')
-        .appendField('なら');
+    this.appendValueInput('IF0').setCheck('Boolean').appendField('もし');
+    this.appendStatementInput('DO0').setCheck('js').appendField('なら');
         
-    // ★ 魔法：ここで先ほど名前を変えた「scl_if_mutator」を呼び出す！
-    // 歯車ではなく、魔改造版の [＋] [−] ボタン付きのミューテーターが適用されます。
+    // ★ これでエラーなく適用されます！
     Blockly.Extensions.apply('scl_if_mutator', this, false);
   }
 };
