@@ -24,8 +24,6 @@
         elseifCount_: 0,
         elseCount_: 0,
 
-        // ブロックが読み込まれた時に1回だけ呼ばれる
-        suppressPrefixSuffix: true,
         
         saveExtraState: function() {
             return {
