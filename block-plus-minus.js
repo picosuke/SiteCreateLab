@@ -91,46 +91,21 @@
 				this.updateShape_()
 			},
 			updateShape_: function() {
-                // 一旦消す
-                if (this.getInput('ELSE')) this.removeInput('ELSE');
-                let i = 1;
-                while (this.getInput('IF' + i)) {
-                    // ダミー入力（改行用）も忘れずに消す
-                    this.removeInput('DUMMY' + i);
-                    this.removeInput('DO' + i);
-                    i++;
-                }
-
-                // 「でなければもし」の追加
-                for (let j = 1; j <= this.elseIfCount_; j++) {
-                    // 1行目：ボタンと「でなければもし」の文字、そして条件の穴
-                    this.appendValueInput('IF' + j)
-                        .setCheck('Boolean')
-                        .appendField(createMinusField('IF' + j))
-                        .appendField('でなければもし');
-                
-                    // 2行目の頭（改行用ダミー）
-                    this.appendDummyInput('DUMMY' + j);
-
-                    // 3行目：「なら」の文字と、コの字の穴
-                    this.appendStatementInput('DO' + j)
-                        .setCheck('js')
-                        .appendField('なら');
-                }
-
-                // 「でなければ」の追加
-                if (this.hasElse_) {
-                    this.appendStatementInput('ELSE')
-                        .setCheck('js')
-                        .appendField(createMinusField('ELSE'))
-                        .appendField('でなければ');
-                }
-
-                // プラスボタンの設置
-                if (this.getInput('IF0') && !this.getField('PLUS')) {
-                    this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
-                }
-            },
+				if (this.getInput("ELSE")) this.removeInput("ELSE");
+				let t = 1;
+				while (this.getInput("IF" + t)) {
+					this.removeInput("IF" + t);
+					this.removeInput("DO" + t);
+					t++
+				}
+				for (let t = 1; t <= this.elseIfCount_; t++) {
+					this.appendValueInput("IF" + t).setCheck("Boolean").appendField(a(t), "MINUS" + t).appendField("でなければもし");
+					this.appendStatementInput("DO" + t).appendField("なら")
+				}
+				if (this.hasElse_) {
+					this.appendStatementInput("ELSE").appendField(a("ELSE"), "MINUS_ELSE").appendField("でなければ")
+				}
+			},
 			plus: function() {
 				if (!this.hasElse_) {
 					this.hasElse_ = !0
@@ -148,6 +123,7 @@
 				this.updateShape_()
 			}
 		};
+	// --- カスタマイズここまで ---
 
 	i.Extensions.isRegistered("controls_if_mutator") && i.Extensions.unregister("controls_if_mutator"), i.Extensions.registerMutator("controls_if_mutator", _, function() {
 		this.getInput("IF0").insertFieldAt(0, u(), "PLUS")
