@@ -1027,19 +1027,6 @@ Blockly.defineBlocksWithJsonArray([
       "colour": "#124d99"
     },
     {
-        "type": "p_control_if",
-        "message0": "もし %1 なら %2 %3",
-        "args0": [
-            { "type": "input_value", "name": "IF0", "check": "Boolean" },
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "DO0", "check": "js" }
-        ],
-        "previousStatement": "js",
-        "nextStatement": "js",
-        "colour": "#124d99",
-        "mutator": "controls_if_mutator"
-    },
-    {
         "type": "p_control_repeat",
         "message0": "%1 回繰り返す %2 %3",
         "args0": [
@@ -1064,6 +1051,27 @@ Blockly.defineBlocksWithJsonArray([
         "inputsInline": true
     }
 ]);
+
+
+Blockly.Blocks['p_control_if'] = {
+  init: function() {
+    this.setColour('#124d99');
+    this.setPreviousStatement(true, 'js');
+    this.setNextStatement(true, 'js');
+    
+    // 最初の基本パーツ
+    this.appendValueInput('IF0')
+        .setCheck('Boolean')
+        .appendField('もし');
+    this.appendStatementInput('DO0')
+        .setCheck('js')
+        .appendField('なら');
+        
+    // ★ 魔法：ここで先ほど名前を変えた「scl_if_mutator」を呼び出す！
+    // 歯車ではなく、魔改造版の [＋] [−] ボタン付きのミューテーターが適用されます。
+    Blockly.Extensions.apply('scl_if_mutator', this, false);
+  }
+};
 
 Blockly.Blocks['KS_ARG_REPORTER'] = {
   init: function() {
