@@ -1013,19 +1013,19 @@ Blockly.defineBlocksWithJsonArray([
         "output": "Boolean",
         "colour": "#59c059"
     },
-    {
+	{
         "type": "p_control_if",
         "message0": "もし %1 なら %2 %3",
         "args0": [
             { "type": "input_value", "name": "IF0", "check": "Boolean" },
             { "type": "input_dummy" },
-            { "type": "input_statement", "name": "DO0", "check": "js" }
+			{ "type": "input_statement", "name": "DO0", "check": "js" }
         ],
+        "inputsInline": false, 
         "previousStatement": "js",
         "nextStatement": "js",
         "colour": "#124d99",
-        "mutator": "scl_if_mutator",
-        "inputsInline": true
+        "mutator": "controls_if_mutator"
     },
     {
         "type": "p_control_repeat",
