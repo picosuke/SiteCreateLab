@@ -134,9 +134,9 @@
         }
     };
 
-    // 公式プラグインと同じように「controls_if_mutator」として登録
+    // 公式プラグインと同じように「scl_if_mutator」として登録
     Blockly.Extensions.registerMutator(
-        'controls_if_mutator',
+        'scl_if_mutator',
         controlsIfMutator,
         function() {
             this.elseifCount_ = 0;
