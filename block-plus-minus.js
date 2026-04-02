@@ -52,7 +52,7 @@
     }
 
     // ==========================================
-    // 公式プラグインそのままのロジック（文字だけ日本語）
+    // 公式プラグインそのままのロジック
     // ==========================================
     const controlsIfMutator = {
         elseIfCount_: 0,
@@ -60,16 +60,9 @@
 
         mutationToDom: function() {
             if (!this.elseIfCount_ && !this.hasElse_) return null;
-            
-            // ★ エラー修正：document.createElement を使って、確実に正しいXML（Element）を作る
-            const container = document.createElement('mutation');
-            
-            if (this.elseIfCount_) {
-                container.setAttribute('elseif', this.elseIfCount_);
-            }
-            if (this.hasElse_) {
-                container.setAttribute('else', 1);
-            }
+            const container = Blockly.utils.xml.createElement('mutation');
+            if (this.elseIfCount_) container.setAttribute('elseif', this.elseIfCount_);
+            if (this.hasElse_) container.setAttribute('else', 1);
             return container;
         },
         domToMutation: function(xmlElement) {
@@ -90,7 +83,7 @@
             this.updateShape_();
         },
 
-        // 公式の増え方（1回目: else if, 2回目: else if... もしelseが必要なら自作ボタンで）
+        // 公式の増え方（1回目: else if, 2回目: else if...）
         plus: function() {
             this.elseIfCount_++;
             this.updateShape_();
@@ -107,18 +100,26 @@
             let i = 1;
             while (this.getInput('IF' + i)) {
                 this.removeInput('IF' + i);
+                this.removeInput('DUMMY' + i); // ★ 追加したダミーも消す
                 this.removeInput('DO' + i);
                 i++;
             }
 
-            // 追加（★ここだけ日本語に直しました）
+            // 追加
             for (let j = 1; j <= this.elseIfCount_; j++) {
+                // ★ 1行目：「でなければもし」＋ 条件穴 ＋「なら」 ＋ マイナスボタン
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
                     .appendField('でなければもし')
+                    .appendField('なら', 'THEN' + j) // ← これが条件の後ろにつく魔法
                     .appendField(createMinusField(j), 'MINUS' + j);
+                
+                // ★ 改行用のダミー
+                this.appendDummyInput('DUMMY' + j);
+
+                // ★ 2行目：文字のない処理の穴
                 this.appendStatementInput('DO' + j)
-                    .appendField('なら');
+                    .setCheck('js');
             }
 
             if (this.hasElse_) {
@@ -133,9 +134,9 @@
         }
     };
 
-    // 公式プラグインと同じように「scl_if_mutator」として登録
+    // 公式プラグインと同じように「controls_if_mutator」として登録
     Blockly.Extensions.registerMutator(
-        'scl_if_mutator',
+        'controls_if_mutator',
         controlsIfMutator,
         function() {
             this.elseifCount_ = 0;
