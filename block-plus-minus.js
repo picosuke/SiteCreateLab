@@ -60,7 +60,7 @@
 
         mutationToDom: function() {
             if (!this.elseIfCount_ && !this.hasElse_) return null;
-            const container = Blockly.utils.xml.createElement('mutation');
+            const container = document.createElement('mutation');
             if (this.elseIfCount_) container.setAttribute('elseif', this.elseIfCount_);
             if (this.hasElse_) container.setAttribute('else', 1);
             return container;
