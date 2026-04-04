@@ -1015,14 +1015,13 @@ Blockly.defineBlocksWithJsonArray([
     },
 	{
         "type": "p_control_if",
-        // ★ 1行目に「もし [条件] なら」をまとめる魔法の順番
         "message0": "もし %1 なら %2 %3",
         "args0": [
             { "type": "input_value", "name": "IF0", "check": "Boolean" },
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "DO0", "check": "js" }
         ],
-        "inputsInline": false,
+        "inputsInline": true,
         "previousStatement": "js",
         "nextStatement": "js",
         "colour": "#124d99",
