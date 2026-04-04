@@ -120,43 +120,50 @@
         },
 
         // 【理想のレイアウト】
+        // 【理想のレイアウト】
         updateShape_: function() {
             // 一旦消す
             if (this.getInput('ELSE')) this.removeInput('ELSE');
             let i = 1;
             while (this.getInput('IF' + i)) {
                 this.removeInput('IF' + i);
-                this.removeInput('DUMMY' + i);
                 this.removeInput('DO' + i);
                 i++;
             }
 
-            // 「でなければもし」の追加（1行にまとめる）
+            // 「ではなく もし ＜＞ なら」の追加（1行にまとめる）
             for (let j = 1; j <= this.elseIfCount_; j++) {
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
-                    .appendField(createMinusField(j), 'MINUS' + j)
-                    .appendField('でなければもし')
+                    .appendField(createMinusField(j), 'MINUS' + j) // マイナスボタン
+                    // ★ 魔法の順番：「ではなく」＋「もし」＋[条件の穴]＋「なら」
+                    .appendField('ではなく もし') 
                     .appendField('なら', 'THEN' + j); 
                 
-                this.appendDummyInput('DUMMY' + j);
-
+                // 処理の穴を追加
                 this.appendStatementInput('DO' + j)
                     .setCheck('js');
             }
 
             // 「でなければ」の追加
             if (this.hasElse_) {
-                this.appendStatementInput('ELSE')
-                    .setCheck('js')
+                // ★ 重要な修正：StatementInput ではなく、DummyInput と StatementInput を分ける！
+                // これにより「でなければ」の文字が改行されず、左端から綺麗に表示されます
+                this.appendDummyInput('ELSE_LABEL')
                     .appendField(createMinusField('ELSE'), 'MINUS_ELSE')
                     .appendField('でなければ');
+                this.appendStatementInput('ELSE')
+                    .setCheck('js');
             }
 
             // 一番最初の「もし」にプラスボタンを付ける
             if (this.getInput('IF0') && !this.getField('PLUS')) {
                 this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
             }
+
+            // ★ 超重要：追加された穴もすべて「インライン（横並び）」として扱うように命令！
+            // これで画像の一番上のブロックと同じ、美しい形が全体に適用されます
+            this.setInputsInline(true);
         }
     };
 
