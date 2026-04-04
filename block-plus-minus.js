@@ -10,11 +10,25 @@
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.BlocklyBlockPlusMinus = {}, global.Blockly));
 }(this, (function (exports, Blockly) { 'use strict';
 
-    // プラス・マイナスの画像データ
+    // 状態を文字列にするヘルパー関数
+    function getMutationState(block) {
+        if (block.saveExtraState) {
+            const state = block.saveExtraState();
+            return state ? JSON.stringify(state) : "";
+        }
+        if (block.mutationToDom) {
+            const dom = block.mutationToDom();
+            return dom ? Blockly.Xml.domToText(dom) : "";
+        }
+        return "";
+    }
+
+    // ==========================================
+    // ボタン作成関数
+    // ==========================================
     const plusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTBoLTR2LTRjMC0xLjEwNC0uODk2LTItMi0ycy0yIC44OTYtMiAybC4wNzEgNGgtNC4wNzFjLTEuMTA0IDAtMiAuODk2LTIgMnMuODk2IDIgMiAybDQuMDcxLS4wNzEtLjA3MSA0LjA3MWMwIDEuMTA0Ljg5NiAyIDIgMnMyLS44OTYgMi0ydi00LjA3MWw0IC4wNzFjMS4xMDQgMCAyLS44OTYgMi0ycy0uODk2LTItMi0yeiIgZmlsbD0id2hpdGUiIC8+PC9zdmc+Cg==';
     const minusImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBkPSJNMTggMTExSDZjLTEuMSAwLTIgLjktMiAycy45IDIgMiAyaDEyYzEuMSAwIDItLjkgMi0ycy0uOS0yLTItMnoiIGZpbGw9IndoaXRlIiAvPjwvc3ZnPgo=';
 
-    // ボタン作成関数（公式のまま）
     function createPlusField(args = undefined) {
         const plusField = new Blockly.FieldImage(plusImage, 15, 15, undefined, plusClick);
         plusField.args_ = args;
@@ -24,11 +38,13 @@
         const block = e.getSourceBlock();
         if (block.isInFlyout) return;
         Blockly.Events.setGroup(true);
-        const oldMutation = block.mutationToDom ? Blockly.Xml.domToText(block.mutationToDom()) : "";
-        block.plus(e.args_);
-        const newMutation = block.mutationToDom ? Blockly.Xml.domToText(block.mutationToDom()) : "";
-        if (oldMutation !== newMutation) {
-            Blockly.Events.fire(new Blockly.Events.BlockChange(block, "mutation", null, oldMutation, newMutation));
+        const oldState = getMutationState(block);
+        
+        block.plus(e.args_); 
+        
+        const newState = getMutationState(block);
+        if (oldState !== newState) {
+            Blockly.Events.fire(new Blockly.Events.BlockChange(block, "mutation", null, oldState, newState));
         }
         Blockly.Events.setGroup(false);
     }
@@ -42,17 +58,19 @@
         const block = e.getSourceBlock();
         if (block.isInFlyout) return;
         Blockly.Events.setGroup(true);
-        const oldMutation = block.mutationToDom ? Blockly.Xml.domToText(block.mutationToDom()) : "";
-        block.minus(e.args_);
-        const newMutation = block.mutationToDom ? Blockly.Xml.domToText(block.mutationToDom()) : "";
-        if (oldMutation !== newMutation) {
-            Blockly.Events.fire(new Blockly.Events.BlockChange(block, "mutation", null, oldMutation, newMutation));
+        const oldState = getMutationState(block);
+        
+        block.minus(e.args_); 
+        
+        const newState = getMutationState(block);
+        if (oldState !== newState) {
+            Blockly.Events.fire(new Blockly.Events.BlockChange(block, "mutation", null, oldState, newState));
         }
         Blockly.Events.setGroup(false);
     }
 
     // ==========================================
-    // 公式プラグインそのままのロジック
+    // ifブロックのミューテーター（完全日本語・理想の増減版）
     // ==========================================
     const controlsIfMutator = {
         elseIfCount_: 0,
@@ -83,64 +101,72 @@
             this.updateShape_();
         },
 
-        // 公式の増え方（1回目: else if, 2回目: else if...）
+        // 【理想の増え方】
         plus: function() {
-            this.elseIfCount_++;
+            if (!this.hasElse_) {
+                this.hasElse_ = true; // 1回目は「でなければ」
+            } else {
+                this.elseIfCount_++;  // 次からは「でなければもし」
+            }
             this.updateShape_();
         },
         minus: function(inputId) {
-            if (this.elseIfCount_ === 0) return;
-            this.elseIfCount_--;
+            if (inputId === 'ELSE') {
+                this.hasElse_ = false;
+            } else {
+                this.elseIfCount_--;
+            }
             this.updateShape_();
         },
 
+        // 【理想のレイアウト】
         updateShape_: function() {
-            // お掃除
+            // 一旦消す
             if (this.getInput('ELSE')) this.removeInput('ELSE');
             let i = 1;
             while (this.getInput('IF' + i)) {
                 this.removeInput('IF' + i);
-                this.removeInput('DUMMY' + i); // ★ 追加したダミーも消す
+                this.removeInput('DUMMY' + i);
                 this.removeInput('DO' + i);
                 i++;
             }
 
-            // 追加
+            // 「でなければもし」の追加（1行にまとめる）
             for (let j = 1; j <= this.elseIfCount_; j++) {
-                // ★ 1行目：「でなければもし」＋ 条件穴 ＋「なら」 ＋ マイナスボタン
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
+                    .appendField(createMinusField(j), 'MINUS' + j)
                     .appendField('でなければもし')
-                    .appendField('なら', 'THEN' + j) // ← これが条件の後ろにつく魔法
-                    .appendField(createMinusField(j), 'MINUS' + j);
+                    .appendField('なら', 'THEN' + j); 
                 
-                // ★ 改行用のダミー
                 this.appendDummyInput('DUMMY' + j);
 
-                // ★ 2行目：文字のない処理の穴
                 this.appendStatementInput('DO' + j)
                     .setCheck('js');
             }
 
+            // 「でなければ」の追加
             if (this.hasElse_) {
                 this.appendStatementInput('ELSE')
+                    .setCheck('js')
+                    .appendField(createMinusField('ELSE'), 'MINUS_ELSE')
                     .appendField('でなければ');
             }
 
-            // プラスボタン（IF0がない場合は追加する）
+            // 一番最初の「もし」にプラスボタンを付ける
             if (this.getInput('IF0') && !this.getField('PLUS')) {
                 this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
             }
         }
     };
 
-    // 公式プラグインと同じように「scl_if_mutator」として登録
+    // Blocklyに新しい名前で登録する
     Blockly.Extensions.registerMutator(
-        'scl_if_mutator',
+        'scl_if_mutator', // ★ 新しい名前
         controlsIfMutator,
         function() {
-            this.elseifCount_ = 0;
-            this.elseCount_ = 0;
+            this.elseIfCount_ = 0;
+            this.hasElse_ = false;
             this.updateShape_();
         }
     );
