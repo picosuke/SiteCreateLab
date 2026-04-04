@@ -119,10 +119,9 @@
             this.updateShape_();
         },
 
-        // 【理想のレイアウト】
-        // 【理想のレイアウト】
+        // 【究極のレイアウト修正】
         updateShape_: function() {
-            // 一旦消す
+            // 一旦すべて消す
             if (this.getInput('ELSE')) this.removeInput('ELSE');
             let i = 1;
             while (this.getInput('IF' + i)) {
@@ -131,28 +130,31 @@
                 i++;
             }
 
-            // 「ではなく もし ＜＞ なら」の追加（1行にまとめる）
+            // 1. 「ではなく もし ＜＞ なら」の追加
             for (let j = 1; j <= this.elseIfCount_; j++) {
+                
+                // ★ 魔法の順番：マイナスボタン ＋「ではなく もし」＋ 条件の穴 ＋「なら」
+                // ※ appendValueInput(条件の穴) を先に宣言し、その【前】と【後】に文字をくっつけるのがBlocklyの正しい書き方です。
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
-                    .appendField(createMinusField(j), 'MINUS' + j) // マイナスボタン
-                    // ★ 魔法の順番：「ではなく」＋「もし」＋[条件の穴]＋「なら」
-                    .appendField('ではなく もし') 
-                    .appendField('なら', 'THEN' + j); 
-                
+                    .appendField(createMinusField(j), 'MINUS' + j) // [-] ボタン
+                    .appendField('ではなく もし')                    // 穴の前の文字
+                    .appendField('なら', 'THEN' + j);               // 穴の後ろの文字
+
                 // 処理の穴を追加
                 this.appendStatementInput('DO' + j)
                     .setCheck('js');
             }
 
-            // 「でなければ」の追加
+            // 2. 「でなければ」の追加
             if (this.hasElse_) {
-                // ★ 重要な修正：StatementInput ではなく、DummyInput と StatementInput を分ける！
-                // これにより「でなければ」の文字が改行されず、左端から綺麗に表示されます
-                this.appendDummyInput('ELSE_LABEL')
+                // ★ ここが重要：「でなければ」を左端に寄せるために、条件の穴を使わない
+                // その代わりに、ただの DummyInput と StatementInput を分けて繋げます
+                this.appendDummyInput('ELSE')
                     .appendField(createMinusField('ELSE'), 'MINUS_ELSE')
                     .appendField('でなければ');
-                this.appendStatementInput('ELSE')
+                    
+                this.appendStatementInput('DO_ELSE')
                     .setCheck('js');
             }
 
@@ -161,9 +163,9 @@
                 this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
             }
 
-            // ★ 超重要：追加された穴もすべて「インライン（横並び）」として扱うように命令！
-            // これで画像の一番上のブロックと同じ、美しい形が全体に適用されます
-            this.setInputsInline(true);
+            // ★ これを false にすることで、ダミー入力などを使わなくても
+            // Blockly が自動的に「条件の行」と「処理の行」を綺麗に分けてくれます！
+            this.setInputsInline(false);
         }
     };
 
