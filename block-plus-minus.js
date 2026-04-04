@@ -133,10 +133,10 @@
 
             // 「でなければもし」の追加（1行にまとめる）
             for (let j = 1; j <= this.elseIfCount_; j++) {
-                this.appendValueInput('IF' + j)
+                this.appendField('でなければ もし')
+                    .appendValueInput('IF' + j)
                     .setCheck('Boolean')
                     .appendField(createMinusField(j), 'MINUS' + j)
-                    .appendField('でなければもし')
                     .appendField('なら', 'THEN' + j); 
                 
                 this.appendDummyInput('DUMMY' + j);
@@ -149,8 +149,8 @@
             if (this.hasElse_) {
                 this.appendStatementInput('ELSE')
                     .setCheck('js')
-                    .appendField(createMinusField('ELSE'), 'MINUS_ELSE')
-                    .appendField('でなければ');
+                    .appendField('でなければ')
+                    .appendField(createMinusField('ELSE'), 'MINUS_ELSE');
             }
 
             // 一番最初の「もし」にプラスボタンを付ける
