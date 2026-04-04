@@ -119,53 +119,45 @@
             this.updateShape_();
         },
 
-        // 【究極のレイアウト修正】
         updateShape_: function() {
-            // 一旦すべて消す
+            // 一旦お掃除
             if (this.getInput('ELSE')) this.removeInput('ELSE');
             let i = 1;
             while (this.getInput('IF' + i)) {
                 this.removeInput('IF' + i);
-                this.removeInput('DO' + i);
+                this.removeInput('DO' + i); // 余計なダミーはもう消さない（存在しないので）
                 i++;
             }
 
             // 1. 「ではなく もし ＜＞ なら」の追加
             for (let j = 1; j <= this.elseIfCount_; j++) {
                 
-                // ★ 魔法の順番：マイナスボタン ＋「ではなく もし」＋ 条件の穴 ＋「なら」
-                // ※ appendValueInput(条件の穴) を先に宣言し、その【前】と【後】に文字をくっつけるのがBlocklyの正しい書き方です。
+                // ★ 最もシンプルな1行レイアウト！
+                // 「でなければもし」の代わりに「ではなく もし」に変更し、
+                // 条件の穴（IF）の後ろに「なら」をくっつけるだけ！
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
-                    .appendField(createMinusField(j), 'MINUS' + j) // [-] ボタン
-                    .appendField('ではなく もし')                    // 穴の前の文字
-                    .appendField('なら', 'THEN' + j);               // 穴の後ろの文字
-
-                // 処理の穴を追加
+                    .appendField(createMinusField(j), 'MINUS' + j)
+                    .appendField('ではなく もし') 
+                    .appendField('なら', 'THEN' + j); 
+                
+                // そのまま、次の行に「処理の穴」を追加する
                 this.appendStatementInput('DO' + j)
                     .setCheck('js');
             }
 
             // 2. 「でなければ」の追加
             if (this.hasElse_) {
-                // ★ ここが重要：「でなければ」を左端に寄せるために、条件の穴を使わない
-                // その代わりに、ただの DummyInput と StatementInput を分けて繋げます
-                this.appendDummyInput('ELSE')
+                this.appendStatementInput('ELSE')
+                    .setCheck('js')
                     .appendField(createMinusField('ELSE'), 'MINUS_ELSE')
                     .appendField('でなければ');
-                    
-                this.appendStatementInput('DO_ELSE')
-                    .setCheck('js');
             }
 
             // 一番最初の「もし」にプラスボタンを付ける
             if (this.getInput('IF0') && !this.getField('PLUS')) {
                 this.getInput('IF0').insertFieldAt(0, createPlusField(), 'PLUS');
             }
-
-            // ★ これを false にすることで、ダミー入力などを使わなくても
-            // Blockly が自動的に「条件の行」と「処理の行」を綺麗に分けてくれます！
-            this.setInputsInline(false);
         }
     };
 
