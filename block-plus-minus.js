@@ -178,7 +178,7 @@
                     .appendField(createMinusField('ELSE'))
                     .appendField('でなければ');
 
-                this.appendStatementInput('ELSE_DO')
+                this.appendStatementInput('ELSE')
                     .setCheck('js');
 
                 if (elseConn) {
