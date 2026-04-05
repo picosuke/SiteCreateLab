@@ -115,7 +115,7 @@
                 this.elseIfCount_--;
             }
             this.updateShape_();
-        }
+        },
 
         updateShape_() {
 
