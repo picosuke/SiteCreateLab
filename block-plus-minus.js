@@ -104,11 +104,18 @@
         minus(inputId) {
             if (inputId === 'ELSE') {
                 this.hasElse_ = false;
+
+                // ★ 一番下をELSE化
+                if (this.elseIfCount_ > 0) {
+                    this.elseIfCount_--;
+                    this.hasElse_ = true;
+                }
+
             } else {
                 this.elseIfCount_--;
             }
             this.updateShape_();
-        },
+        }
 
         updateShape_() {
 
