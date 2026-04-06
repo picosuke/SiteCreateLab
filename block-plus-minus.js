@@ -113,7 +113,7 @@
                 this.elseIfCount_--;
             }
             this.updateShape_();
-        }
+        },
 
         updateShape_() {
             // --- 接続保存 ---
