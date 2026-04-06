@@ -117,17 +117,20 @@
 
         updateShape_() {
             // --- 接続保存 ---
-            const connections = [];
-            let i = 1;
-            while (this.getInput('IF' + i)) {
-                connections.push({
-                    if: this.getInput('IF' + i).connection.targetConnection,
-                    do: this.getInput('DO' + i).connection.targetConnection
-                });
-                i++;
-            }
-            // ★ 修正箇所1：退避させる時の名前を 'ELSE' に直しました
-            const elseConn = this.getInput('ELSE')?.connection.targetConnection;
+const connections = [];
+let i = 1;
+while (this.getInput('IF' + i)) {
+    connections.push({
+        if: this.getInput('IF' + i).connection.targetConnection,
+        do: this.getInput('DO' + i).connection.targetConnection
+    });
+    i++;
+}
+
+let elseConn = null;
+if (this.getInput('ELSE')) {
+    elseConn = this.getInput('ELSE').connection.targetConnection;
+}
 
             // --- 全削除 ---
             i = 1;
@@ -156,31 +159,34 @@
                 
                 const key = 'IF' + j;
                 if (connections[key]) {
-                    if (connections[key].if) {
-                        this.getInput(key).connection.connect(connections[key].if);
-                    }
-                    if (connections[key].do) {
-                        this.getInput('DO' + j).connection.connect(connections[key].do);
-                    }
+if (connections[j - 1]) {
+    if (connections[j - 1].if) {
+        this.getInput('IF' + j).connection.connect(connections[j - 1].if);
+    }
+    if (connections[j - 1].do) {
+        this.getInput('DO' + j).connection.connect(connections[j - 1].do);
+    }
+}
                 }
             }
 
             // --- else（必ず最後） ---
-            if (this.hasElse_ || this.elseIfCount_ > 0) {
-                this.hasElse_ = true; // ★ 強制維持
+if (this.hasElse_ && this.elseIfCount_ >= 0) {
 
-                this.appendDummyInput('ELSE_ROW')
-                    .appendField(createMinusField('ELSE'))
-                    .appendField('でなければ');
+    // ELSEがあるなら
+    if (this.getInput('ELSE') && elseConn) {
+        this.getInput('ELSE').connection.connect(elseConn);
+    }
 
-                // ★ 修正箇所3：ジェネレータが読み取れるように 'ELSE_DO' ではなく 'ELSE' にしました！
-                this.appendStatementInput('ELSE')
-                    .setCheck('js');
+    // ★ 最後のelseifをELSEとして扱う
+    if (connections.length > 0 && this.hasElse_) {
+        const last = connections[connections.length - 1];
 
-                if (elseConn) {
-                    this.getInput('ELSE').connection.connect(elseConn);
-                }
-            }
+        if (last && last.do && this.getInput('ELSE')) {
+            this.getInput('ELSE').connection.connect(last.do);
+        }
+    }
+}
 
             // --- プラス ---
             if (this.getInput('IF0') && !this.getField('PLUS')) {
