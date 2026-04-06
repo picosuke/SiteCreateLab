@@ -101,21 +101,27 @@
             this.updateShape_();
         },
 
-        minus(inputId) {
-            if (inputId === 'ELSE') {
-                this.hasElse_ = false;
+minus(inputId) {
+    if (inputId === 'ELSE') {
 
-                // ★ 一番下をELSE化（素晴らしいアイデアです！）
-                if (this.elseIfCount_ > 0) {
-                    this.elseIfCount_--;
-                    this.hasElse_ = true;
-                }
+        this.hasElse_ = false;
 
-            } else {
-                this.elseIfCount_--;
-            }
-            this.updateShape_();
-        },
+        if (this.elseIfCount_ > 0) {
+            // ★ ここが重要：削る前に最後をELSE扱いにする
+            const lastIndex = this.elseIfCount_;
+
+            this.elseIfCount_--;
+
+            // ★ 次のupdateでELSEとして再生成
+            this.hasElse_ = true;
+        }
+
+    } else {
+        this.elseIfCount_--;
+    }
+
+    this.updateShape_();
+}
 
         updateShape_() {
             // --- 接続保存 ---
