@@ -103,15 +103,21 @@
 
         minus(inputId) {
             if (inputId === 'ELSE') {
-                this.hasElse_ = false; // 「でなければ」ボタンを押したら、素直に「でなければ」だけを消す
+                this.hasElse_ = false;
+
+                // ★ 一番下をELSE化（素晴らしいアイデアです！）
+                if (this.elseIfCount_ > 0) {
+                    this.elseIfCount_--;
+                    this.hasElse_ = true;
+                }
+
             } else {
-                this.elseIfCount_--; // 「でなければもし」ボタンを押したら、それを減らす
+                this.elseIfCount_--;
             }
             this.updateShape_();
         },
 
         updateShape_() {
-
             // --- 接続保存 ---
             const connections = [];
             let i = 1;
@@ -122,7 +128,8 @@
                 });
                 i++;
             }
-            const elseConn = this.getInput('ELSE_DO')?.connection.targetConnection;
+            // ★ 修正箇所1：退避させる時の名前を 'ELSE' に直しました
+            const elseConn = this.getInput('ELSE')?.connection.targetConnection;
 
             // --- 全削除 ---
             i = 1;
@@ -133,7 +140,7 @@
                 i++;
             }
             if (this.getInput('ELSE_ROW')) this.removeInput('ELSE_ROW');
-            if (this.getInput('ELSE_DO')) this.removeInput('ELSE_DO');
+            if (this.getInput('ELSE')) this.removeInput('ELSE'); // ★ 修正箇所2
 
             // --- elseif ---
             for (let j = 1; j <= this.elseIfCount_; j++) {
@@ -164,16 +171,19 @@
             }
 
             // --- else（必ず最後） ---
-            if (this.hasElse_) { 
+            if (this.hasElse_ || this.elseIfCount_ > 0) {
+                this.hasElse_ = true; // ★ 強制維持
+
                 this.appendDummyInput('ELSE_ROW')
                     .appendField(createMinusField('ELSE'))
                     .appendField('でなければ');
 
+                // ★ 修正箇所3：ジェネレータが読み取れるように 'ELSE_DO' ではなく 'ELSE' にしました！
                 this.appendStatementInput('ELSE')
                     .setCheck('js');
 
                 if (elseConn) {
-                    this.getInput('ELSE_DO').connection.connect(elseConn);
+                    this.getInput('ELSE').connection.connect(elseConn);
                 }
             }
 
