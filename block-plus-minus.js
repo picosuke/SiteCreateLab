@@ -101,27 +101,19 @@
             this.updateShape_();
         },
 
-minus(inputId) {
-    if (inputId === 'ELSE') {
-
-        this.hasElse_ = false;
-
-        if (this.elseIfCount_ > 0) {
-            // ★ ここが重要：削る前に最後をELSE扱いにする
-            const lastIndex = this.elseIfCount_;
-
-            this.elseIfCount_--;
-
-            // ★ 次のupdateでELSEとして再生成
-            this.hasElse_ = true;
+        minus(inputId) {
+            if (inputId === 'ELSE') {
+                this.hasElse_ = false;
+                if (this.elseIfCount_ > 0) {
+                    const lastIndex = this.elseIfCount_;
+                    this.elseIfCount_--;
+                    this.hasElse_ = true;
+                }
+            } else {
+                this.elseIfCount_--;
+            }
+            this.updateShape_();
         }
-
-    } else {
-        this.elseIfCount_--;
-    }
-
-    this.updateShape_();
-}
 
         updateShape_() {
             // --- 接続保存 ---
@@ -151,27 +143,24 @@ minus(inputId) {
             // --- elseif ---
             for (let j = 1; j <= this.elseIfCount_; j++) {
 
-                // ① 条件（前半）
                 this.appendValueInput('IF' + j)
                     .setCheck('Boolean')
                     .appendField(createMinusField(j))
                     .appendField('ではなく もし');
 
-                // ② 「なら」専用（これでズレ防止）
                 this.appendDummyInput('THEN' + j)
                     .appendField('なら');
 
-                // ③ 処理
                 this.appendStatementInput('DO' + j)
                     .setCheck('js');
-
-                // --- 接続復元 ---
-                if (connections[j - 1]) {
-                    if (connections[j - 1].if) {
-                        this.getInput('IF' + j).connection.connect(connections[j - 1].if);
+                
+                const key = 'IF' + j;
+                if (connections[key]) {
+                    if (connections[key].if) {
+                        this.getInput(key).connection.connect(connections[key].if);
                     }
-                    if (connections[j - 1].do) {
-                        this.getInput('DO' + j).connection.connect(connections[j - 1].do);
+                    if (connections[key].do) {
+                        this.getInput('DO' + j).connection.connect(connections[key].do);
                     }
                 }
             }
