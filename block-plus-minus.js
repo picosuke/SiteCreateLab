@@ -103,16 +103,9 @@
 
         minus(inputId) {
             if (inputId === 'ELSE') {
-                this.hasElse_ = false;
-
-                // ★ 一番下をELSE化
-                if (this.elseIfCount_ > 0) {
-                    this.elseIfCount_--;
-                    this.hasElse_ = true;
-                }
-
+                this.hasElse_ = false; // 「でなければ」ボタンを押したら、素直に「でなければ」だけを消す
             } else {
-                this.elseIfCount_--;
+                this.elseIfCount_--; // 「でなければもし」ボタンを押したら、それを減らす
             }
             this.updateShape_();
         },
