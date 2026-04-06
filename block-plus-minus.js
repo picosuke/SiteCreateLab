@@ -164,9 +164,7 @@
             }
 
             // --- else（必ず最後） ---
-            if (this.hasElse_ || this.elseIfCount_ > 0) {
-                this.hasElse_ = true; // ★ 強制維持
-
+            if (this.hasElse_) { 
                 this.appendDummyInput('ELSE_ROW')
                     .appendField(createMinusField('ELSE'))
                     .appendField('でなければ');
