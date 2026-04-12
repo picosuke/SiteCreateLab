@@ -36,6 +36,14 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "オリジナルレンダリング^-^",
         "helpUrl": ""
     },
+	{
+        "type": "FT2",
+        "message0": "チケット2",
+		"output": "TICKET2",
+        "colour": "#ff6b5c",
+        "tooltip": "オリジナルレンダリング^-^",
+        "helpUrl": ""
+    },
     {
         "type": "F",
         "message0": "フィールド大量 %1 %2 %3 %4 %5 %6",
