@@ -3,7 +3,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
         this.CUSTOM_TICKET_RADIUS = 10;   // 元のチケットのへこみ
-        this.CUSTOM_TICKET2_RADIUS = 8;   // ★追加: 新しいチケットのへこみ
+        this.CUSTOM_TICKET2_RADIUS = 9;   // ★追加: 新しいチケットのへこみ
     }
 }
 
@@ -39,7 +39,7 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             this.outlinePath_ = path;
 
         } else if (isTicket2) {
-            // --- ★新規追加: 「左右の中央」がへこむチケット ---
+            // --- ★「左右の中央」がへこむチケット ---
             const r = this.constants_.CUSTOM_TICKET2_RADIUS;
             const width = this.info_.width;
             const height = this.info_.height;
@@ -52,14 +52,14 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             path += `h ${width} `;                   // 上の辺
             path += `v ${halfH - safeR} `;           // 右の辺（へこみの上まで）
             
-            // 右辺のへこみ（内側=左向きに半円を描く）
-            path += `a ${safeR},${safeR} 0 0,1 0,${2 * safeR} `; 
+            // 右辺のへこみ（修正：フラグを1から0に変更して内側へ）
+            path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; 
             
             path += `v ${halfH - safeR} `;           // 右の辺（へこみの下から下端まで）
             path += `h -${width} `;                  // 下の辺
             path += `v -${halfH - safeR} `;          // 左の辺（へこみの下まで）
             
-            // 左辺のへこみ（内側=右向きに半円を描く）
+            // 左辺のへこみ（元から0で内側）
             path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `; 
             
             path += `z`;                             // 閉じる
