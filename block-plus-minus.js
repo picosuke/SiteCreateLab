@@ -78,16 +78,10 @@
         // --- － ---
         minus(inputId) {
             if (inputId === 'ELSE') {
-
+                // ELSEだけ消す
                 this.hasElse_ = false;
-
-                // ★ 一番下をELSEに昇格
-                if (this.elseIfCount_ > 0) {
-                    this.elseIfCount_--;
-                    this.hasElse_ = true;
-                }
-
             } else {
+                // 該当の elseif を1個減らす
                 this.elseIfCount_--;
             }
             this.updateShape_();
