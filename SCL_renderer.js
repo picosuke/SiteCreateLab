@@ -2,42 +2,68 @@
 class SCLConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
-        this.CUSTOM_TICKET_RADIUS = 10; 
+        this.CUSTOM_TICKET_RADIUS = 10;   // 元のチケットのへこみ
+        this.CUSTOM_TICKET2_RADIUS = 8;   // ★追加: 新しいチケットのへこみ
     }
 }
 
 // ② 描画処理：ここで強引に形を書き換える
 class TicketDrawer extends Blockly.zelos.Drawer {
     drawOutline_() {
-        // 1. まずは普通に描く（この時点では外に膨らんでいるか、ただの四角）
+        // 1. まずは普通に描く
         super.drawOutline_();
 
-        // 2. このブロックが「TICKET」かどうかを【超確実】に判定
         const outputConn = this.block_.outputConnection;
-        const isTicket = outputConn && outputConn.getCheck() && outputConn.getCheck().includes('TICKET');
+        // 配列かどうか安全にチェックして取得
+        const checkArr = outputConn && outputConn.getCheck() ? outputConn.getCheck() : [];
+        
+        const isTicket = checkArr.includes('TICKET');
+        const isTicket2 = checkArr.includes('TICKET2'); // ★追加: 左右へこみ型
 
         if (isTicket) {
-            // 3. へこみの強さを取得
+            // --- 元の「四隅」がへこむチケット ---
             const r = this.constants_.CUSTOM_TICKET_RADIUS;
-
-            // 4. SVGのパス（線データ）をチケット型に作り直す
-            // blockInfoから現在の幅と高さを取得
             const width = this.info_.width;
             const height = this.info_.height;
 
-            // --- 魔法のチケットパス生成 ---
-            // 詳しく説明：M(移動) -> a(内向き円弧) -> h(横線) -> a(内向き円弧) ...
-            let path = `M 0,${r} `; // 左上スタート
-            path += `a ${r},${r} 0 0,0 ${r},-${r} `; // 左上のへこみ
-            path += `h ${width - 2 * r} `;           // 上の辺
-            path += `a ${r},${r} 0 0,0 ${r},${r} `;  // 右上のへこみ
-            path += `v ${height - 2 * r} `;          // 右の辺
-            path += `a ${r},${r} 0 0,0 -${r},${r} `; // 右下のへこみ
-            path += `h -${width - 2 * r} `;          // 下の辺
-            path += `a ${r},${r} 0 0,0 -${r},-${r} `;// 左下のへこみ
+            let path = `M 0,${r} `;
+            path += `a ${r},${r} 0 0,0 ${r},-${r} `;
+            path += `h ${width - 2 * r} `;
+            path += `a ${r},${r} 0 0,0 ${r},${r} `;
+            path += `v ${height - 2 * r} `;
+            path += `a ${r},${r} 0 0,0 -${r},${r} `;
+            path += `h -${width - 2 * r} `;
+            path += `a ${r},${r} 0 0,0 -${r},-${r} `;
+            path += `z`;
+
+            this.outlinePath_ = path;
+
+        } else if (isTicket2) {
+            // --- ★新規追加: 「左右の中央」がへこむチケット ---
+            const r = this.constants_.CUSTOM_TICKET2_RADIUS;
+            const width = this.info_.width;
+            const height = this.info_.height;
+            
+            // ブロックの高さが低い時に、へこみが突き抜けないようにする安全対策
+            const safeR = Math.min(r, height / 3); 
+            const halfH = height / 2;
+
+            let path = `M 0,0 `;                     // 左上（角は直角）
+            path += `h ${width} `;                   // 上の辺
+            path += `v ${halfH - safeR} `;           // 右の辺（へこみの上まで）
+            
+            // 右辺のへこみ（内側=左向きに半円を描く）
+            path += `a ${safeR},${safeR} 0 0,1 0,${2 * safeR} `; 
+            
+            path += `v ${halfH - safeR} `;           // 右の辺（へこみの下から下端まで）
+            path += `h -${width} `;                  // 下の辺
+            path += `v -${halfH - safeR} `;          // 左の辺（へこみの下まで）
+            
+            // 左辺のへこみ（内側=右向きに半円を描く）
+            path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `; 
+            
             path += `z`;                             // 閉じる
 
-            // 5. 元のパスを捨てて、自作のパスにすり替える！
             this.outlinePath_ = path;
         }
     }
@@ -48,10 +74,10 @@ class TicketRenderInfo extends Blockly.zelos.RenderInfo {
     finalize_() {
         super.finalize_();
         const outputConn = this.block_.outputConnection;
-        const isTicket = outputConn && outputConn.getCheck() && outputConn.getCheck().includes('TICKET');
+        const checkArr = outputConn && outputConn.getCheck() ? outputConn.getCheck() : [];
         
-        if (isTicket) {
-            // これをfalseにしないと、自作パスが無視されることがあります
+        // TICKET または TICKET2 の場合は丸薬型を強制解除
+        if (checkArr.includes('TICKET') || checkArr.includes('TICKET2')) {
             this.isPill = false; 
         }
     }
