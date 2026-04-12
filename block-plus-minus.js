@@ -77,39 +77,57 @@ const controlsIfMutator = {
     // --- － ---
     minus(inputId) {
         if (inputId === 'ELSE') {
-            // ★ 「一番下をELSEに昇格」するロジックを削除し、素直にELSEを消す
-            this.hasElse_ = false;
+            if (this.elseIfCount_ > 0) {
+                // ★ 一番下をELSEに昇格させる準備
+                this.elseIfCount_--;
+                this.hasElse_ = true;
+                this.minusAction_ = 'PROMOTE_ELSE';
+            } else {
+                // ELSE IFが無ければ純粋にELSEを消す
+                this.hasElse_ = false;
+                this.minusAction_ = 'REMOVE_ELSE';
+            }
         } else {
+            // 途中の ELSE IF が消された場合
             this.elseIfCount_--;
-            // ★ 追加: どの「ではなく」が消されたかを記憶しておく（間が抜けた時に上に詰めるため）
-            this.removeElseIfIndex_ = inputId;
+            this.minusAction_ = parseInt(inputId, 10);
         }
         this.updateShape_();
     },
 
     // --- 描画 ---
     updateShape_() {
-        // ★ ここにあった「自動ELSE維持」のロジックを削除しました
-
         // --- 接続保存 ---
-        const connections = [];
+        const connections = { if: [], do: [] };
         let i = 1;
         while (this.getInput('IF' + i)) {
-            // ★ 修正: 消された行のブロック接続は保存せず、下のブロックを上に詰める
-            if (i !== this.removeElseIfIndex_) {
-                connections.push({
-                    if: this.getInput('IF' + i).connection.targetConnection,
-                    do: this.getInput('DO' + i).connection.targetConnection
-                });
-            }
+            connections.if[i] = this.getInput('IF' + i).connection.targetConnection;
+            connections.do[i] = this.getInput('DO' + i).connection.targetConnection;
             i++;
         }
-        this.removeElseIfIndex_ = null; // 記憶をリセット
+        const oldCount = i - 1; // 変更前の ELSE IF の数
 
         let elseConn = null;
         if (this.getInput('ELSE')) {
             elseConn = this.getInput('ELSE').connection.targetConnection;
         }
+
+        // ★ minusアクションに伴うブロック接続の引き継ぎ・シフト処理
+        if (this.minusAction_ === 'PROMOTE_ELSE') {
+            // 最後の「ではなく もし」を「でなければ」に変化させるため、
+            // 「なら(DO)」に繋がっていたブロックを新しい ELSE の接続として引き継ぐ
+            if (oldCount > 0) {
+                elseConn = connections.do[oldCount];
+            }
+        } else if (typeof this.minusAction_ === 'number') {
+            // 途中の「ではなく もし」が消された場合、下のブロックを上に詰める
+            const removeIdx = this.minusAction_;
+            for (let j = removeIdx; j < oldCount; j++) {
+                connections.if[j] = connections.if[j + 1];
+                connections.do[j] = connections.do[j + 1];
+            }
+        }
+        this.minusAction_ = null; // 処理が終わったらリセット
 
         // --- 全削除 ---
         i = 1;
@@ -124,7 +142,6 @@ const controlsIfMutator = {
 
         // --- elseif ---
         for (let j = 1; j <= this.elseIfCount_; j++) {
-
             this.appendValueInput('IF' + j)
                 .setCheck('Boolean')
                 .appendField(createMinusField(j))
@@ -137,19 +154,16 @@ const controlsIfMutator = {
                 .setCheck('js');
 
             // 接続復元
-            if (connections[j - 1]) {
-                if (connections[j - 1].if) {
-                    this.getInput('IF' + j).connection.connect(connections[j - 1].if);
-                }
-                if (connections[j - 1].do) {
-                    this.getInput('DO' + j).connection.connect(connections[j - 1].do);
-                }
+            if (connections.if[j]) {
+                this.getInput('IF' + j).connection.connect(connections.if[j]);
+            }
+            if (connections.do[j]) {
+                this.getInput('DO' + j).connection.connect(connections.do[j]);
             }
         }
 
         // --- else ---
         if (this.hasElse_) {
-
             this.appendDummyInput('ELSE_ROW')
                 .appendField(createMinusField('ELSE'))
                 .appendField('でなければ');
@@ -157,7 +171,7 @@ const controlsIfMutator = {
             this.appendStatementInput('ELSE')
                 .setCheck('js');
 
-            // 復元
+            // 復元（昇格した場合は、ここに旧DOのブロックが接続される）
             if (elseConn) {
                 this.getInput('ELSE').connection.connect(elseConn);
             }
