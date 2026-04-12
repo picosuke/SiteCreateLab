@@ -3,7 +3,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
         this.CUSTOM_TICKET_RADIUS = 10;   // 元のチケットのへこみ
-        this.CUSTOM_TICKET2_RADIUS = 9;   // ★追加: 新しいチケットのへこみ
+        this.CUSTOM_TICKET2_RADIUS = 8;   // ★追加: 新しいチケットのへこみ
     }
 }
 
