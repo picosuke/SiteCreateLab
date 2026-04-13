@@ -34,7 +34,11 @@ Blockly.defineBlocksWithJsonArray([
         "output": "TICKET",
         "colour": "#ff6b5c",
         "args0": [
-            { "type": "input_value", "name": "IF0", "check": "TICKET" }
+    		{
+      			"type": "input_value",
+      			"name": "TICKET_INPUT",
+                "check": "TICKET"  // ★ここを追加！（この穴はTICKETしか受け付けない＝穴がTICKET型になる）
+    		}
 		],
         "tooltip": "オリジナルレンダリング^-^",
         "helpUrl": ""
@@ -45,11 +49,15 @@ Blockly.defineBlocksWithJsonArray([
 		"output": "TICKET2",
         "colour": "#ff6b5c",
         "args0": [
-            { "type": "input_value", "name": "IF0", "check": "TICKET2" }
+    		{
+      			"type": "input_value",
+      			"name": "TICKET_INPUT2",
+                "check": "TICKET2" // ★ここを追加！（この穴はTICKET2しか受け付けない＝穴がTICKET2型になる）
+    		}
 		],
         "tooltip": "オリジナルレンダリング^-^",
         "helpUrl": ""
-    },
+	},
     {
         "type": "F",
         "message0": "フィールド大量 %1 %2 %3 %4 %5 %6",
