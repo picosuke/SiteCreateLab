@@ -30,7 +30,7 @@ Blockly.BlockSvg.prototype.initSvg = function() {
 Blockly.defineBlocksWithJsonArray([
 	{
         "type": "FT",
-        "message0": "チケット%1",
+        "message0": "チケット %1",
         "output": "TICKET",
         "colour": "#ff6b5c",
         "args0": [
@@ -41,7 +41,7 @@ Blockly.defineBlocksWithJsonArray([
     },
 	{
         "type": "FT2",
-        "message0": "チケット2",
+        "message0": "チケット2 %1",
 		"output": "TICKET2",
         "colour": "#ff6b5c",
         "args0": [
