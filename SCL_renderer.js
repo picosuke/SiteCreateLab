@@ -2,15 +2,15 @@
 class SCLConstants extends Blockly.zelos.ConstantProvider {
     constructor() {
         super();
-        this.CUSTOM_TICKET_RADIUS = 10;   // 元のチケットのへこみ
-        this.CUSTOM_TICKET2_RADIUS = 8;   // 新しいチケットのへこみ
+        this.CUSTOM_TICKET_RADIUS = 10;
+        this.CUSTOM_TICKET2_RADIUS = 8;
     }
 }
 
 // ② 描画処理
 class TicketDrawer extends Blockly.zelos.Drawer {
     
-    // --- ブロック本体の外枠を描く ---
+    // --- ブロック本体の外枠 ---
     drawOutline_() {
         super.drawOutline_();
 
@@ -58,7 +58,7 @@ class TicketDrawer extends Blockly.zelos.Drawer {
         }
     }
 
-    // --- ★修正: ブロックの中の「穴」を完璧な形にくり抜く ---
+    // --- ★修正: ブロックの中の「穴」を暗い色で塗る ---
     drawInlineInput_(input) {
         this.positionInlineInputConnection_(input);
 
@@ -78,18 +78,22 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             
             let path = '';
 
-            // ★修正ポイント：円弧のフラグを1(時計回り)にすることで、外に膨らまず内側に凸を作る
+            // ★【完全再現の魔法】
+            // はまり込むブロックと「全く同じ形」を、「時計回り」で描画する。
+            // これにより、Zelosのテーマシステムがこれを「穴」と認識し、
+            // 透明にならず、親ブロックの色より一段暗い色でペタッと塗ってくれます！
+
             if (isTicket) {
                 const r = this.constants_.CUSTOM_TICKET_RADIUS;
-                path += `M ${x + width - r},${y} `;         
-                path += `h -${width - 2 * r} `;             
-                path += `a ${r},${r} 0 0,1 -${r},${r} `;    // 左上の凸
-                path += `v ${height - 2 * r} `;             
-                path += `a ${r},${r} 0 0,1 ${r},${r} `;     // 左下の凸
-                path += `h ${width - 2 * r} `;              
-                path += `a ${r},${r} 0 0,1 ${r},-${r} `;    // 右下の凸
-                path += `v -${height - 2 * r} `;            
-                path += `a ${r},${r} 0 0,1 -${r},-${r} `;   // 右上の凸
+                path += `M ${x + r},${y} `;
+                path += `h ${width - 2 * r} `;
+                path += `a ${r},${r} 0 0,0 ${r},${r} `;
+                path += `v ${height - 2 * r} `;
+                path += `a ${r},${r} 0 0,0 -${r},${r} `;
+                path += `h -${width - 2 * r} `;
+                path += `a ${r},${r} 0 0,0 -${r},-${r} `;
+                path += `v -${height - 2 * r} `;
+                path += `a ${r},${r} 0 0,0 ${r},-${r} `;
                 path += `z`;
 
             } else if (isTicket2) {
@@ -97,20 +101,22 @@ class TicketDrawer extends Blockly.zelos.Drawer {
                 const safeR = Math.min(r, height / 3); 
                 const halfH = height / 2;
 
-                path += `M ${x + width},${y} `;                      
-                path += `h -${width} `;                              
-                path += `v ${halfH - safeR} `;                       
-                path += `a ${safeR},${safeR} 0 0,1 0,${2 * safeR} `; // 左側の凸
-                path += `v ${halfH - safeR} `;                       
-                path += `h ${width} `;                               
-                path += `v -${halfH - safeR} `;                      
-                path += `a ${safeR},${safeR} 0 0,1 0,-${2 * safeR}`; // 右側の凸
+                path += `M ${x},${y} `;                     
+                path += `h ${width} `;                   
+                path += `v ${halfH - safeR} `;           
+                path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; // 内側へのへこみ
+                path += `v ${halfH - safeR} `;           
+                path += `h -${width} `;                  
+                path += `v -${halfH - safeR} `;          
+                path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `; // 内側へのへこみ
+                path += `v -${halfH - safeR} `;
                 path += `z`;                             
             }
 
             this.inlinePath_ += path;
 
         } else {
+            // チケット以外の普通の丸穴などは、デフォルトの描画に任せる
             super.drawInlineInput_(input);
         }
     }
