@@ -5,12 +5,41 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
         this.CUSTOM_TICKET_RADIUS = 10;
         this.CUSTOM_TICKET2_RADIUS = 8;
     }
+
+    init() {
+        super.init();
+        
+        // ★あなたのご指摘通りの「正しい方法」です！
+        // TICKET2専用の「接続の形（Connection Shape）」を定義して登録するだけで、
+        // Blocklyが勝手に「暗い色」「黄色い枠」付きの穴を完璧に描画してくれます。
+        const r2 = this.CUSTOM_TICKET2_RADIUS;
+        this.TICKET2_SHAPE = {
+            type: Blockly.blockRendering.Types.INPUT,
+            isOutput: true,
+            width: r2,
+            height: r2 * 2,
+            // 穴の左側の出っ張り（右向きの凸）
+            pathDown: `a ${r2},${r2} 0 0,0 0,${r2 * 2}`,
+            // 穴の右側の出っ張り（左向きの凸）
+            pathUp: `a ${r2},${r2} 0 0,1 0,-${r2 * 2}`
+        };
+    }
+
+    // TICKET2のチェックを持つ穴は、上で作った専用の形を使う！
+    shapeFor(connection) {
+        const checks = connection.getCheck();
+        if (checks && checks.includes('TICKET2')) {
+            return this.TICKET2_SHAPE;
+        }
+        return super.shapeFor(connection);
+    }
 }
 
 // ② 描画処理
 class TicketDrawer extends Blockly.zelos.Drawer {
     
-    // --- ブロック本体の外枠 ---
+    // --- ブロック本体の外枠を描く ---
+    // ※外枠全体の形はShapeだけでは決められないため、ここだけは残します
     drawOutline_() {
         super.drawOutline_();
 
@@ -41,85 +70,24 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             const r = this.constants_.CUSTOM_TICKET2_RADIUS;
             const width = this.info_.width;
             const height = this.info_.height;
-            const safeR = Math.min(r, height / 3); 
             const halfH = height / 2;
 
             let path = `M 0,0 `;                     
             path += `h ${width} `;                   
-            path += `v ${halfH - safeR} `;           
-            path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; 
-            path += `v ${halfH - safeR} `;           
+            path += `v ${halfH - r} `;           
+            path += `a ${r},${r} 0 0,0 0,${2 * r} `; // 右辺の凹み
+            path += `v ${halfH - r} `;           
             path += `h -${width} `;                  
-            path += `v -${halfH - safeR} `;          
-            path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `;
+            path += `v -${halfH - r} `;          
+            path += `a ${r},${r} 0 0,0 0,-${2 * r} `; // 左辺の凹み
             path += `z`;                             
 
             this.outlinePath_ = path;
         }
     }
 
-    // --- ★修正: ブロックの中の「穴」を暗い色で塗る ---
-    drawInlineInput_(input) {
-        this.positionInlineInputConnection_(input);
-
-        if (input.connectedBlock || this.info_.isInserted) {
-            return;
-        }
-
-        const checkArr = input.connectionModel.getCheck() ? input.connectionModel.getCheck() : [];
-        const isTicket = checkArr.includes('TICKET');
-        const isTicket2 = checkArr.includes('TICKET2');
-
-        if (isTicket || isTicket2) {
-            const width = input.width;
-            const height = input.height;
-            const x = input.xPos;
-            const y = input.centerline - height / 2;
-            
-            let path = '';
-
-            // ★【完全再現の魔法】
-            // はまり込むブロックと「全く同じ形」を、「時計回り」で描画する。
-            // これにより、Zelosのテーマシステムがこれを「穴」と認識し、
-            // 透明にならず、親ブロックの色より一段暗い色でペタッと塗ってくれます！
-
-            if (isTicket) {
-                const r = this.constants_.CUSTOM_TICKET_RADIUS;
-                path += `M ${x + r},${y} `;
-                path += `h ${width - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 ${r},${r} `;
-                path += `v ${height - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 -${r},${r} `;
-                path += `h -${width - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 -${r},-${r} `;
-                path += `v -${height - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 ${r},-${r} `;
-                path += `z`;
-
-            } else if (isTicket2) {
-                const r = this.constants_.CUSTOM_TICKET2_RADIUS;
-                const safeR = Math.min(r, height / 3); 
-                const halfH = height / 2;
-
-                path += `M ${x},${y} `;                     
-                path += `h ${width} `;                   
-                path += `v ${halfH - safeR} `;           
-                path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; // 内側へのへこみ
-                path += `v ${halfH - safeR} `;           
-                path += `h -${width} `;                  
-                path += `v -${halfH - safeR} `;          
-                path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `; // 内側へのへこみ
-                path += `v -${halfH - safeR} `;
-                path += `z`;                             
-            }
-
-            this.inlinePath_ += path;
-
-        } else {
-            // チケット以外の普通の丸穴などは、デフォルトの描画に任せる
-            super.drawInlineInput_(input);
-        }
-    }
+    // ★私が今まで書いていた「穴を無理やり描くコード」は全て削除しました！
+    // 穴の描画はすべてBlocklyの標準エンジンに任せることで、バグが消滅します。
 }
 
 // ③ 情報処理：丸薬型(Pill)にならないように設定
