@@ -10,7 +10,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
 // ② 描画処理
 class TicketDrawer extends Blockly.zelos.Drawer {
     
-    // --- ブロック本体の外枠を描く ---
+    // --- ブロック本体の外枠を描く（ここは変更なし・時計回り） ---
     drawOutline_() {
         super.drawOutline_();
 
@@ -58,12 +58,11 @@ class TicketDrawer extends Blockly.zelos.Drawer {
         }
     }
 
-    // --- ★修正: ブロックの中の「穴（暗い色）」を描く ---
+    // --- ★修正: ブロックの中の「穴」を【反時計回り】で描く ---
     drawInlineInput_(input) {
-        // 必須：接続位置の計算
         this.positionInlineInputConnection_(input);
 
-        // ★罠1の修正：すでにブロックが繋がっている場合は穴を描画しない！
+        // すでにブロックが繋がっている場合は描画しない
         if (input.connectedBlock || this.info_.isInserted) {
             return;
         }
@@ -80,19 +79,21 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             
             let path = '';
 
-            // ★罠2の修正：Zelosの「暗い色の穴」はくり抜きではなく、
-            // 「暗い色でスタンプを押す」仕様。そのため、外枠と全く同じ形のパスを描く。
+            // ★ここが最大のポイント！
+            // 右上の角からスタートして、左へ、下へ、右へ、上へと逆回り（反時計回り）にパスを引くことで
+            // 「出っ張ったブロック」ではなく「へこんだ穴」として認識させる！
 
             if (isTicket) {
                 const r = this.constants_.CUSTOM_TICKET_RADIUS;
-                path += `M ${x},${y + r} `;
-                path += `a ${r},${r} 0 0,0 ${r},-${r} `;
-                path += `h ${width - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 ${r},${r} `;
-                path += `v ${height - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 -${r},${r} `;
-                path += `h -${width - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 -${r},-${r} `;
+                path += `M ${x + width - r},${y} `;         // 右上からスタート
+                path += `h -${width - 2 * r} `;             // 左へ
+                path += `a ${r},${r} 0 0,0 -${r},${r} `;    // 左上の凹み
+                path += `v ${height - 2 * r} `;             // 下へ
+                path += `a ${r},${r} 0 0,0 ${r},${r} `;     // 左下の凹み
+                path += `h ${width - 2 * r} `;              // 右へ
+                path += `a ${r},${r} 0 0,0 ${r},-${r} `;    // 右下の凹み
+                path += `v -${height - 2 * r} `;            // 上へ
+                path += `a ${r},${r} 0 0,0 -${r},-${r} `;   // 右上の凹み
                 path += `z`;
 
             } else if (isTicket2) {
@@ -100,18 +101,18 @@ class TicketDrawer extends Blockly.zelos.Drawer {
                 const safeR = Math.min(r, height / 3); 
                 const halfH = height / 2;
 
-                path += `M ${x},${y} `;                     
-                path += `h ${width} `;                   
-                path += `v ${halfH - safeR} `;           
-                path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; 
-                path += `v ${halfH - safeR} `;           
-                path += `h -${width} `;                  
-                path += `v -${halfH - safeR} `;          
-                path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `;
+                path += `M ${x + width},${y} `;                      // 右上からスタート
+                path += `h -${width} `;                              // 左へ
+                path += `v ${halfH - safeR} `;                       // 下へ
+                path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; // 左辺の凹み
+                path += `v ${halfH - safeR} `;                       // 下へ
+                path += `h ${width} `;                               // 右へ
+                path += `v -${halfH - safeR} `;                      // 上へ
+                path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR}`; // 右辺の凹み
+                path += `v -${halfH - safeR} `;                      // 上へ
                 path += `z`;                             
             }
 
-            // outlinePath_ ではなく、inlinePath_ (暗い色レイヤー) に追加する！
             this.inlinePath_ += path;
 
         } else {
