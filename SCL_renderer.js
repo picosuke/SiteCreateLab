@@ -6,7 +6,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
         this.CUSTOM_TICKET2_RADIUS = 8;
     }
 
-    // ★ ChatGPTの正解：接続の形だけを定義する
+    // 接続（Shape）の設定：ここを正しく定義することで黄色い枠が完璧に出ます
     shapeFor(connection) {
         const base = super.shapeFor(connection);
         if (!base) return base;
@@ -16,7 +16,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
             const r = this.CUSTOM_TICKET2_RADIUS;
             return {
                 ...base,
-                // あなたの環境のエラーを回避するため「関数」として定義します
+                // 関数として定義（Blocklyの内部エラーを回避）
                 pathDown: function() { return `a ${r},${r} 0 0,0 0,${r * 2}`; },
                 pathUp: function() { return `a ${r},${r} 0 0,1 0,-${r * 2}`; }
             };
@@ -27,7 +27,6 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
 
 // ② 描画処理
 class TicketDrawer extends Blockly.zelos.Drawer {
-    // --- ブロック本体の外枠を描く ---
     drawOutline_() {
         super.drawOutline_();
         const outputConn = this.block_.outputConnection;
@@ -47,15 +46,30 @@ class TicketDrawer extends Blockly.zelos.Drawer {
         }
     }
 
-    // ★ 重要：drawInlineInput_ は上書きせず、完全にシステム(super)に任せる！
-    // これにより、Zelos標準の「暗い色の塗り」と「黄色い枠」が復活します。
+    // 穴（スロット）の描画：ここは標準(super)に任せるのが一番安全です
     drawInlineInput_(input) {
         super.drawInlineInput_(input);
     }
 }
 
-// ③ 情報処理
+// ③ 情報処理：【ここが崩れを直す核心部分です】
 class TicketRenderInfo extends Blockly.zelos.RenderInfo {
+    
+    // 穴（input）を生成する瞬間に割り込む
+    makeInput_(input) {
+        const res = super.makeInput_(input);
+        
+        // もし入力（穴）のチェックが TICKET または TICKET2 なら
+        const checks = input.connection.getCheck();
+        if (checks && (checks.includes('TICKET') || checks.includes('TICKET2'))) {
+            // ★ Zelosの「丸薬型(Pill)にする」という強制フラグをOFFにする
+            // これにより、形が崩れず、きれいな矩形ベースの穴になります。
+            res.isPill = false;
+        }
+        return res;
+    }
+
+    // ブロック全体の丸薬設定
     finalize_() {
         super.finalize_();
         const outputConn = this.block_.outputConnection;
