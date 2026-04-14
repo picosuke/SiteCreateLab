@@ -6,31 +6,32 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
         this.CUSTOM_TICKET2_RADIUS = 8;
     }
 
-    // ★ ChatGPTの正解を取り入れた「安全なShape（接続判定）」の登録
     shapeFor(connection) {
-        // 1. まず標準の形データ（ベース）を取得してエラーを防ぐ！
         const base = super.shapeFor(connection);
         if (!base) return base;
 
         const checks = connection.getCheck();
         
-        // 2. チケット2の場合、ベースを継承しつつ「凹みのパス」だけ上書きして返す
         if (checks && checks.includes('TICKET2')) {
             const r = this.CUSTOM_TICKET2_RADIUS;
             return {
                 ...base, 
-                // 左辺と右辺の凹みにフィットするパス（これのおかげで黄色い枠が正しい形で出ます！）
-                pathDown: `a ${r},${r} 0 0,0 0,${r * 2}`,
-                pathUp: `a ${r},${r} 0 0,1 0,-${r * 2}`
+                // ★ここが最終修正！ただの文字ではなく「関数（function）」にする！
+                pathDown: function() { 
+                    return `a ${r},${r} 0 0,0 0,${r * 2}`; 
+                },
+                pathUp: function() { 
+                    return `a ${r},${r} 0 0,1 0,-${r * 2}`; 
+                }
             };
         }
         
-        // 3. チケット1の場合も、エラーを防ぐためにベースを継承させる
         if (checks && checks.includes('TICKET')) {
             return {
                 ...base,
-                pathDown: '',
-                pathUp: ''
+                // TICKET1も同様に関数にする
+                pathDown: function() { return ''; },
+                pathUp: function() { return ''; }
             };
         }
         
@@ -89,11 +90,10 @@ class TicketDrawer extends Blockly.zelos.Drawer {
         }
     }
 
-    // --- 中の「穴」の描画（濃い色をつける） ---
+    // --- 中の「穴（暗い色）」の描画 ---
     drawInlineInput_(input) {
         this.positionInlineInputConnection_(input);
 
-        // すでにブロックが繋がっている時は穴を描かない
         if (input.connectedBlock || this.info_.isInserted) {
             return;
         }
@@ -110,7 +110,6 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             
             let path = '';
 
-            // 暗い色でペタッと塗るための正しいシルエットパス
             if (isTicket) {
                 const r = this.constants_.CUSTOM_TICKET_RADIUS;
                 path += `M ${x + r},${y} `;
@@ -141,7 +140,6 @@ class TicketDrawer extends Blockly.zelos.Drawer {
                 path += `z`;                             
             }
 
-            // ★ inlinePath_ に追加することで、暗い色の穴として塗られます！
             this.inlinePath_ += path;
 
         } else {
