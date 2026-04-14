@@ -6,29 +6,36 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
         this.CUSTOM_TICKET2_RADIUS = 8;
     }
 
-    // 接続（Shape）の設定：ここを正しく定義することで黄色い枠が完璧に出ます
-    shapeFor(connection) {
-        const base = super.shapeFor(connection);
-        if (!base) return base;
+    init() {
+        super.init();
+        const r = this.CUSTOM_TICKET2_RADIUS;
+        // ★ TICKET2の形を「公式な接続形状」としてシステムに完全登録
+        // これにより、黄色い枠も暗い穴も、システムが自動で完璧に計算します
+        this.TICKET2_SHAPE = {
+            type: Blockly.blockRendering.Types.PUZZLE_TAB, // 接続タイプ
+            width: r,
+            height: r * 2,
+            pathDown: function() { return `a ${r},${r} 0 0,0 0,${r * 2}`; },
+            pathUp: function() { return `a ${r},${r} 0 0,1 0,-${r * 2}`; }
+        };
+    }
 
+    shapeFor(connection) {
         const checks = connection.getCheck();
         if (checks && checks.includes('TICKET2')) {
-            const r = this.CUSTOM_TICKET2_RADIUS;
-            return {
-                ...base,
-                // 関数として定義（Blocklyの内部エラーを回避）
-                pathDown: function() { return `a ${r},${r} 0 0,0 0,${r * 2}`; },
-                pathUp: function() { return `a ${r},${r} 0 0,1 0,-${r * 2}`; }
-            };
+            return this.TICKET2_SHAPE;
         }
-        return base;
+        return super.shapeFor(connection);
     }
 }
 
 // ② 描画処理
 class TicketDrawer extends Blockly.zelos.Drawer {
     drawOutline_() {
+        // ★ 核心：接続の「出っ張り」はシステム(super)に描かせる！
+        // 自分では、上・右・下の辺だけを描く。
         super.drawOutline_();
+
         const outputConn = this.block_.outputConnection;
         const checkArr = outputConn && outputConn.getCheck() ? outputConn.getCheck() : [];
 
@@ -42,34 +49,37 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             const w = this.info_.width;
             const h = this.info_.height;
             const halfH = h / 2;
-            this.outlinePath_ = `M 0,0 h ${w} v ${halfH - r} a ${r},${r} 0 0,0 0,${2 * r} v ${halfH - r} h -${w} v -${halfH - r} a ${r},${r} 0 0,0 0,-${2 * r} z`;
+            
+            // 左側の出っ張りは super.drawOutline_() が描いてくれるので、
+            // 私たちは「右側の凹み」を含めた外枠だけを整える
+            let path = `M 0,0 `;
+            path += `h ${w} `;
+            path += `v ${halfH - r} `;
+            path += `a ${r},${r} 0 0,0 0,${2 * r} `; // 右側の凹み
+            path += `v ${halfH - r} `;
+            path += `h -${w} `;
+            // 左側は自動で接続されるので閉じなくて良い(z)
+            this.outlinePath_ += path;
         }
     }
 
-    // 穴（スロット）の描画：ここは標準(super)に任せるのが一番安全です
+    // ★ 穴の描画は100%システムに任せる。これが「崩れない」唯一の方法。
     drawInlineInput_(input) {
         super.drawInlineInput_(input);
     }
 }
 
-// ③ 情報処理：【ここが崩れを直す核心部分です】
+// ③ 情報処理
 class TicketRenderInfo extends Blockly.zelos.RenderInfo {
-    
-    // 穴（input）を生成する瞬間に割り込む
     makeInput_(input) {
         const res = super.makeInput_(input);
-        
-        // もし入力（穴）のチェックが TICKET または TICKET2 なら
         const checks = input.connection.getCheck();
         if (checks && (checks.includes('TICKET') || checks.includes('TICKET2'))) {
-            // ★ Zelosの「丸薬型(Pill)にする」という強制フラグをOFFにする
-            // これにより、形が崩れず、きれいな矩形ベースの穴になります。
-            res.isPill = false;
+            res.isPill = false; // 丸薬型を無効化
         }
         return res;
     }
 
-    // ブロック全体の丸薬設定
     finalize_() {
         super.finalize_();
         const outputConn = this.block_.outputConnection;
