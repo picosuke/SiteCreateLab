@@ -6,6 +6,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
         this.CUSTOM_TICKET2_RADIUS = 8;
     }
 
+    // ★ 黄色い枠を出すために、システムに接続の形を教える
     shapeFor(connection) {
         const base = super.shapeFor(connection);
         if (!base) return base;
@@ -15,7 +16,6 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
             const r = this.CUSTOM_TICKET2_RADIUS;
             return {
                 ...base,
-                // Zelosのエラーを回避するため、必ず関数(function)で返す
                 pathDown: function() { return `a ${r},${r} 0 0,0 0,${r * 2}`; },
                 pathUp: function() { return `a ${r},${r} 0 0,1 0,-${r * 2}`; }
             };
@@ -45,26 +45,69 @@ class TicketDrawer extends Blockly.zelos.Drawer {
         }
     }
 
-    // 穴の描画は標準に任せる（これで暗い色と黄色い枠が出る）
+    // ★ 形の歪みを防ぐため、自分で穴を描く！
     drawInlineInput_(input) {
-        super.drawInlineInput_(input);
+        // これを呼ぶことで黄色い枠が正しい位置に出ます
+        this.positionInlineInputConnection_(input);
+
+        if (input.connectedBlock || this.info_.isInserted) {
+            return;
+        }
+
+        const checkArr = input.connectionModel.getCheck() ? input.connectionModel.getCheck() : [];
+        const isTicket = checkArr.includes('TICKET');
+        const isTicket2 = checkArr.includes('TICKET2');
+
+        if (isTicket || isTicket2) {
+            const width = input.width;
+            const height = input.height;
+            const x = input.xPos;
+            const y = input.centerline - height / 2;
+            
+            let path = '';
+
+            // システムの「丸くする処理」を無視し、完璧なチケット型を描く
+            if (isTicket) {
+                const r = this.constants_.CUSTOM_TICKET_RADIUS;
+                path += `M ${x + r},${y} `;
+                path += `h ${width - 2 * r} `;
+                path += `a ${r},${r} 0 0,0 ${r},${r} `;
+                path += `v ${height - 2 * r} `;
+                path += `a ${r},${r} 0 0,0 -${r},${r} `;
+                path += `h -${width - 2 * r} `;
+                path += `a ${r},${r} 0 0,0 -${r},-${r} `;
+                path += `v -${height - 2 * r} `;
+                path += `a ${r},${r} 0 0,0 ${r},-${r} `;
+                path += `z`;
+
+            } else if (isTicket2) {
+                const r = this.constants_.CUSTOM_TICKET2_RADIUS;
+                const safeR = Math.min(r, height / 3); 
+                const halfH = height / 2;
+
+                path += `M ${x},${y} `;                     
+                path += `h ${width} `;                   
+                path += `v ${halfH - safeR} `;           
+                path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; 
+                path += `v ${halfH - safeR} `;           
+                path += `h -${width} `;                  
+                path += `v -${halfH - safeR} `;          
+                path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `; 
+                path += `v -${halfH - safeR} `;
+                path += `z`;                             
+            }
+
+            // これにより、この形が暗い色で塗られます
+            this.inlinePath_ += path;
+
+        } else {
+            super.drawInlineInput_(input);
+        }
     }
 }
 
-// ③ 情報処理：ここで穴が丸くなるのを止める
+// ③ 情報処理
 class TicketRenderInfo extends Blockly.zelos.RenderInfo {
-    
-    // ★ 追加：個別の「穴（input）」の計算に割り込む
-    makeInput_(input) {
-        const res = super.makeInput_(input);
-        const checks = input.connection.getCheck();
-        // チケット系の場合は、丸薬型(isPill)フラグをOFFにする
-        if (checks && (checks.includes('TICKET') || checks.includes('TICKET2'))) {
-            res.isPill = false; 
-        }
-        return res;
-    }
-
     finalize_() {
         super.finalize_();
         const outputConn = this.block_.outputConnection;
