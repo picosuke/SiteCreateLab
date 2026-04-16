@@ -6,7 +6,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
         this.CUSTOM_TICKET2_RADIUS = 8;
     }
 
-    // ★ 黄色い枠を出すために、システムに接続の形を教える
+    // ★ 黄色い枠を出すために接続の形をシステムに教える
     shapeFor(connection) {
         const base = super.shapeFor(connection);
         if (!base) return base;
@@ -45,9 +45,9 @@ class TicketDrawer extends Blockly.zelos.Drawer {
         }
     }
 
-    // ★ 形の歪みを防ぐため、自分で穴を描く！
+    // ★ 形の歪みを防ぎつつ、「暗い色」にする！
     drawInlineInput_(input) {
-        // これを呼ぶことで黄色い枠が正しい位置に出ます
+        // これを呼ぶことで黄色い枠が出ます
         this.positionInlineInputConnection_(input);
 
         if (input.connectedBlock || this.info_.isInserted) {
@@ -66,18 +66,20 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             
             let path = '';
 
-            // システムの「丸くする処理」を無視し、完璧なチケット型を描く
+            // ★ 最大のポイント：【反時計回り】でパスを描く！
+            // 右上からスタートし、左→下→右→上へと逆走することで、ブロックがくり抜かれて「暗い色」になります。
+            
             if (isTicket) {
                 const r = this.constants_.CUSTOM_TICKET_RADIUS;
-                path += `M ${x + r},${y} `;
-                path += `h ${width - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 ${r},${r} `;
-                path += `v ${height - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 -${r},${r} `;
+                path += `M ${x + width - r},${y} `;
                 path += `h -${width - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 -${r},-${r} `;
+                path += `a ${r},${r} 0 0,1 -${r},${r} `;
+                path += `v ${height - 2 * r} `;
+                path += `a ${r},${r} 0 0,1 ${r},${r} `;
+                path += `h ${width - 2 * r} `;
+                path += `a ${r},${r} 0 0,1 ${r},-${r} `;
                 path += `v -${height - 2 * r} `;
-                path += `a ${r},${r} 0 0,0 ${r},-${r} `;
+                path += `a ${r},${r} 0 0,1 -${r},-${r} `;
                 path += `z`;
 
             } else if (isTicket2) {
@@ -85,19 +87,19 @@ class TicketDrawer extends Blockly.zelos.Drawer {
                 const safeR = Math.min(r, height / 3); 
                 const halfH = height / 2;
 
-                path += `M ${x},${y} `;                     
-                path += `h ${width} `;                   
-                path += `v ${halfH - safeR} `;           
-                path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; 
-                path += `v ${halfH - safeR} `;           
-                path += `h -${width} `;                  
-                path += `v -${halfH - safeR} `;          
-                path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `; 
-                path += `v -${halfH - safeR} `;
+                path += `M ${x + width},${y} `;                      // 右上からスタート
+                path += `h -${width} `;                              // 左へ
+                path += `v ${halfH - safeR} `;                       // 下へ
+                path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; // 穴が左側に膨らむ
+                path += `v ${halfH - safeR} `;                       // 下へ
+                path += `h ${width} `;                               // 右へ
+                path += `v -${halfH - safeR} `;                      // 上へ
+                path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR}`; // 穴が右側に膨らむ
+                path += `v -${halfH - safeR} `;                      // 上へ
                 path += `z`;                             
             }
 
-            // これにより、この形が暗い色で塗られます
+            // このパスによって、形が崩れず、かつ暗く透けた色になります！
             this.inlinePath_ += path;
 
         } else {
@@ -108,6 +110,16 @@ class TicketDrawer extends Blockly.zelos.Drawer {
 
 // ③ 情報処理
 class TicketRenderInfo extends Blockly.zelos.RenderInfo {
+    // 念のため、システム側に「これは丸じゃない」と教えておく
+    makeInput_(input) {
+        const res = super.makeInput_(input);
+        const checks = input.connection.getCheck();
+        if (checks && (checks.includes('TICKET') || checks.includes('TICKET2'))) {
+            res.isPill = false; 
+        }
+        return res;
+    }
+
     finalize_() {
         super.finalize_();
         const outputConn = this.block_.outputConnection;
