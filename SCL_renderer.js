@@ -6,6 +6,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
         this.CUSTOM_TICKET2_RADIUS = 8;
     }
 
+    // 黄色い枠（ハイライト）を出すために、システムの形だけは残しておきます
     shapeFor(connection) {
         const base = super.shapeFor(connection);
         if (!base) return base;
@@ -16,7 +17,7 @@ class SCLConstants extends Blockly.zelos.ConstantProvider {
             return {
                 ...base,
                 pathDown: function() { return `a ${r},${r} 0 0,0 0,${r * 2}`; },
-                pathUp: function() { return `a ${r},${r} 0 0,1 0,-${r * 2}`; }
+                pathUp: function() { return `a ${r},${r} 0 0,0 0,-${r * 2}`; }
             };
         }
         return base;
@@ -44,17 +45,12 @@ class TicketDrawer extends Blockly.zelos.Drawer {
         }
     }
 
+    // ★暗い色は一切塗らず、システムに「透明なチケット型の穴」をくり抜かせる！
     drawInlineInput_(input) {
+        // これで近づけた時に「黄色い枠」が出ます
         this.positionInlineInputConnection_(input);
 
-        let svgRoot = this.block_.getSvgRoot();
-        let holeId = 'scl_hole_' + input.name;
-        let holePath = svgRoot.querySelector('.' + holeId);
-
-        // ★修正2：他のブロックに入った時に消えてしまう原因を削除しました！
-        // 「自分の穴にブロックが入った時」だけ暗い色を消すようにします。
-        if (input.connectedBlock) {
-            if (holePath) holePath.style.display = 'none';
+        if (input.connectedBlock || this.info_.isInserted) {
             return;
         }
 
@@ -69,30 +65,41 @@ class TicketDrawer extends Blockly.zelos.Drawer {
             const y = input.centerline - height / 2;
             let path = '';
 
+            // ★反時計回りでパスを描くことで、ブロックからこの形が切り抜かれ「透明」になります
             if (isTicket) {
                 const r = this.constants_.CUSTOM_TICKET_RADIUS;
-                path += `M ${x + r},${y} h ${width - 2 * r} a ${r},${r} 0 0,0 ${r},${r} v ${height - 2 * r} a ${r},${r} 0 0,0 -${r},${r} h -${width - 2 * r} a ${r},${r} 0 0,0 -${r},-${r} v -${height - 2 * r} a ${r},${r} 0 0,0 ${r},-${r} z`;
+                path += `M ${x + width - r},${y} `;
+                path += `h -${width - 2 * r} `;
+                path += `a ${r},${r} 0 0,1 -${r},${r} `;
+                path += `v ${height - 2 * r} `;
+                path += `a ${r},${r} 0 0,1 ${r},${r} `;
+                path += `h ${width - 2 * r} `;
+                path += `a ${r},${r} 0 0,1 ${r},-${r} `;
+                path += `v -${height - 2 * r} `;
+                path += `a ${r},${r} 0 0,1 -${r},-${r} `;
+                path += `z`;
+
             } else if (isTicket2) {
                 const r = this.constants_.CUSTOM_TICKET2_RADIUS;
                 const safeR = Math.min(r, height / 3); 
                 const halfH = height / 2;
                 
-                path += `M ${x + width},${y} h -${width} v ${halfH - safeR} `;
-                // ★修正1：左側のフラグを「1」にして、しっかり内側にえぐれるようにしました！
-                path += `a ${safeR},${safeR} 0 0,1 0,${2 * safeR} `; 
-                path += `v ${halfH - safeR} h ${width} v -${halfH - safeR} `;
-                path += `a ${safeR},${safeR} 0 0,1 0,-${2 * safeR} `; 
-                path += `v -${halfH - safeR} z`;
+                path += `M ${x + width},${y} `;
+                path += `h -${width} `;
+                path += `v ${halfH - safeR} `;
+                // ★修正：左側のへこみも完璧に内側にえぐれるようにしました（フラグ0）
+                path += `a ${safeR},${safeR} 0 0,0 0,${2 * safeR} `; 
+                path += `v ${halfH - safeR} `;
+                path += `h ${width} `;
+                path += `v -${halfH - safeR} `;
+                // 右側のへこみ
+                path += `a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} `; 
+                path += `v -${halfH - safeR} `;
+                path += `z`;
             }
 
-            if (!holePath) {
-                holePath = Blockly.utils.dom.createSvgElement('path', {
-                    'class': holeId,
-                    'fill': 'rgba(0, 0, 0, 0.2)' 
-                }, svgRoot);
-            }
-            holePath.style.display = 'block';
-            holePath.setAttribute('d', path);
+            // このパスをシステムに渡すことで、背景が透ける透明な穴になります
+            this.inlinePath_ += path;
 
         } else {
             super.drawInlineInput_(input);
@@ -100,7 +107,7 @@ class TicketDrawer extends Blockly.zelos.Drawer {
     }
 }
 
-// ③ 情報処理
+// ③ 情報処理：形がお椀型になるのを防ぐ
 class TicketRenderInfo extends Blockly.zelos.RenderInfo {
     makeInput_(input) {
         const res = super.makeInput_(input);
