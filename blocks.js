@@ -897,7 +897,7 @@ Blockly.defineBlocksWithJsonArray([
         "args0": [
             { "type": "input_value", "name": "HEN", "check": "text" }
         ],
-        "output": "HEN",
+        "output": [ "text", "jkazu", "HEN"],
         "colour": '#fe9f3d',
         "tooltip": "",
         "helpUrl": ""
@@ -1057,7 +1057,7 @@ Blockly.Blocks['KS_ARG_REPORTER'] = {
   init: function() {
     this.appendDummyInput()
         .appendField(new Blockly.FieldLabel(""), "ARG_NAME");
-    this.setOutput(true, null);
+    this.setOutput(true, "HEN");
     this.setColour('#ff6b5c'); 
   }
 };
