@@ -97,7 +97,7 @@ Blockly.Msg["SCL_p_if_mozi_reporter"] = "もし %1 なら %2 でなければ %3"
 // ==========================================
 // ブロック定義（上の Blockly.Msg を参照）
 // ==========================================
-Blockly.defineBlocksWithJsonArray([
+const sclBlockDefinitions = [
 	{
         "type": "FT",
         // ★ "%{BKY_〇〇}" と書くことで、Blocklyが自動的に辞書から引っ張ってきます
@@ -1134,7 +1134,35 @@ Blockly.defineBlocksWithJsonArray([
         "colour": "#124d99",
         "inputsInline": true
     }
-]);
+];
+
+Blockly.defineBlocksWithJsonArray(sclBlockDefinitions);
+
+function changeBlockNames(newNamesObj) {
+    // 1. 辞書 (Blockly.Msg) を新しい名前に書き換える
+    for (let key in newNamesObj) {
+        Blockly.Msg[key] = newNamesObj[key];
+    }
+
+    // 2. ワークスペースの「今の状態（置かれているブロック）」を一時保存する
+    const state = Blockly.serialization.workspaces.save(workspace);
+
+    // 3. Blocklyの記憶（古いブロック定義）を一旦消去し、新しい辞書で再定義する
+    sclBlockDefinitions.forEach(def => {
+        delete Blockly.Blocks[def.type]; 
+    });
+    Blockly.defineBlocksWithJsonArray(sclBlockDefinitions);
+
+    // 4. ワークスペースを真っさらにして、保存しておいたブロックを置き直す（ここで文字が変わる！）
+    workspace.clear();
+    Blockly.serialization.workspaces.load(state, workspace);
+
+    // 5. 左側のメニュー（ツールボックス）も再描画して文字を更新する
+    const toolboxElement = document.getElementById('toolbox');
+    if (toolboxElement) {
+        workspace.updateToolbox(toolboxElement);
+    }
+}
 
 Blockly.Blocks['KS_ARG_REPORTER'] = {
   init: function() {
