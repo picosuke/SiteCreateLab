@@ -12,91 +12,96 @@ Blockly.BlockSvg.prototype.initSvg = function() {
   };
 }();
 
-const B_NAME = [
-    "チケット %1",                                     // 0: FT
-    "チケット2 %1",                                    // 1: FT2
-    "フィールド大量 %1 %2 %3 %4 %5 %6",               // 2: F
-    "設定 %1 %2",                                      // 3: HSE
-    "出すもの %1 %2",                                  // 4: HDA
-    "文字 %1",                                         // 5: M
-    "サイトを作り始める",                              // 6: S
-    "HTML %1 %2 CSS %3 %4 JavaScript %5 %6",         // 7: HCJ
-    "HTML %1 %2",                                      // 8: c_html
-    "CSS %1 %2",                                       // 9: c_css
-    "JavaScript %1 %2",                                // 10: c_js
-    "タイトルを %1 にする",                            // 11: T
-    "JSを読み込む %1",                                 // 12: JY
-    "CSSを読み込む %1",                                // 13: CY
-    "%1",                                              // 14: MD
-    "%1",                                              // 15: KD
-    "%1",                                              // 16: CID
-    "改行",                                            // 17: K
-    "タイトル",                                        // 18: TD
-    "%1 と %2",                                        // 19: GD
-    "INPUT ボタン 詳細設定 %1 文字 %2",                // 20: Ibtn
-    "BUTTON ボタン 詳細設定 %1 %2 %3",                 // 21: Bbtn
-    "P  詳細設定 %1 %2",                               // 22: p
-    "DIV  詳細設定 %1 %2",                             // 23: div
-    "SPAN  詳細設定 %1 %2",                            // 24: span
-    "Classを %1 にする",                               // 25: CD
-    "Idを %1 にする",                                  // 26: ID
-    "%1 & %2",                                         // 27: SGD
-    "HTML コメント // %1",                             // 28: HC
-    "CSS コメント // %1",                              // 29: CC
-    "%1 を %2 %3",                                     // 30: CN
-    "Class %1",                                        // 31: CNCD
-    "Id %1",                                           // 32: CNID
-    "要素 %1",                                         // 33: CNYD
-    "ボディー",                                        // 34: CNB
-    "%1 を %2 にする",                                 // 35: CIS
-    "%1 を %2 にする",                                 // 36: WS
-    "角の %1 を %2 で丸くする",                        // 37: KMS
-    "要素内側を %1 にそろえる",                        // 38: DSS
-    "%1 の %2 の余白を %3 にする",                     // 39: PDS
-    "滑らかする。速さ  %1",                            // 40: NS
-    "文字の太さを %1 にする",                          // 41: FW
-    "フォントを %1 にする",                            // 42: FF
-    "透明",                                            // 43: TMD
-    "%1",                                              // 44: PDD
-    "%1 %2",                                           // 45: ND
-    "%1",                                              // 46: KMID
-    "%1",                                              // 47: DSD
-    "クリックされたとき",                              // 48: CKLD
-    "重なったとき",                                    // 49: CHOD
-    "%1 で %2",                                        // 50: KTD
-    "パス %1 で画像を表示 詳細設定 %2",                // 51: img_block
-    "JS コメント // %1",                               // 52: JC
-    "%1",                                              // 53: JMD
-    "%1",                                              // 54: JKD
-    "文字 %1",                                         // 55: JMAD
-    "数 %1",                                           // 56: JKAD
-    "%1 を %2",                                        // 57: NNSD
-    "配列 [ %1 %2 ]",                                  // 58: HAD[
-    "JSON { %1 %2 }",                                  // 59: HAD{
-    "%1 %2と",                                         // 60: HAD
-    "%1 を %2 にする",                                 // 61: NW
-    "%1 で %2 を作り %3 にする",                       // 62: NTW
-    "変数 %1",                                         // 63: HD
-    "関数 %1",                                         // 64: KB
-    "関数 %1",                                         // 65: KA
-    "引数の設定 %1 %2",                                // 66: ks_mutator_container
-    "引数名 %1",                                       // 67: ks_mutator_arg
-    "関数 %1",                                         // 68: KS
-    "無名関数 %1 %2",                                  // 69: MKS
-    "%1 %2 %3",                                        // 70: p_logic_compare
-    "%1 %2 %3",                                        // 71: p_logic_operation
-    "%1 ではない",                                     // 72: p_logic_negate
-    "もし %1 なら %2 %3",                              // 73: p_control_if
-    "%1 回繰り返す %2 %3",                             // 74: p_control_repeat
-    "もし %1 なら %2 でなければ %3"                    // 75: p_if_mozi_reporter
-];
+// ==========================================
+// ブロックの表示名・レイアウトを一括管理する辞書
+// ※ ここを変更するだけで、全ブロックの文字が変わります
+// ==========================================
+Blockly.Msg["SCL_FT"] = "チケット %1";
+Blockly.Msg["SCL_FT2"] = "チケット2 %1";
+Blockly.Msg["SCL_F"] = "フィールド大量 %1 %2 %3 %4 %5 %6";
+Blockly.Msg["SCL_HSE"] = "設定 %1 %2";
+Blockly.Msg["SCL_HDA"] = "出すもの %1 %2";
+Blockly.Msg["SCL_M"] = "文字 %1";
+Blockly.Msg["SCL_S"] = "サイトを作り始める";
+Blockly.Msg["SCL_HCJ"] = "HTML %1 %2 CSS %3 %4 JavaScript %5 %6";
+Blockly.Msg["SCL_c_html"] = "HTML %1 %2";
+Blockly.Msg["SCL_c_css"] = "CSS %1 %2";
+Blockly.Msg["SCL_c_js"] = "JavaScript %1 %2";
+Blockly.Msg["SCL_T"] = "タイトルを %1 にする";
+Blockly.Msg["SCL_JY"] = "JSを読み込む %1";
+Blockly.Msg["SCL_CY"] = "CSSを読み込む %1";
+Blockly.Msg["SCL_MD"] = "%1";
+Blockly.Msg["SCL_KD"] = "%1";
+Blockly.Msg["SCL_CID"] = "%1";
+Blockly.Msg["SCL_K"] = "改行";
+Blockly.Msg["SCL_TD"] = "タイトル";
+Blockly.Msg["SCL_GD"] = "%1 と %2";
+Blockly.Msg["SCL_Ibtn"] = "INPUT ボタン 詳細設定 %1 文字 %2";
+Blockly.Msg["SCL_Bbtn"] = "BUTTON ボタン 詳細設定 %1 %2 %3";
+Blockly.Msg["SCL_p"] = "P  詳細設定 %1 %2";
+Blockly.Msg["SCL_div"] = "DIV  詳細設定 %1 %2";
+Blockly.Msg["SCL_span"] = "SPAN  詳細設定 %1 %2";
+Blockly.Msg["SCL_CD"] = "Classを %1 にする";
+Blockly.Msg["SCL_ID"] = "Idを %1 にする";
+Blockly.Msg["SCL_SGD"] = "%1 & %2";
+Blockly.Msg["SCL_HC"] = "HTML コメント // %1";
+Blockly.Msg["SCL_CC"] = "CSS コメント // %1";
+Blockly.Msg["SCL_CN"] = "%1 を %2 %3";
+Blockly.Msg["SCL_CNCD"] = "Class %1";
+Blockly.Msg["SCL_CNID"] = "Id %1";
+Blockly.Msg["SCL_CNYD"] = "要素 %1";
+Blockly.Msg["SCL_CNB"] = "ボディー";
+Blockly.Msg["SCL_CIS"] = "%1 を %2 にする";
+Blockly.Msg["SCL_WS"] = "%1 を %2 にする";
+Blockly.Msg["SCL_KMS"] = "角の %1 を %2 で丸くする";
+Blockly.Msg["SCL_DSS"] = "要素内側を %1 にそろえる";
+Blockly.Msg["SCL_PDS"] = "%1 の %2 の余白を %3 にする";
+Blockly.Msg["SCL_NS"] = "滑らかする。速さ  %1";
+Blockly.Msg["SCL_FW"] = "文字の太さを %1 にする";
+Blockly.Msg["SCL_FF"] = "フォントを %1 にする";
+Blockly.Msg["SCL_TMD"] = "透明";
+Blockly.Msg["SCL_PDD"] = "%1";
+Blockly.Msg["SCL_ND"] = "%1 %2";
+Blockly.Msg["SCL_KMID"] = "%1";
+Blockly.Msg["SCL_DSD"] = "%1";
+Blockly.Msg["SCL_CKLD"] = "クリックされたとき";
+Blockly.Msg["SCL_CHOD"] = "重なったとき";
+Blockly.Msg["SCL_KTD"] = "%1 で %2";
+Blockly.Msg["SCL_img_block"] = "パス %1 で画像を表示 詳細設定 %2";
+Blockly.Msg["SCL_JC"] = "JS コメント // %1";
+Blockly.Msg["SCL_JMD"] = "%1";
+Blockly.Msg["SCL_JKD"] = "%1";
+Blockly.Msg["SCL_JMAD"] = "文字 %1";
+Blockly.Msg["SCL_JKAD"] = "数 %1";
+Blockly.Msg["SCL_NNSD"] = "%1 を %2";
+Blockly.Msg["SCL_HAD_A"] = "配列 [ %1 %2 ]"; // HAD[ は変数名に使えないため HAD_A に変更
+Blockly.Msg["SCL_HAD_O"] = "JSON { %1 %2 }";  // HAD{ は変数名に使えないため HAD_O に変更
+Blockly.Msg["SCL_HAD"] = "%1 %2と";
+Blockly.Msg["SCL_NW"] = "%1 を %2 にする";
+Blockly.Msg["SCL_NTW"] = "%1 で %2 を作り %3 にする";
+Blockly.Msg["SCL_HD"] = "変数 %1";
+Blockly.Msg["SCL_KB"] = "関数 %1";
+Blockly.Msg["SCL_KA"] = "関数 %1";
+Blockly.Msg["SCL_ks_mutator_container"] = "引数の設定 %1 %2";
+Blockly.Msg["SCL_ks_mutator_arg"] = "引数名 %1";
+Blockly.Msg["SCL_KS"] = "関数 %1";
+Blockly.Msg["SCL_MKS"] = "無名関数 %1 %2";
+Blockly.Msg["SCL_p_logic_compare"] = "%1 %2 %3";
+Blockly.Msg["SCL_p_logic_operation"] = "%1 %2 %3";
+Blockly.Msg["SCL_p_logic_negate"] = "%1 ではない";
+Blockly.Msg["SCL_p_control_if"] = "もし %1 なら %2 %3";
+Blockly.Msg["SCL_p_control_repeat"] = "%1 回繰り返す %2 %3";
+Blockly.Msg["SCL_p_if_mozi_reporter"] = "もし %1 なら %2 でなければ %3";
 
-// ブロック定義（配列 B_NAME を参照）
 
+// ==========================================
+// ブロック定義（上の Blockly.Msg を参照）
+// ==========================================
 Blockly.defineBlocksWithJsonArray([
 	{
         "type": "FT",
-        "message0": B_NAME[0],
+        // ★ "%{BKY_〇〇}" と書くことで、Blocklyが自動的に辞書から引っ張ってきます
+        "message0": "%{BKY_SCL_FT}",
         "output": "TICKET",
         "colour": "#ff6b5c",
         "args0": [
@@ -107,7 +112,7 @@ Blockly.defineBlocksWithJsonArray([
     },
 	{
         "type": "FT2",
-        "message0": B_NAME[1],
+        "message0": "%{BKY_SCL_FT2}",
 		"output": "TICKET2",
         "colour": "#ff6b5c",
         "args0": [
@@ -118,7 +123,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "F",
-        "message0": B_NAME[2],
+        "message0": "%{BKY_SCL_F}",
         "colour": '#aa8800',
         "args0": [
             {
@@ -168,7 +173,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "HSE",
-        "message0": B_NAME[3],
+        "message0": "%{BKY_SCL_HSE}",
         "colour": '#ff9800',
         "previousStatement": "html",
         "nextStatement": "html",
@@ -181,7 +186,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "HDA",
-        "message0": B_NAME[4],
+        "message0": "%{BKY_SCL_HDA}",
         "colour": '#ff9800',
         "previousStatement": "html",
         "nextStatement": "html",
@@ -194,7 +199,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "M",
-        "message0": B_NAME[5],
+        "message0": "%{BKY_SCL_M}",
         "previousStatement": "body",
         "nextStatement": "body",
         "args0": [
@@ -206,7 +211,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "S",
-        "message0": B_NAME[6],
+        "message0": "%{BKY_SCL_S}",
         "colour": '#ffbf00',
         "style": { "hat": "cap" },
         "nextStatement": "Sai",
@@ -215,7 +220,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "HCJ",
-        "message0": B_NAME[7],
+        "message0": "%{BKY_SCL_HCJ}",
         "colour": '#ffbf00',
         "previousStatement": "Sai",
         "args0": [
@@ -231,7 +236,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "c_html",
-        "message0": B_NAME[8],
+        "message0": "%{BKY_SCL_c_html}",
         "colour": '#ffbf00',
         "previousStatement": "Sai",
         "nextStatement": "Sai",
@@ -244,7 +249,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "c_css",
-        "message0": B_NAME[9],
+        "message0": "%{BKY_SCL_c_css}",
         "colour": '#ffbf00',
         "previousStatement": "Sai",
         "nextStatement": "Sai",
@@ -257,7 +262,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "c_js",
-        "message0": B_NAME[10],
+        "message0": "%{BKY_SCL_c_js}",
         "colour": '#ffbf00',
         "previousStatement": "Sai",
         "nextStatement": "Sai",
@@ -270,7 +275,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "T",
-        "message0": B_NAME[11],
+        "message0": "%{BKY_SCL_T}",
         "previousStatement": "head",
         "nextStatement": "head",
         "args0": [
@@ -282,7 +287,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "JY",
-        "message0": B_NAME[12],
+        "message0": "%{BKY_SCL_JY}",
         "previousStatement": "head",
         "nextStatement": "head",
         "args0": [
@@ -294,7 +299,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CY",
-        "message0": B_NAME[13],
+        "message0": "%{BKY_SCL_CY}",
         "previousStatement": "head",
         "nextStatement": "head",
         "args0": [
@@ -306,7 +311,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "MD",
-        "message0": B_NAME[14],
+        "message0": "%{BKY_SCL_MD}",
         "output": [ "mozi", "text" ],
         "args0": [
             { "type": "field_input", "name": "mozi" }
@@ -317,7 +322,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KD",
-        "message0": B_NAME[15],
+        "message0": "%{BKY_SCL_KD}",
         "output": "kazu",
         "args0": [
             { "type": "field_number", "name": "kazu", "value": 0 }
@@ -328,7 +333,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CID",
-        "message0": B_NAME[16],
+        "message0": "%{BKY_SCL_CID}",
         "output": "color",
         "args0": [
             { "type": "field_colour_hsv_sliders", "name": "color", "colour": "#ff0000" }
@@ -339,7 +344,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "K",
-        "message0": B_NAME[17],
+        "message0": "%{BKY_SCL_K}",
         "previousStatement": "body",
         "nextStatement": "body",
         "colour": '#0170a7',
@@ -348,7 +353,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "TD",
-        "message0": B_NAME[18],
+        "message0": "%{BKY_SCL_TD}",
         "output": "mozi",
         "colour": '#20a002',
         "tooltip": "",
@@ -356,7 +361,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "GD",
-        "message0": B_NAME[19],
+        "message0": "%{BKY_SCL_GD}",
         "output": "mozi",
         "args0": [
             { "type": "input_value", "name": "M1", "check": "mozi" },
@@ -369,7 +374,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "Ibtn",
-        "message0": B_NAME[20],
+        "message0": "%{BKY_SCL_Ibtn}",
         "args0": [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_value", "name": "value", "check": "mozi" }
@@ -383,7 +388,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "Bbtn",
-        "message0": B_NAME[21],
+        "message0": "%{BKY_SCL_Bbtn}",
         "args0": [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_dummy" },
@@ -398,7 +403,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "p",
-        "message0": B_NAME[22],
+        "message0": "%{BKY_SCL_p}",
         "args0": [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_statement", "name": "p", "check": "body" }
@@ -412,7 +417,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "div",
-        "message0": B_NAME[23],
+        "message0": "%{BKY_SCL_div}",
         "args0": [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_statement", "name": "div", "check": "body" }
@@ -426,7 +431,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "span",
-        "message0": B_NAME[24],
+        "message0": "%{BKY_SCL_span}",
         "args0": [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_statement", "name": "span", "check": "body" }
@@ -440,7 +445,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CD",
-        "message0": B_NAME[25],
+        "message0": "%{BKY_SCL_CD}",
         "output": "syo",
         "args0": [
             { "type": "input_value", "name": "CM", "check": "mozi" }
@@ -451,7 +456,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "ID",
-        "message0": B_NAME[26],
+        "message0": "%{BKY_SCL_ID}",
         "output": "syo",
         "args0": [
             { "type": "input_value", "name": "IM", "check": "mozi" }
@@ -462,7 +467,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "SGD",
-        "message0": B_NAME[27],
+        "message0": "%{BKY_SCL_SGD}",
         "output": "syo",
         "args0": [
             { "type": "input_value", "name": "S1", "check": "syo" },
@@ -475,7 +480,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "HC",
-        "message0": B_NAME[28],
+        "message0": "%{BKY_SCL_HC}",
         "previousStatement": "body",
         "nextStatement": "body",
         "args0": [
@@ -487,7 +492,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CC",
-        "message0": B_NAME[29],
+        "message0": "%{BKY_SCL_CC}",
         "previousStatement": "css",
         "nextStatement": "css",
         "args0": [
@@ -499,7 +504,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CN",
-        "message0": B_NAME[30],
+        "message0": "%{BKY_SCL_CN}",
         "args0": [
           { "type": "input_value", "name": "nani", "check": [ "kakutyo", "youso", "class", "id", "kanma", "puras" ] },
           { "type": "input_dummy" },
@@ -514,7 +519,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CNCD",
-        "message0": B_NAME[31],
+        "message0": "%{BKY_SCL_CNCD}",
         "args0": [
           { "type": "input_value", "name": "class", "check": "mozi" }
         ],
@@ -525,7 +530,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CNID",
-        "message0": B_NAME[32],
+        "message0": "%{BKY_SCL_CNID}",
         "args0": [
           { "type": "input_value", "name": "id", "check": "mozi" }
         ],
@@ -536,7 +541,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CNYD",
-        "message0": B_NAME[33],
+        "message0": "%{BKY_SCL_CNYD}",
         "args0": [
           { "type": "input_value", "name": "you", "check": "mozi" }
         ],
@@ -547,7 +552,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CNB",
-        "message0": B_NAME[34],
+        "message0": "%{BKY_SCL_CNB}",
         "output": "id",
         "colour": '#298a8f',
         "tooltip": "",
@@ -555,7 +560,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CIS",
-        "message0": B_NAME[35],
+        "message0": "%{BKY_SCL_CIS}",
         "args0": [
 		    {"type": "field_dropdown", "name": "name", "options": [
     			  ["色", "color"],
@@ -572,7 +577,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "WS",
-        "message0": B_NAME[36],
+        "message0": "%{BKY_SCL_WS}",
         "args0": [
 		    {"type": "field_dropdown", "name": "name", "options": [
     			  ["横幅", "width"],
@@ -594,7 +599,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KMS",
-        "message0": B_NAME[37],
+        "message0": "%{BKY_SCL_KMS}",
         "args0": [
           { "type": "input_value", "name": "doko", "check": "doko" },
           { "type": "input_value", "name": "naga", "check": "naga" }
@@ -608,7 +613,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "DSS",
-        "message0": B_NAME[38],
+        "message0": "%{BKY_SCL_DSS}",
         "args0": [
           { "type": "input_value", "name": "soroe", "check": "soroe" }
         ],
@@ -621,7 +626,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "PDS",
-        "message0": B_NAME[39],
+        "message0": "%{BKY_SCL_PDS}",
         "args0": [
 		    {"type": "field_dropdown", "name": "name", "options": [
     			  ["要素内側", "padding"],
@@ -639,7 +644,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "NS",
-        "message0": B_NAME[40],
+        "message0": "%{BKY_SCL_NS}",
         "args0": [
           { "type": "input_value", "name": "kazu", "check": "kazu" }
         ],
@@ -652,7 +657,7 @@ Blockly.defineBlocksWithJsonArray([
     },
 	{
         "type": "FW",
-        "message0": B_NAME[41],
+        "message0": "%{BKY_SCL_FW}",
         "args0": [
             {
                 "type": "field_slider",
@@ -671,7 +676,7 @@ Blockly.defineBlocksWithJsonArray([
     },
 	{
         "type": "FF",
-        "message0": B_NAME[42],
+        "message0": "%{BKY_SCL_FF}",
         "args0": [
             {
                 "type": "field_dropdown",
@@ -698,7 +703,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "TMD",
-        "message0": B_NAME[43],
+        "message0": "%{BKY_SCL_TMD}",
         "output": "color",
         "colour": '#ed5179',
         "tooltip": "",
@@ -706,7 +711,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "PDD",
-        "message0": B_NAME[44],
+        "message0": "%{BKY_SCL_PDD}",
         "output": "doko",
         "args0": [
             {
@@ -724,7 +729,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "ND",
-        "message0": B_NAME[45],
+        "message0": "%{BKY_SCL_ND}",
         "output": "naga",
         "args0": [
             { "type": "input_value", "name": "kazu", "check": "kazu" },
@@ -740,7 +745,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KMID",
-        "message0": B_NAME[46],
+        "message0": "%{BKY_SCL_KMID}",
         "output": "doko",
         "args0": [
             {
@@ -758,7 +763,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "DSD",
-        "message0": B_NAME[47],
+        "message0": "%{BKY_SCL_DSD}",
         "output": "soroe",
         "args0": [
             {
@@ -776,7 +781,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CKLD",
-        "message0": B_NAME[48],
+        "message0": "%{BKY_SCL_CKLD}",
         "output": "kaku",
         "colour": '#f289af',
         "tooltip": "",
@@ -784,7 +789,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "CHOD",
-        "message0": B_NAME[49],
+        "message0": "%{BKY_SCL_CHOD}",
         "output": "kaku",
         "colour": '#f289af',
         "tooltip": "",
@@ -792,7 +797,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KTD",
-        "message0": B_NAME[50],
+        "message0": "%{BKY_SCL_KTD}",
         "output": "kakutyo",
         "args0": [
             { "type": "input_value", "name": "M1", "check": [ "YOU", "class", "id" ] },
@@ -806,7 +811,7 @@ Blockly.defineBlocksWithJsonArray([
 
 	{
         "type": "img_block",
-        "message0": B_NAME[51],
+        "message0": "%{BKY_SCL_img_block}",
         "args0": [
             {
                 "type": "field_input",
@@ -829,7 +834,7 @@ Blockly.defineBlocksWithJsonArray([
 	
     {
         "type": "JC",
-        "message0": B_NAME[52],
+        "message0": "%{BKY_SCL_JC}",
         "previousStatement": "js",
         "nextStatement": "js",
         "args0": [
@@ -841,7 +846,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "JMD",
-        "message0": B_NAME[53],
+        "message0": "%{BKY_SCL_JMD}",
         "output": "text",
         "args0": [
             { "type": "field_input", "name": "DKTM" }
@@ -852,7 +857,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "JKD",
-        "message0": B_NAME[54],
+        "message0": "%{BKY_SCL_JKD}",
         "output": "jkazu",
         "args0": [
             { "type": "field_number", "name": "jkazu", "value": 0 }
@@ -863,7 +868,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "JMAD",
-        "message0": B_NAME[55],
+        "message0": "%{BKY_SCL_JMAD}",
         "output": "text",
         "args0": [
             { "type": "input_value", "name": "DKTM", "check": "text" }
@@ -874,7 +879,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "JKAD",
-        "message0": B_NAME[56],
+        "message0": "%{BKY_SCL_JKAD}",
         "output": "jkazu",
         "args0": [
             { "type": "input_value", "name": "DKTK", "check": "jkazu" }
@@ -885,7 +890,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "NNSD",
-        "message0": B_NAME[57],
+        "message0": "%{BKY_SCL_NNSD}",
         "previousStatement": "haiN",
         "nextStatement": "haiN",
         "args0": [
@@ -899,7 +904,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "HAD[",
-        "message0": B_NAME[58],
+        "message0": "%{BKY_SCL_HAD_A}",
         "output": "hai[",
         "args0": [
             { "type": "input_dummy" },
@@ -911,7 +916,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "HAD{",
-        "message0": B_NAME[59],
+        "message0": "%{BKY_SCL_HAD_O}",
         "output": "hai{",
         "args0": [
             { "type": "input_dummy" },
@@ -923,7 +928,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "HAD",
-        "message0": B_NAME[60],
+        "message0": "%{BKY_SCL_HAD}",
         "previousStatement": "hai",
         "nextStatement": "hai",
         "args0": [
@@ -937,7 +942,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "NW",
-        "message0": B_NAME[61],
+        "message0": "%{BKY_SCL_NW}",
         "previousStatement": "js",
         "nextStatement": "js",
         "args0": [
@@ -950,7 +955,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "NTW",
-        "message0": B_NAME[62],
+        "message0": "%{BKY_SCL_NTW}",
         "previousStatement": "js",
         "nextStatement": "js",
         "args0": [
@@ -972,7 +977,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "HD",
-        "message0": B_NAME[63],
+        "message0": "%{BKY_SCL_HD}",
         "args0": [
             { "type": "input_value", "name": "HEN", "check": "text" }
         ],
@@ -983,7 +988,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KB",
-        "message0": B_NAME[64],
+        "message0": "%{BKY_SCL_KB}",
         "previousStatement": "js",
         "nextStatement": "js",
         "args0": [
@@ -995,7 +1000,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KA",
-        "message0": B_NAME[65],
+        "message0": "%{BKY_SCL_KA}",
         "args0": [
             { "type": "field_input", "name": "mozi" }
         ],
@@ -1006,7 +1011,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "ks_mutator_container",
-        "message0": B_NAME[66],
+        "message0": "%{BKY_SCL_ks_mutator_container}",
         "args0": [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "STACK" }
@@ -1015,7 +1020,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "ks_mutator_arg",
-        "message0": B_NAME[67],
+        "message0": "%{BKY_SCL_ks_mutator_arg}",
         "args0": [
             { "type": "field_input", "name": "NAME", "text": "x" }
         ],
@@ -1025,7 +1030,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "KS",
-        "message0": B_NAME[68],
+        "message0": "%{BKY_SCL_KS}",
         "args0": [
           { "type": "field_input", "name": "mozi" }
         ],
@@ -1040,7 +1045,7 @@ Blockly.defineBlocksWithJsonArray([
 	
     {
         "type": "MKS",
-        "message0": B_NAME[69],
+        "message0": "%{BKY_SCL_MKS}",
         "args0": [
           { "type": "input_dummy" },
           { "type": "input_statement", "name": "js", "check": "js" }
@@ -1051,10 +1056,9 @@ Blockly.defineBlocksWithJsonArray([
         "tooltip": "",
         "helpUrl": ""
     },
-    // --- 制御 (オレンジ) ---
     {
         "type": "p_logic_compare",
-        "message0": B_NAME[70],
+        "message0": "%{BKY_SCL_p_logic_compare}",
         "args0": [
             { "type": "input_value", "name": "A", "check": ["text", "jkazu"] },
             { "type": "field_dropdown", "name": "OP", "options": [
@@ -1073,7 +1077,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "p_logic_operation",
-        "message0": B_NAME[71],
+        "message0": "%{BKY_SCL_p_logic_operation}",
         "args0": [
             { "type": "input_value", "name": "A", "check": "Boolean" },
             { "type": "field_dropdown", "name": "OP", "options": [["かつ", "AND"], ["または", "OR"]] },
@@ -1085,7 +1089,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "p_logic_negate",
-        "message0": B_NAME[72],
+        "message0": "%{BKY_SCL_p_logic_negate}",
         "args0": [
             { "type": "input_value", "name": "BOOL", "check": "Boolean" }
         ],
@@ -1094,7 +1098,7 @@ Blockly.defineBlocksWithJsonArray([
     },
 	{
         "type": "p_control_if",
-        "message0": B_NAME[73],
+        "message0": "%{BKY_SCL_p_control_if}",
         "args0": [
             { "type": "input_value", "name": "IF0", "check": "Boolean" },
             { "type": "input_dummy" },
@@ -1108,7 +1112,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "p_control_repeat",
-        "message0": B_NAME[74],
+        "message0": "%{BKY_SCL_p_control_repeat}",
         "args0": [
             { "type": "input_value", "name": "TIMES", "check": "jkazu" },
             { "type": "input_dummy" },
@@ -1120,7 +1124,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "p_if_mozi_reporter",
-        "message0": B_NAME[75],
+        "message0": "%{BKY_SCL_p_if_mozi_reporter}",
         "args0": [
             { "type": "input_value", "name": "IF", "check": "Boolean" },
             { "type": "input_value", "name": "A", "check": ["mozi", "text"] },
