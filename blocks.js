@@ -12,10 +12,18 @@ Blockly.BlockSvg.prototype.initSvg = function() {
   };
 }();
 
-// ==========================================
-// ブロックの表示名・レイアウトを一括管理する辞書
-// ※ ここを変更するだけで、全ブロックの文字が変わります
-// ==========================================
+Blockly.Blocks['KS_ARG_REPORTER'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldLabel(""), "ARG_NAME");
+    this.setOutput(true, "HEN");
+    this.setColour('#ff6b5c'); 
+  }
+};
+
+// ========================================================
+// 1. 最初（デフォルト）の辞書登録
+// ========================================================
 Blockly.Msg["SCL_FT"] = "チケット %1";
 Blockly.Msg["SCL_FT2"] = "チケット2 %1";
 Blockly.Msg["SCL_F"] = "フィールド大量 %1 %2 %3 %4 %5 %6";
@@ -74,8 +82,8 @@ Blockly.Msg["SCL_JKD"] = "%1";
 Blockly.Msg["SCL_JMAD"] = "文字 %1";
 Blockly.Msg["SCL_JKAD"] = "数 %1";
 Blockly.Msg["SCL_NNSD"] = "%1 を %2";
-Blockly.Msg["SCL_HAD_A"] = "配列 [ %1 %2 ]"; // HAD[ は変数名に使えないため HAD_A に変更
-Blockly.Msg["SCL_HAD_O"] = "JSON { %1 %2 }";  // HAD{ は変数名に使えないため HAD_O に変更
+Blockly.Msg["SCL_HAD_A"] = "配列 [ %1 %2 ]"; 
+Blockly.Msg["SCL_HAD_O"] = "JSON { %1 %2 }";  
 Blockly.Msg["SCL_HAD"] = "%1 %2と";
 Blockly.Msg["SCL_NW"] = "%1 を %2 にする";
 Blockly.Msg["SCL_NTW"] = "%1 で %2 を作り %3 にする";
@@ -93,130 +101,67 @@ Blockly.Msg["SCL_p_control_if"] = "もし %1 なら %2 %3";
 Blockly.Msg["SCL_p_control_repeat"] = "%1 回繰り返す %2 %3";
 Blockly.Msg["SCL_p_if_mozi_reporter"] = "もし %1 なら %2 でなければ %3";
 
-
-// ==========================================
-// ブロック定義（上の Blockly.Msg を参照）
-// ==========================================
+// ========================================================
+// 2. ブロックのJSON定義（変数として保存しておく）
+// ========================================================
 const sclBlockDefinitions = [
 	{
         "type": "FT",
-        // ★ "%{BKY_〇〇}" と書くことで、Blocklyが自動的に辞書から引っ張ってきます
         "message0": "%{BKY_SCL_FT}",
         "output": "TICKET",
         "colour": "#ff6b5c",
-        "args0": [
-            { "type": "input_value", "name": "IF0", "check": "TICKET" }
-		],
-        "tooltip": "オリジナルレンダリング^-^",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "IF0", "check": "TICKET" } ],
+        "tooltip": "オリジナルレンダリング^-^", "helpUrl": ""
     },
 	{
         "type": "FT2",
         "message0": "%{BKY_SCL_FT2}",
 		"output": "TICKET2",
         "colour": "#ff6b5c",
-        "args0": [
-            { "type": "input_value", "name": "IF0", "check": "TICKET2" }
-		],
-        "tooltip": "オリジナルレンダリング^-^",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "IF0", "check": "TICKET2" } ],
+        "tooltip": "オリジナルレンダリング^-^", "helpUrl": ""
     },
     {
         "type": "F",
         "message0": "%{BKY_SCL_F}",
         "colour": '#aa8800',
         "args0": [
-            {
-                "type": 'field_input',
-                "name": 'FIELDNAME',
-                "date": '1/11/2022',
-                "token": 'L/d/yyyy',
-                "textEdit": true
-            },
-            {
-                "type": 'field_date',
-                "name": 'FIELDNAME',
-                "date": '1/11/2022',
-                "token": 'L/d/yyyy',
-                "textEdit": true
-            },
-            {
-                "type": 'field_angle',
-                "offset": 90,
-                "clockwise": true,
-                "name": 'FIELDNAME',
-                "value": 50,
-            },
-            {
-                "type": "input_value",
-                "name": "color"
-            },
-            {
-                "type": 'field_grid_dropdown',
-                "name": 'FIELDNAME',
-                "options": [
-                    ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'],
-                    ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'], ['0', '0'],
-                ],
-            },
-            {
-                "type": 'field_slider',
-                "name": 'FIELDNAME',
-                "value": 50,
-                "min": 0,
-                "max": 100,
-                "precision": 1
-            },
+            { "type": 'field_input', "name": 'FIELDNAME', "date": '1/11/2022', "token": 'L/d/yyyy', "textEdit": true },
+            { "type": 'field_date', "name": 'FIELDNAME', "date": '1/11/2022', "token": 'L/d/yyyy', "textEdit": true },
+            { "type": 'field_angle', "offset": 90, "clockwise": true, "name": 'FIELDNAME', "value": 50 },
+            { "type": "input_value", "name": "color" },
+            { "type": 'field_grid_dropdown', "name": 'FIELDNAME', "options": [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'], ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'], ['0', '0']] },
+            { "type": 'field_slider', "name": 'FIELDNAME', "value": 50, "min": 0, "max": 100, "precision": 1 }
         ],
-        "tooltip": "こんなにたくさんのフィールド　使い道あったら言って",
-        "helpUrl": ""
+        "tooltip": "こんなにたくさんのフィールド", "helpUrl": ""
     },
     {
         "type": "HSE",
         "message0": "%{BKY_SCL_HSE}",
         "colour": '#ff9800',
-        "previousStatement": "html",
-        "nextStatement": "html",
-        "args0": [
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "head", "check": "head" }
-        ],
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "html", "nextStatement": "html",
+        "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "head", "check": "head" } ]
     },
     {
         "type": "HDA",
         "message0": "%{BKY_SCL_HDA}",
         "colour": '#ff9800',
-        "previousStatement": "html",
-        "nextStatement": "html",
-        "args0": [
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "body", "check": "body" }
-        ],
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "html", "nextStatement": "html",
+        "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "body", "check": "body" } ]
     },
     {
         "type": "M",
         "message0": "%{BKY_SCL_M}",
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "args0": [
-            { "type": "input_value", "name": "MOZI", "check": [ "mozi", "kazu" ] }
-        ],
-        "colour": '#0580ed',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "body", "nextStatement": "body",
+        "args0": [ { "type": "input_value", "name": "MOZI", "check": [ "mozi", "kazu" ] } ],
+        "colour": '#0580ed'
     },
     {
         "type": "S",
         "message0": "%{BKY_SCL_S}",
         "colour": '#ffbf00',
         "style": { "hat": "cap" },
-        "nextStatement": "Sai",
-        "tooltip": "",
-        "helpUrl": ""
+        "nextStatement": "Sai"
     },
     {
         "type": "HCJ",
@@ -224,140 +169,85 @@ const sclBlockDefinitions = [
         "colour": '#ffbf00',
         "previousStatement": "Sai",
         "args0": [
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "html", "check": "html" },
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "css", "check": "css" },
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "js", "check": "js" }
-        ],
-        "tooltip": "",
-        "helpUrl": ""
+            { "type": "input_dummy" }, { "type": "input_statement", "name": "html", "check": "html" },
+            { "type": "input_dummy" }, { "type": "input_statement", "name": "css", "check": "css" },
+            { "type": "input_dummy" }, { "type": "input_statement", "name": "js", "check": "js" }
+        ]
     },
     {
         "type": "c_html",
         "message0": "%{BKY_SCL_c_html}",
         "colour": '#ffbf00',
-        "previousStatement": "Sai",
-        "nextStatement": "Sai",
-        "args0": [
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "html", "check": "html" }
-        ],
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "Sai", "nextStatement": "Sai",
+        "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "html", "check": "html" } ]
     },
     {
         "type": "c_css",
         "message0": "%{BKY_SCL_c_css}",
         "colour": '#ffbf00',
-        "previousStatement": "Sai",
-        "nextStatement": "Sai",
-        "args0": [
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "css", "check": "css" }
-        ],
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "Sai", "nextStatement": "Sai",
+        "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "css", "check": "css" } ]
     },
     {
         "type": "c_js",
         "message0": "%{BKY_SCL_c_js}",
         "colour": '#ffbf00',
-        "previousStatement": "Sai",
-        "nextStatement": "Sai",
-        "args0": [
-            { "type": "input_dummy" },
-            { "type": "input_statement", "name": "js", "check": "js" }
-        ],
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "Sai", "nextStatement": "Sai",
+        "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "js", "check": "js" } ]
     },
     {
         "type": "T",
         "message0": "%{BKY_SCL_T}",
-        "previousStatement": "head",
-        "nextStatement": "head",
-        "args0": [
-            { "type": "input_value", "name": "websiteName", "check": [ "mozi", "kazu" ] }
-        ],
-        "colour": '#ff9800',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "head", "nextStatement": "head",
+        "args0": [ { "type": "input_value", "name": "websiteName", "check": [ "mozi", "kazu" ] } ],
+        "colour": '#ff9800'
     },
     {
         "type": "JY",
         "message0": "%{BKY_SCL_JY}",
-        "previousStatement": "head",
-        "nextStatement": "head",
-        "args0": [
-            { "type": "input_value", "name": "JS", "check": [ "mozi", "kazu" ] }
-        ],
-        "colour": '#ff9800',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "head", "nextStatement": "head",
+        "args0": [ { "type": "input_value", "name": "JS", "check": [ "mozi", "kazu" ] } ],
+        "colour": '#ff9800'
     },
     {
         "type": "CY",
         "message0": "%{BKY_SCL_CY}",
-        "previousStatement": "head",
-        "nextStatement": "head",
-        "args0": [
-            { "type": "input_value", "name": "CSS", "check": [ "mozi", "kazu" ] }
-        ],
-        "colour": '#ff9800',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "head", "nextStatement": "head",
+        "args0": [ { "type": "input_value", "name": "CSS", "check": [ "mozi", "kazu" ] } ],
+        "colour": '#ff9800'
     },
     {
         "type": "MD",
         "message0": "%{BKY_SCL_MD}",
         "output": [ "mozi", "text" ],
-        "args0": [
-            { "type": "field_input", "name": "mozi" }
-        ],
-        "colour": '#000000',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "field_input", "name": "mozi" } ],
+        "colour": '#000000'
     },
     {
         "type": "KD",
         "message0": "%{BKY_SCL_KD}",
         "output": "kazu",
-        "args0": [
-            { "type": "field_number", "name": "kazu", "value": 0 }
-        ],
-        "colour": '#000000',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "field_number", "name": "kazu", "value": 0 } ],
+        "colour": '#000000'
     },
     {
         "type": "CID",
         "message0": "%{BKY_SCL_CID}",
         "output": "color",
-        "args0": [
-            { "type": "field_colour_hsv_sliders", "name": "color", "colour": "#ff0000" }
-        ],
-        "colour": '#000000',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "field_colour_hsv_sliders", "name": "color", "colour": "#ff0000" } ],
+        "colour": '#000000'
     },
     {
         "type": "K",
         "message0": "%{BKY_SCL_K}",
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "colour": '#0170a7',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "body", "nextStatement": "body",
+        "colour": '#0170a7'
     },
     {
         "type": "TD",
         "message0": "%{BKY_SCL_TD}",
         "output": "mozi",
-        "colour": '#20a002',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#20a002'
     },
     {
         "type": "GD",
@@ -367,10 +257,7 @@ const sclBlockDefinitions = [
             { "type": "input_value", "name": "M1", "check": "mozi" },
             { "type": "input_value", "name": "M2", "check": "mozi" }
         ],
-        "inputsInline": true,
-        "colour": '#20a002',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "colour": '#20a002'
     },
     {
         "type": "Ibtn",
@@ -379,12 +266,8 @@ const sclBlockDefinitions = [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_value", "name": "value", "check": "mozi" }
         ],
-        "inputsInline": true,
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "colour": '#0580ed',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "body", "nextStatement": "body",
+        "colour": '#0580ed'
     },
     {
         "type": "Bbtn",
@@ -394,12 +277,8 @@ const sclBlockDefinitions = [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "body", "check": "body" }
         ],
-        "inputsInline": true,
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "colour": '#0580ed',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "body", "nextStatement": "body",
+        "colour": '#0580ed'
     },
     {
         "type": "p",
@@ -408,12 +287,8 @@ const sclBlockDefinitions = [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_statement", "name": "p", "check": "body" }
         ],
-        "inputsInline": true,
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "colour": '#0580ed',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "body", "nextStatement": "body",
+        "colour": '#0580ed'
     },
     {
         "type": "div",
@@ -422,12 +297,8 @@ const sclBlockDefinitions = [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_statement", "name": "div", "check": "body" }
         ],
-        "inputsInline": true,
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "colour": '#0580ed',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "body", "nextStatement": "body",
+        "colour": '#0580ed'
     },
     {
         "type": "span",
@@ -436,34 +307,22 @@ const sclBlockDefinitions = [
             { "type": "input_value", "name": "syo", "check": "syo" },
             { "type": "input_statement", "name": "span", "check": "body" }
         ],
-        "inputsInline": true,
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "colour": '#0580ed',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "body", "nextStatement": "body",
+        "colour": '#0580ed'
     },
     {
         "type": "CD",
         "message0": "%{BKY_SCL_CD}",
         "output": "syo",
-        "args0": [
-            { "type": "input_value", "name": "CM", "check": "mozi" }
-        ],
-        "colour": '#893273',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "CM", "check": "mozi" } ],
+        "colour": '#893273'
     },
     {
         "type": "ID",
         "message0": "%{BKY_SCL_ID}",
         "output": "syo",
-        "args0": [
-            { "type": "input_value", "name": "IM", "check": "mozi" }
-        ],
-        "colour": '#893273',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "IM", "check": "mozi" } ],
+        "colour": '#893273'
     },
     {
         "type": "SGD",
@@ -473,34 +332,21 @@ const sclBlockDefinitions = [
             { "type": "input_value", "name": "S1", "check": "syo" },
             { "type": "input_value", "name": "S2", "check": "syo" }
         ],
-        "inputsInline": true,
-        "colour": '#893273',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "colour": '#893273'
     },
     {
         "type": "HC",
         "message0": "%{BKY_SCL_HC}",
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "args0": [
-            { "type": "input_value", "name": "MOZI" }
-        ],
-        "colour": '#f0a080',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "body", "nextStatement": "body",
+        "args0": [ { "type": "input_value", "name": "MOZI" } ],
+        "colour": '#f0a080'
     },
     {
         "type": "CC",
         "message0": "%{BKY_SCL_CC}",
-        "previousStatement": "css",
-        "nextStatement": "css",
-        "args0": [
-            { "type": "input_value", "name": "MOZI" }
-        ],
-        "colour": '#f0a080',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "css", "nextStatement": "css",
+        "args0": [ { "type": "input_value", "name": "MOZI" } ],
+        "colour": '#f0a080'
     },
     {
         "type": "CN",
@@ -510,92 +356,51 @@ const sclBlockDefinitions = [
           { "type": "input_dummy" },
           { "type": "input_statement", "name": "dou", "check": "dou" }
         ],
-        "inputsInline": true,
-        "previousStatement": "css",
-        "nextStatement": "css",
-        "colour": "#298a8f",
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "css", "nextStatement": "css",
+        "colour": "#298a8f"
     },
     {
         "type": "CNCD",
         "message0": "%{BKY_SCL_CNCD}",
-        "args0": [
-          { "type": "input_value", "name": "class", "check": "mozi" }
-        ],
-        "output": "class",
-        "colour": '#298a8f',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "class", "check": "mozi" } ],
+        "output": "class", "colour": '#298a8f'
     },
     {
         "type": "CNID",
         "message0": "%{BKY_SCL_CNID}",
-        "args0": [
-          { "type": "input_value", "name": "id", "check": "mozi" }
-        ],
-        "output": "id",
-        "colour": '#298a8f',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "id", "check": "mozi" } ],
+        "output": "id", "colour": '#298a8f'
     },
     {
         "type": "CNYD",
         "message0": "%{BKY_SCL_CNYD}",
-        "args0": [
-          { "type": "input_value", "name": "you", "check": "mozi" }
-        ],
-        "output": "id",
-        "colour": '#298a8f',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "you", "check": "mozi" } ],
+        "output": "id", "colour": '#298a8f'
     },
     {
         "type": "CNB",
         "message0": "%{BKY_SCL_CNB}",
-        "output": "id",
-        "colour": '#298a8f',
-        "tooltip": "",
-        "helpUrl": ""
+        "output": "id", "colour": '#298a8f'
     },
     {
         "type": "CIS",
         "message0": "%{BKY_SCL_CIS}",
         "args0": [
-		    {"type": "field_dropdown", "name": "name", "options": [
-    			  ["色", "color"],
-      			  ["背景色", "background-color"]
-    		]},
-          { "type": "input_value", "name": "color", "check": "color" }
+		    {"type": "field_dropdown", "name": "name", "options": [ ["色", "color"], ["背景色", "background-color"] ]},
+            { "type": "input_value", "name": "color", "check": "color" }
         ],
-        "inputsInline": true,
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ed5179",
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "dou", "nextStatement": "dou",
+        "colour": "#ed5179"
     },
     {
         "type": "WS",
         "message0": "%{BKY_SCL_WS}",
         "args0": [
-		    {"type": "field_dropdown", "name": "name", "options": [
-    			  ["横幅", "width"],
-      			  ["縦幅", "height"],
-                  ["最大横幅", "max-width"],
-                  ["最小横幅", "min-width"],
-                  ["最大縦幅", "max-height"],
-                  ["最小縦幅", "min-height"],
-                  ["文字の大きさ", "font-size"]
-    		]},
+		    {"type": "field_dropdown", "name": "name", "options": [ ["横幅", "width"], ["縦幅", "height"], ["最大横幅", "max-width"], ["最小横幅", "min-width"], ["最大縦幅", "max-height"], ["最小縦幅", "min-height"], ["文字の大きさ", "font-size"] ]},
             { "type": "input_value", "name": "naga", "check": "naga" }
         ],
-        "inputsInline": true,
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ed5179",
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "dou", "nextStatement": "dou",
+        "colour": "#ed5179"
     },
     {
         "type": "KMS",
@@ -604,128 +409,70 @@ const sclBlockDefinitions = [
           { "type": "input_value", "name": "doko", "check": "doko" },
           { "type": "input_value", "name": "naga", "check": "naga" }
         ],
-        "inputsInline": true,
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ed5179",
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "dou", "nextStatement": "dou",
+        "colour": "#ed5179"
     },
     {
         "type": "DSS",
         "message0": "%{BKY_SCL_DSS}",
-        "args0": [
-          { "type": "input_value", "name": "soroe", "check": "soroe" }
-        ],
-        "inputsInline": true,
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ed5179",
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "soroe", "check": "soroe" } ],
+        "inputsInline": true, "previousStatement": "dou", "nextStatement": "dou",
+        "colour": "#ed5179"
     },
     {
         "type": "PDS",
         "message0": "%{BKY_SCL_PDS}",
         "args0": [
-		    {"type": "field_dropdown", "name": "name", "options": [
-    			  ["要素内側", "padding"],
-      			  ["要素外側", "margin"]
-    		]},
-          { "type": "input_value", "name": "doko", "check": "doko" },
-          { "type": "input_value", "name": "naga", "check": "naga" }
+		    {"type": "field_dropdown", "name": "name", "options": [ ["要素内側", "padding"], ["要素外側", "margin"] ]},
+            { "type": "input_value", "name": "doko", "check": "doko" },
+            { "type": "input_value", "name": "naga", "check": "naga" }
         ],
-        "inputsInline": true,
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ed5179",
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "dou", "nextStatement": "dou",
+        "colour": "#ed5179"
     },
     {
         "type": "NS",
         "message0": "%{BKY_SCL_NS}",
-        "args0": [
-          { "type": "input_value", "name": "kazu", "check": "kazu" }
-        ],
-        "inputsInline": true,
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ed5179",
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "kazu", "check": "kazu" } ],
+        "inputsInline": true, "previousStatement": "dou", "nextStatement": "dou",
+        "colour": "#ed5179"
     },
 	{
         "type": "FW",
         "message0": "%{BKY_SCL_FW}",
         "args0": [
-            {
-                "type": "field_slider",
-                "name": "WEIGHT",
-                "value": 4,
-                "min": 1,
-                "max": 9,
-                "precision": 1
-            }
+            { "type": "field_slider", "name": "WEIGHT", "value": 4, "min": 1, "max": 9, "precision": 1 }
         ],
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ed5179",
-        "tooltip": "1:細い ～ 9:太い",
-        "helpUrl": ""
+        "previousStatement": "dou", "nextStatement": "dou",
+        "colour": "#ed5179"
     },
 	{
         "type": "FF",
         "message0": "%{BKY_SCL_FF}",
         "args0": [
             {
-                "type": "field_dropdown",
-                "name": "FONT",
+                "type": "field_dropdown", "name": "FONT",
                 "options": [
-                    ["ゴシック体 (標準)", "sans-serif"],
-                    ["明朝体 (標準)", "serif"],
-                    ["Noto Sans (すごく綺麗・スマホ最適)", "'Noto Sans JP', sans-serif"],
-                    ["Noto Serif (美しい明朝・高級感)", "'Noto Serif JP', serif"],
-                    ["M PLUS Rounded (かわいい丸字)", "'M PLUS Rounded 1c', sans-serif"],
-                    ["Yusei Magic (油性ペンの手書き)", "'Yusei Magic', sans-serif"],
-                    ["Dela Gothic One (極太インパクト)", "'Dela Gothic One', cursive"],
-                    ["DotGothic16 (レトロ・ドット絵風)", "'DotGothic16', sans-serif"],
-                    ["Hachi Maru Pop (昭和レトロポップ)", "'Hachi Maru Pop', cursive"],
-                    ["等幅 (プログラミング用)", "monospace"]
+                    ["ゴシック体 (標準)", "sans-serif"], ["明朝体 (標準)", "serif"], ["Noto Sans", "'Noto Sans JP', sans-serif"], ["Noto Serif", "'Noto Serif JP', serif"], ["M PLUS Rounded", "'M PLUS Rounded 1c', sans-serif"], ["Yusei Magic", "'Yusei Magic', sans-serif"], ["Dela Gothic One", "'Dela Gothic One', cursive"], ["DotGothic16", "'DotGothic16', sans-serif"], ["Hachi Maru Pop", "'Hachi Maru Pop', cursive"], ["等幅", "monospace"]
                 ]
             }
         ],
-        "previousStatement": "dou",
-        "nextStatement": "dou",
-        "colour": "#ed5179",
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "dou", "nextStatement": "dou",
+        "colour": "#ed5179"
     },
     {
         "type": "TMD",
         "message0": "%{BKY_SCL_TMD}",
-        "output": "color",
-        "colour": '#ed5179',
-        "tooltip": "",
-        "helpUrl": ""
+        "output": "color", "colour": '#ed5179'
     },
     {
         "type": "PDD",
         "message0": "%{BKY_SCL_PDD}",
         "output": "doko",
         "args0": [
-            {
-              "type": "field_dropdown",
-              "name": "PDD",
-              "options": [
-                [ "全部", "" ], [ "上", "-top" ], [ "下", "-bottom" ],
-                [ "右", "-right" ], [ "左", "-left" ]
-              ]
-            }
+            { "type": "field_dropdown", "name": "PDD", "options": [ [ "全部", "" ], [ "上", "-top" ], [ "下", "-bottom" ], [ "右", "-right" ], [ "左", "-left" ] ] }
         ],
-        "colour": '#ed5179',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#ed5179'
     },
     {
         "type": "ND",
@@ -733,67 +480,37 @@ const sclBlockDefinitions = [
         "output": "naga",
         "args0": [
             { "type": "input_value", "name": "kazu", "check": "kazu" },
-            {
-              "type": "field_dropdown",
-              "name": "ND",
-              "options": [ [ "PX", "px" ], [ "%", "%" ] ]
-            }
+            { "type": "field_dropdown", "name": "ND", "options": [ [ "PX", "px" ], [ "%", "%" ] ] }
         ],
-        "colour": '#ed5179',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#ed5179'
     },
     {
         "type": "KMID",
         "message0": "%{BKY_SCL_KMID}",
         "output": "doko",
         "args0": [
-            {
-              "type": "field_dropdown",
-              "name": "KMID",
-              "options": [
-                [ "全部", "" ], [ "右上", "-top-right" ], [ "左上", "-top-left" ],
-                [ "右下", "-bottom-right" ], [ "左下", "-bottom-left" ]
-              ]
-            }
+            { "type": "field_dropdown", "name": "KMID", "options": [ [ "全部", "" ], [ "右上", "-top-right" ], [ "左上", "-top-left" ], [ "右下", "-bottom-right" ], [ "左下", "-bottom-left" ] ] }
         ],
-        "colour": '#ed5179',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#ed5179'
     },
     {
         "type": "DSD",
         "message0": "%{BKY_SCL_DSD}",
         "output": "soroe",
         "args0": [
-            {
-              "type": "field_dropdown",
-              "name": "DSD",
-              "options": [
-                [ "左端", "left" ], [ "右端", "right" ], [ "中央", "center" ],
-                [ "開始側", "start" ], [ "終了側", "end" ]
-              ]
-            }
+            { "type": "field_dropdown", "name": "DSD", "options": [ [ "左端", "left" ], [ "右端", "right" ], [ "中央", "center" ], [ "開始側", "start" ], [ "終了側", "end" ] ] }
         ],
-        "colour": '#ed5179',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#ed5179'
     },
     {
         "type": "CKLD",
         "message0": "%{BKY_SCL_CKLD}",
-        "output": "kaku",
-        "colour": '#f289af',
-        "tooltip": "",
-        "helpUrl": ""
+        "output": "kaku", "colour": '#f289af'
     },
     {
         "type": "CHOD",
         "message0": "%{BKY_SCL_CHOD}",
-        "output": "kaku",
-        "colour": '#f289af',
-        "tooltip": "",
-        "helpUrl": ""
+        "output": "kaku", "colour": '#f289af'
     },
     {
         "type": "KTD",
@@ -803,104 +520,62 @@ const sclBlockDefinitions = [
             { "type": "input_value", "name": "M1", "check": [ "YOU", "class", "id" ] },
             { "type": "input_value", "name": "M2", "check": "kaku" }
         ],
-        "inputsInline": true,
-        "colour": '#298a8f',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "colour": '#298a8f'
     },
-
 	{
         "type": "img_block",
         "message0": "%{BKY_SCL_img_block}",
         "args0": [
-            {
-                "type": "field_input",
-                "name": "SRC",
-                "text": "画像名.png"
-            },
-            {
-                "type": "input_value",
-                "name": "syo",
-                "check": "syo"
-            }
+            { "type": "field_input", "name": "SRC", "text": "画像名.png" },
+            { "type": "input_value", "name": "syo", "check": "syo" }
         ],
-        "inputsInline": true,
-        "previousStatement": "body",
-        "nextStatement": "body",
-        "colour": "#0580ed",
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "previousStatement": "body", "nextStatement": "body",
+        "colour": "#0580ed"
     },
-	
     {
         "type": "JC",
         "message0": "%{BKY_SCL_JC}",
-        "previousStatement": "js",
-        "nextStatement": "js",
-        "args0": [
-            { "type": "input_value", "name": "MOZI", "check": "text" }
-        ],
-        "colour": '#f0a080',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "js", "nextStatement": "js",
+        "args0": [ { "type": "input_value", "name": "MOZI", "check": "text" } ],
+        "colour": '#f0a080'
     },
     {
         "type": "JMD",
         "message0": "%{BKY_SCL_JMD}",
         "output": "text",
-        "args0": [
-            { "type": "field_input", "name": "DKTM" }
-        ],
-        "colour": '#000000',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "field_input", "name": "DKTM" } ],
+        "colour": '#000000'
     },
     {
         "type": "JKD",
         "message0": "%{BKY_SCL_JKD}",
         "output": "jkazu",
-        "args0": [
-            { "type": "field_number", "name": "jkazu", "value": 0 }
-        ],
-        "colour": '#000000',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "field_number", "name": "jkazu", "value": 0 } ],
+        "colour": '#000000'
     },
     {
         "type": "JMAD",
         "message0": "%{BKY_SCL_JMAD}",
         "output": "text",
-        "args0": [
-            { "type": "input_value", "name": "DKTM", "check": "text" }
-        ],
-        "colour": '#aabbcc',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "DKTM", "check": "text" } ],
+        "colour": '#aabbcc'
     },
     {
         "type": "JKAD",
         "message0": "%{BKY_SCL_JKAD}",
         "output": "jkazu",
-        "args0": [
-            { "type": "input_value", "name": "DKTK", "check": "jkazu" }
-        ],
-        "colour": '#aabbcc',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "DKTK", "check": "jkazu" } ],
+        "colour": '#aabbcc'
     },
     {
         "type": "NNSD",
         "message0": "%{BKY_SCL_NNSD}",
-        "previousStatement": "haiN",
-        "nextStatement": "haiN",
+        "previousStatement": "haiN", "nextStatement": "haiN",
         "args0": [
             { "type": "input_value", "name": "DKTM1", "check": "text" },
             { "type": "input_value", "name": "DKTM2", "check": "text" }
         ],
-        "inputsInline": true,
-        "colour": '#abcabc',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "colour": '#abcabc'
     },
     {
         "type": "HAD[",
@@ -910,9 +585,7 @@ const sclBlockDefinitions = [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "j[]", "check": [ "hai[", "hai{", "hai", "haiN" ] }
         ],
-        "colour": '#bbaacc',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#bbaacc'
     },
     {
         "type": "HAD{",
@@ -922,92 +595,57 @@ const sclBlockDefinitions = [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "j{}", "check": [ "hai[", "hai{", "hai", "haiN" ] }
         ],
-        "colour": '#aaccbb',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#aaccbb'
     },
     {
         "type": "HAD",
         "message0": "%{BKY_SCL_HAD}",
-        "previousStatement": "hai",
-        "nextStatement": "hai",
+        "previousStatement": "hai", "nextStatement": "hai",
         "args0": [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "j{}", "check": [ "hai[", "hai{", "hai", "haiN" ] }
         ],
-        "inputsInline": true,
-        "colour": '#ccbbaa',
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "colour": '#ccbbaa'
     },
     {
         "type": "NW",
         "message0": "%{BKY_SCL_NW}",
-        "previousStatement": "js",
-        "nextStatement": "js",
+        "previousStatement": "js", "nextStatement": "js",
         "args0": [
             { "type": "input_value", "name": "NANI", "check": "HEN" },
             { "type": "input_value", "name": "DOU", "check": [ "text", "jkazu", "HEN", "hai{", "hai[" ] }
         ],
-        "colour": '#fe9f3d',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#fe9f3d'
     },
     {
         "type": "NTW",
         "message0": "%{BKY_SCL_NTW}",
-        "previousStatement": "js",
-        "nextStatement": "js",
+        "previousStatement": "js", "nextStatement": "js",
         "args0": [
-            {
-              "type": "field_dropdown",
-              "name": "name",
-              "options": [
-    			[ "定数", "const" ], 
-    			[ "ローカル変数", "let" ], 
-    			[ "グローバル変数", "var" ]
-              ]
-            },
+            { "type": "field_dropdown", "name": "name", "options": [ [ "定数", "const" ], [ "ローカル変数", "let" ], [ "グローバル変数", "var" ] ] },
             { "type": "input_value", "name": "NANI", "check": "HEN" },
             { "type": "input_value", "name": "DOU", "check": [ "text", "jkazu", "HEN", "hai{", "hai[" ] }
         ],
-        "colour": '#fe9f3d',
-        "tooltip": "",
-        "helpUrl": ""
+        "colour": '#fe9f3d'
     },
     {
         "type": "HD",
         "message0": "%{BKY_SCL_HD}",
-        "args0": [
-            { "type": "input_value", "name": "HEN", "check": "text" }
-        ],
-        "output": [ "text", "jkazu", "HEN"],
-        "colour": '#fe9f3d',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "input_value", "name": "HEN", "check": "text" } ],
+        "output": [ "text", "jkazu", "HEN"], "colour": '#fe9f3d'
     },
     {
         "type": "KB",
         "message0": "%{BKY_SCL_KB}",
-        "previousStatement": "js",
-        "nextStatement": "js",
-        "args0": [
-            { "type": "field_input", "name": "mozi" }
-        ],
-        "colour": '#8a88bb',
-        "tooltip": "",
-        "helpUrl": ""
+        "previousStatement": "js", "nextStatement": "js",
+        "args0": [ { "type": "field_input", "name": "mozi" } ],
+        "colour": '#8a88bb'
     },
     {
         "type": "KA",
         "message0": "%{BKY_SCL_KA}",
-        "args0": [
-            { "type": "field_input", "name": "mozi" }
-        ],
-        "output": "text",
-        "colour": '#8a88bb',
-        "tooltip": "",
-        "helpUrl": ""
+        "args0": [ { "type": "field_input", "name": "mozi" } ],
+        "output": "text", "colour": '#8a88bb'
     },
     {
         "type": "ks_mutator_container",
@@ -1021,28 +659,19 @@ const sclBlockDefinitions = [
     {
         "type": "ks_mutator_arg",
         "message0": "%{BKY_SCL_ks_mutator_arg}",
-        "args0": [
-            { "type": "field_input", "name": "NAME", "text": "x" }
-        ],
-        "previousStatement": null,
-        "nextStatement": null,
+        "args0": [ { "type": "field_input", "name": "NAME", "text": "x" } ],
+        "previousStatement": null, "nextStatement": null,
         "colour": "#8a88bb"
     },
     {
         "type": "KS",
         "message0": "%{BKY_SCL_KS}",
-        "args0": [
-          { "type": "field_input", "name": "mozi" }
-        ],
-        "mutator": "ks_mutator",
-        "inputsInline": false,
-        "previousStatement": "js",
-        "nextStatement": "js",
+        "args0": [ { "type": "field_input", "name": "mozi" } ],
+        "mutator": "ks_mutator", "inputsInline": false,
+        "previousStatement": "js", "nextStatement": "js",
         "colour": "#8a88bb",
-        "tooltip": "歯車マークで引数を追加できます",
-        "helpUrl": ""
+        "tooltip": "歯車マークで引数を追加できます"
     },
-	
     {
         "type": "MKS",
         "message0": "%{BKY_SCL_MKS}",
@@ -1050,30 +679,17 @@ const sclBlockDefinitions = [
           { "type": "input_dummy" },
           { "type": "input_statement", "name": "js", "check": "js" }
         ],
-        "inputsInline": true,
-        "output": "text",
-        "colour": "#8a88bb",
-        "tooltip": "",
-        "helpUrl": ""
+        "inputsInline": true, "output": "text", "colour": "#8a88bb"
     },
     {
         "type": "p_logic_compare",
         "message0": "%{BKY_SCL_p_logic_compare}",
         "args0": [
             { "type": "input_value", "name": "A", "check": ["text", "jkazu"] },
-            { "type": "field_dropdown", "name": "OP", "options": [
-				["=", "=="],
-				["≠","!="],
-				[">", ">"],
-				["<", "<"],
-				["≦", "<="],
-				["≧", ">="],
-			]},
+            { "type": "field_dropdown", "name": "OP", "options": [ ["=", "=="], ["≠","!="], [">", ">"], ["<", "<"], ["≦", "<="], ["≧", ">="] ] },
             { "type": "input_value", "name": "B", "check": ["text", "jkazu"] }
         ],
-        "output": "Boolean",
-        "colour": "#59c059",
-        "inputsInline": true
+        "output": "Boolean", "colour": "#59c059", "inputsInline": true
     },
     {
         "type": "p_logic_operation",
@@ -1083,18 +699,13 @@ const sclBlockDefinitions = [
             { "type": "field_dropdown", "name": "OP", "options": [["かつ", "AND"], ["または", "OR"]] },
             { "type": "input_value", "name": "B", "check": "Boolean" }
         ],
-        "output": "Boolean",
-        "colour": "#59c059",
-        "inputsInline": true
+        "output": "Boolean", "colour": "#59c059", "inputsInline": true
     },
     {
         "type": "p_logic_negate",
         "message0": "%{BKY_SCL_p_logic_negate}",
-        "args0": [
-            { "type": "input_value", "name": "BOOL", "check": "Boolean" }
-        ],
-        "output": "Boolean",
-        "colour": "#59c059"
+        "args0": [ { "type": "input_value", "name": "BOOL", "check": "Boolean" } ],
+        "output": "Boolean", "colour": "#59c059"
     },
 	{
         "type": "p_control_if",
@@ -1104,11 +715,8 @@ const sclBlockDefinitions = [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "DO0", "check": "js" }
         ],
-        "inputsInline": true,
-        "previousStatement": "js",
-        "nextStatement": "js",
-        "colour": "#124d99",
-        "mutator": "scl_if_mutator"
+        "inputsInline": true, "previousStatement": "js", "nextStatement": "js",
+        "colour": "#124d99", "mutator": "scl_if_mutator"
     },
     {
         "type": "p_control_repeat",
@@ -1118,8 +726,7 @@ const sclBlockDefinitions = [
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "DO", "check": "js" }
         ],
-        "previousStatement": "js",
-        "nextStatement": "js",
+        "previousStatement": "js", "nextStatement": "js",
         "colour": "#124d99"
     },
     {
@@ -1130,45 +737,116 @@ const sclBlockDefinitions = [
             { "type": "input_value", "name": "A", "check": ["mozi", "text"] },
             { "type": "input_value", "name": "B", "check": ["mozi", "text"] }
         ],
-        "output": ["mozi", "text"],
-        "colour": "#124d99",
-        "inputsInline": true
+        "output": ["mozi", "text"], "colour": "#124d99", "inputsInline": true
     }
 ];
 
+// 初回読み込み
 Blockly.defineBlocksWithJsonArray(sclBlockDefinitions);
 
-function changeBlockNames(newNamesObj) {
-    // 1. 辞書 (Blockly.Msg) を新しい名前に書き換える
-    for (let key in newNamesObj) {
-        Blockly.Msg[key] = newNamesObj[key];
+
+// ========================================================
+// 3. 【魔法の関数】これを呼ぶと全てが「やさしい日本語」に一瞬で切り替わる！
+// ========================================================
+function applyEasyJapaneseMode() {
+    
+    // ① 辞書を書き換える（引数の数も元のブロックと完全に一致しています！）
+    const easyNames = {
+        "SCL_FT": "特別なチケット %1",
+        "SCL_FT2": "特別なチケット2 %1",
+        "SCL_F": "フィールド大量 %1 %2 %3 %4 %5 %6",
+        "SCL_S": "🚀 サイト制作を始める",
+        "SCL_HCJ": "【枠組み】 %1 %2 【見た目】 %3 %4 【動き】 %5 %6",
+        "SCL_c_html": "【枠組み】を作る %1 %2",
+        "SCL_c_css": "【見た目】を整える %1 %2",
+        "SCL_c_js": "【動き】をつける %1 %2",
+        "SCL_HSE": "裏側の設定 %1 %2",
+        "SCL_HDA": "画面に出すもの %1 %2",
+        "SCL_T": "ページのタイトルを %1 にする",
+        "SCL_JY": "動きのファイル(JS)を読み込む %1",
+        "SCL_CY": "見た目のファイル(CSS)を読み込む %1",
+        "SCL_M": "文字を書く %1",
+        "SCL_K": "改行する",
+        "SCL_TD": "ページのタイトル",
+        "SCL_GD": "%1 と %2 をくっつける",
+        "SCL_Ibtn": "入力ボタンを置く ｜ 詳細: %1 文字: %2",
+        "SCL_Bbtn": "ボタンを置く ｜ 詳細: %1 %2 中身: %3",
+        "SCL_p": "文章を作る(P) ｜ 詳細: %1 %2 中身: %3",
+        "SCL_div": "透明な箱を作る(DIV) ｜ 詳細: %1 %2 中身: %3",
+        "SCL_span": "一部だけを囲む(SPAN) ｜ 詳細: %1 %2 中身: %3",
+        "SCL_img_block": "画像を表示 ｜ パス: %1 詳細: %2",
+        "SCL_CD": "グループ名(Class)を %1 にする",
+        "SCL_ID": "個別の名前(Id)を %1 にする",
+        "SCL_SGD": "%1 と %2 を両方つける",
+        "SCL_CN": "【 %1 】のデザインを変更 %2 %3",
+        "SCL_CNCD": "グループ名(Class)が %1 のもの",
+        "SCL_CNID": "名前(Id)が %1 のもの",
+        "SCL_CNYD": "種類が %1 のもの",
+        "SCL_CNB": "ページ全体（ボディー）",
+        "SCL_CIS": "%1 を %2 にする",
+        "SCL_WS": "%1 を %2 にする",
+        "SCL_KMS": "角の【 %1 】を %2 丸くする",
+        "SCL_DSS": "要素内側を %1 にそろえる",
+        "SCL_PDS": "【 %1 】の【 %2 】の余白を %3 にする",
+        "SCL_NS": "変化をなめらかにする 速さ: %1",
+        "SCL_FW": "文字の太さを %1 にする",
+        "SCL_FF": "フォントを %1 にする",
+        "SCL_TMD": "透明",
+        "SCL_PDD": "%1",
+        "SCL_ND": "%1 %2",
+        "SCL_KMID": "%1",
+        "SCL_DSD": "%1",
+        "SCL_CKLD": "クリックされたとき",
+        "SCL_CHOD": "重なったとき",
+        "SCL_KTD": "【 %1 】が【 %2 】",
+        "SCL_JMD": "%1",
+        "SCL_JKD": "%1",
+        "SCL_JMAD": "文字 %1",
+        "SCL_JKAD": "数 %1",
+        "SCL_NW": "変数 %1 を %2 にする",
+        "SCL_NTW": "%1 で変数 %2 を作り、中身を %3 にする",
+        "SCL_HD": "変数 %1",
+        "SCL_KB": "命令 %1 を実行する",
+        "SCL_KA": "命令 %1 の結果",
+        "SCL_ks_mutator_container": "受け取る情報の設定 %1 %2",
+        "SCL_ks_mutator_arg": "情報の名前 %1",
+        "SCL_KS": "命令 %1 を作る",
+        "SCL_MKS": "名前のない命令を作る %1 %2",
+        "SCL_NNSD": "%1 を %2",
+        "SCL_HAD_A": "リスト(配列) [ %1 %2 ]",
+        "SCL_HAD_O": "辞書(JSON) { %1 %2 }",
+        "SCL_HAD": "%1 %2 と",
+        "SCL_HC": "枠組みのメモ // %1",
+        "SCL_CC": "見た目のメモ // %1",
+        "SCL_JC": "動きのメモ // %1",
+        "SCL_p_logic_compare": "%1 %2 %3",
+        "SCL_p_logic_operation": "%1 %2 %3",
+        "SCL_p_logic_negate": "%1 ではない",
+        "SCL_p_control_if": "もし %1 なら %2 %3",
+        "SCL_p_control_repeat": "%1 回繰り返す %2 %3",
+        "SCL_p_if_mozi_reporter": "もし %1 なら %2 でなければ %3"
+    };
+
+    for (let key in easyNames) {
+        Blockly.Msg[key] = easyNames[key];
     }
 
-    // 2. ワークスペースの「今の状態（置かれているブロック）」を一時保存する
+    // ② 画面上のブロックを保存して、システムに「辞書が新しくなったぞ！」と教えて再描画する
     const state = Blockly.serialization.workspaces.save(workspace);
-
-    // 3. Blocklyの記憶（古いブロック定義）を一旦消去し、新しい辞書で再定義する
-    sclBlockDefinitions.forEach(def => {
-        delete Blockly.Blocks[def.type]; 
-    });
+    
+    // Blocklyの中から古い定義を一旦消す
+    sclBlockDefinitions.forEach(def => { delete Blockly.Blocks[def.type]; });
+    
+    // 新しい辞書をまとったブロックを再登録する
     Blockly.defineBlocksWithJsonArray(sclBlockDefinitions);
-
-    // 4. ワークスペースを真っさらにして、保存しておいたブロックを置き直す（ここで文字が変わる！）
+    
+    // 画面に置き直す
     workspace.clear();
     Blockly.serialization.workspaces.load(state, workspace);
 
-    // 5. 左側のメニュー（ツールボックス）も再描画して文字を更新する
+    // 左側のメニューも更新する
     const toolboxElement = document.getElementById('toolbox');
     if (toolboxElement) {
         workspace.updateToolbox(toolboxElement);
     }
 }
-
-Blockly.Blocks['KS_ARG_REPORTER'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldLabel(""), "ARG_NAME");
-    this.setOutput(true, "HEN");
-    this.setColour('#ff6b5c'); 
-  }
-};
