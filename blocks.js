@@ -16,10 +16,6 @@ Blockly.Blocks['KS_ARG_REPORTER'] = {
   }
 };
 
-// ========================================================
-// 1. 最初（デフォルト）の辞書登録
-// ★ 修正：キー名はすべて「大文字」に統一しました！
-// ========================================================
 Blockly.Msg["SCL_FT"] = "チケット %1";
 Blockly.Msg["SCL_FT2"] = "チケット2 %1";
 Blockly.Msg["SCL_F"] = "フィールド大量 %1 %2 %3 %4 %5 %6";
@@ -28,9 +24,9 @@ Blockly.Msg["SCL_HDA"] = "出すもの %1 %2";
 Blockly.Msg["SCL_M"] = "文字 %1";
 Blockly.Msg["SCL_S"] = "サイトを作り始める";
 Blockly.Msg["SCL_HCJ"] = "HTML %1 %2 CSS %3 %4 JavaScript %5 %6";
-Blockly.Msg["SCL_C_HTML"] = "HTML %1 %2";  // ← 小文字をやめて大文字に！
-Blockly.Msg["SCL_C_CSS"] = "CSS %1 %2";    // ← 大文字に！
-Blockly.Msg["SCL_C_JS"] = "JavaScript %1 %2"; // ← 大文字に！
+Blockly.Msg["SCL_C_HTML"] = "HTML %1 %2";
+Blockly.Msg["SCL_C_CSS"] = "CSS %1 %2"; 
+Blockly.Msg["SCL_C_JS"] = "JavaScript %1 %2";
 Blockly.Msg["SCL_T"] = "タイトルを %1 にする";
 Blockly.Msg["SCL_JY"] = "JSを読み込む %1";
 Blockly.Msg["SCL_CY"] = "CSSを読み込む %1";
@@ -40,11 +36,11 @@ Blockly.Msg["SCL_CID"] = "%1";
 Blockly.Msg["SCL_K"] = "改行";
 Blockly.Msg["SCL_TD"] = "タイトル";
 Blockly.Msg["SCL_GD"] = "%1 と %2";
-Blockly.Msg["SCL_IBTN"] = "INPUT ボタン 詳細設定 %1 文字 %2"; // ← 大文字に！
-Blockly.Msg["SCL_BBTN"] = "BUTTON ボタン 詳細設定 %1 %2 %3"; // ← 大文字に！
-Blockly.Msg["SCL_P"] = "P  詳細設定 %1 %2"; // ← 大文字に！
-Blockly.Msg["SCL_DIV"] = "DIV  詳細設定 %1 %2"; // ← 大文字に！
-Blockly.Msg["SCL_SPAN"] = "SPAN  詳細設定 %1 %2"; // ← 大文字に！
+Blockly.Msg["SCL_IBTN"] = "INPUT ボタン 詳細設定 %1 文字 %2";
+Blockly.Msg["SCL_BBTN"] = "BUTTON ボタン 詳細設定 %1 %2 %3";
+Blockly.Msg["SCL_P"] = "P  詳細設定 %1 %2";
+Blockly.Msg["SCL_DIV"] = "DIV  詳細設定 %1 %2";
+Blockly.Msg["SCL_SPAN"] = "SPAN  詳細設定 %1 %2";
 Blockly.Msg["SCL_CD"] = "Classを %1 にする";
 Blockly.Msg["SCL_ID"] = "Idを %1 にする";
 Blockly.Msg["SCL_SGD"] = "%1 & %2";
@@ -71,7 +67,7 @@ Blockly.Msg["SCL_DSD"] = "%1";
 Blockly.Msg["SCL_CKLD"] = "クリックされたとき";
 Blockly.Msg["SCL_CHOD"] = "重なったとき";
 Blockly.Msg["SCL_KTD"] = "%1 で %2";
-Blockly.Msg["SCL_IMG_BLOCK"] = "パス %1 で画像を表示 詳細設定 %2"; // ← 大文字に！
+Blockly.Msg["SCL_IMG_BLOCK"] = "パス %1 で画像を表示 詳細設定 %2";
 Blockly.Msg["SCL_JC"] = "JS コメント // %1";
 Blockly.Msg["SCL_JMD"] = "%1";
 Blockly.Msg["SCL_JKD"] = "%1";
@@ -86,21 +82,17 @@ Blockly.Msg["SCL_NTW"] = "%1 で %2 を作り %3 にする";
 Blockly.Msg["SCL_HD"] = "変数 %1";
 Blockly.Msg["SCL_KB"] = "関数 %1";
 Blockly.Msg["SCL_KA"] = "関数 %1";
-Blockly.Msg["SCL_KS_MUTATOR_CONTAINER"] = "引数の設定 %1 %2"; // ← 大文字に！
-Blockly.Msg["SCL_KS_MUTATOR_ARG"] = "引数名 %1"; // ← 大文字に！
+Blockly.Msg["SCL_KS_MUTATOR_CONTAINER"] = "引数の設定 %1 %2";
+Blockly.Msg["SCL_KS_MUTATOR_ARG"] = "引数名 %1";
 Blockly.Msg["SCL_KS"] = "関数 %1";
 Blockly.Msg["SCL_MKS"] = "無名関数 %1 %2";
-Blockly.Msg["SCL_P_LOGIC_COMPARE"] = "%1 %2 %3"; // ← 大文字に！
-Blockly.Msg["SCL_P_LOGIC_OPERATION"] = "%1 %2 %3"; // ← 大文字に！
-Blockly.Msg["SCL_P_LOGIC_NEGATE"] = "%1 ではない"; // ← 大文字に！
-Blockly.Msg["SCL_P_CONTROL_IF"] = "もし %1 なら %2 %3"; // ← 大文字に！
-Blockly.Msg["SCL_P_CONTROL_REPEAT"] = "%1 回繰り返す %2 %3"; // ← 大文字に！
-Blockly.Msg["SCL_P_IF_MOZI_REPORTER"] = "もし %1 なら %2 でなければ %3"; // ← 大文字に！
+Blockly.Msg["SCL_P_LOGIC_COMPARE"] = "%1 %2 %3";
+Blockly.Msg["SCL_P_LOGIC_OPERATION"] = "%1 %2 %3";
+Blockly.Msg["SCL_P_LOGIC_NEGATE"] = "%1 ではない";
+Blockly.Msg["SCL_P_CONTROL_IF"] = "もし %1 なら %2 %3";
+Blockly.Msg["SCL_P_CONTROL_REPEAT"] = "%1 回繰り返す %2 %3";
+Blockly.Msg["SCL_P_IF_MOZI_REPORTER"] = "もし %1 なら %2 でなければ %3";
 
-// ========================================================
-// 2. ブロックのJSON定義
-// ★ ここの %{BKY_〇〇} の中身も、大文字に合わせます。
-// ========================================================
 const sclBlockDefinitions = [
 {
 	"type": "FT",
@@ -1345,5 +1337,105 @@ const sclBlockDefinitions = [
 	"inputsInline": true
 }];
 
-// 初回読み込み
 Blockly.defineBlocksWithJsonArray(sclBlockDefinitions);
+
+function applyEasyJapaneseMode() {
+    
+    // ① 辞書を新しい言葉に書き換える（★キーはすべて大文字！）
+    const easyNames = {
+        "SCL_FT": "特別なチケット %1",
+        "SCL_FT2": "特別なチケット2 %1",
+        "SCL_F": "フィールド大量 %1 %2 %3 %4 %5 %6",
+        "SCL_S": "🚀 サイト制作を始める",
+        "SCL_HCJ": "【枠組み】 %1 %2 【見た目】 %3 %4 【動き】 %5 %6",
+        "SCL_C_HTML": "【枠組み】を作る %1 %2",
+        "SCL_C_CSS": "【見た目】を整える %1 %2",
+        "SCL_C_JS": "【動き】をつける %1 %2",
+        "SCL_HSE": "裏側の設定 %1 %2",
+        "SCL_HDA": "画面に出すもの %1 %2",
+        "SCL_T": "ページのタイトルを %1 にする",
+        "SCL_JY": "動きのファイル(JS)を読み込む %1",
+        "SCL_CY": "見た目のファイル(CSS)を読み込む %1",
+        "SCL_M": "文字を書く %1",
+        "SCL_K": "改行する",
+        "SCL_TD": "ページのタイトル",
+        "SCL_GD": "%1 と %2 をくっつける",
+        "SCL_IBTN": "入力ボタンを置く ｜ 詳細: %1 文字: %2",
+        "SCL_BBTN": "ボタンを置く ｜ 詳細: %1 %2 中身: %3",
+        "SCL_P": "文章を作る(P) ｜ 詳細: %1 %2 中身: %3",
+        "SCL_DIV": "透明な箱を作る(DIV) ｜ 詳細: %1 %2 中身: %3",
+        "SCL_SPAN": "一部だけを囲む(SPAN) ｜ 詳細: %1 %2 中身: %3",
+        "SCL_IMG_BLOCK": "画像を表示 ｜ パス: %1 詳細: %2",
+        "SCL_CD": "グループ名(Class)を %1 にする",
+        "SCL_ID": "個別の名前(Id)を %1 にする",
+        "SCL_SGD": "%1 と %2 を両方つける",
+        "SCL_CN": "【 %1 】のデザインを変更 %2 %3",
+        "SCL_CNCD": "グループ名(Class)が %1 のもの",
+        "SCL_CNID": "名前(Id)が %1 のもの",
+        "SCL_CNYD": "種類が %1 のもの",
+        "SCL_CNB": "ページ全体（ボディー）",
+        "SCL_CIS": "%1 を %2 にする",
+        "SCL_WS": "%1 を %2 にする",
+        "SCL_KMS": "角の【 %1 】を %2 丸くする",
+        "SCL_DSS": "要素内側を %1 にそろえる",
+        "SCL_PDS": "【 %1 】の【 %2 】の余白を %3 にする",
+        "SCL_NS": "変化をなめらかにする 速さ: %1",
+        "SCL_FW": "文字の太さを %1 にする",
+        "SCL_FF": "フォントを %1 にする",
+        "SCL_TMD": "透明",
+        "SCL_PDD": "%1",
+        "SCL_ND": "%1 %2",
+        "SCL_KMID": "%1",
+        "SCL_DSD": "%1",
+        "SCL_CKLD": "クリックされたとき",
+        "SCL_CHOD": "重なったとき",
+        "SCL_KTD": "【 %1 】が【 %2 】",
+        "SCL_JMD": "%1",
+        "SCL_JKD": "%1",
+        "SCL_JMAD": "文字 %1",
+        "SCL_JKAD": "数 %1",
+        "SCL_NW": "変数 %1 を %2 にする",
+        "SCL_NTW": "%1 で変数 %2 を作り、中身を %3 にする",
+        "SCL_HD": "変数 %1",
+        "SCL_KB": "命令 %1 を実行する",
+        "SCL_KA": "命令 %1 の結果",
+        "SCL_KS_MUTATOR_CONTAINER": "受け取る情報の設定 %1 %2",
+        "SCL_KS_MUTATOR_ARG": "情報の名前 %1",
+        "SCL_KS": "命令 %1 を作る",
+        "SCL_MKS": "名前のない命令を作る %1 %2",
+        "SCL_NNSD": "%1 を %2",
+        "SCL_HAD_A": "リスト(配列) [ %1 %2 ]",
+        "SCL_HAD_O": "辞書(JSON) { %1 %2 }",
+        "SCL_HAD": "%1 %2 と",
+        "SCL_HC": "枠組みのメモ // %1",
+        "SCL_CC": "見た目のメモ // %1",
+        "SCL_JC": "動きのメモ // %1",
+        "SCL_P_LOGIC_COMPARE": "%1 %2 %3",
+        "SCL_P_LOGIC_OPERATION": "%1 %2 %3",
+        "SCL_P_LOGIC_NEGATE": "%1 ではない",
+        "SCL_P_CONTROL_IF": "もし %1 なら %2 %3",
+        "SCL_P_CONTROL_REPEAT": "%1 回繰り返す %2 %3",
+        "SCL_P_IF_MOZI_REPORTER": "もし %1 なら %2 でなければ %3"
+    };
+
+    // Blockly.Msg を新しい言葉で上書き
+    for (let key in easyNames) {
+        Blockly.Msg[key] = easyNames[key];
+    }
+
+    // ====================================================
+    // ② 【更新処理】画面のブロックとメニューを一瞬でリフレッシュする
+    // ====================================================
+    
+    // 左側のメニュー（ツールボックス）を更新
+    const toolboxElement = document.getElementById('toolbox');
+    if (toolboxElement) {
+        workspace.updateToolbox(toolboxElement);
+    }
+
+    // ワークスペース上のブロックを再描画（状態を保存 → 全消去 → 復元）
+    // これにより、新しく書き換わった辞書（Blockly.Msg）が即座に反映されます！
+    const state = Blockly.serialization.workspaces.save(workspace);
+    workspace.clear();
+    Blockly.serialization.workspaces.load(state, workspace);
+}
