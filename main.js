@@ -55,11 +55,27 @@ var workspace = Blockly.inject(`blocklyDiv`, {
     }, 
 });
 
-Blockly.ContextMenuRegistry.registry.unregister('blockCollapseExpand');
-Blockly.ContextMenuRegistry.registry.unregister('blockInline');
-Blockly.ContextMenuRegistry.registry.unregister('blockDisable');
-Blockly.ContextMenuRegistry.registry.unregister('blockComment');
+function HardMenus(TRUE){
+	if (on_off) {
+		Blockly.ContextMenuRegistry.registry.unregister('blockCollapseExpand');
+		Blockly.ContextMenuRegistry.registry.unregister('blockInline');
+		Blockly.ContextMenuRegistry.registry.unregister('blockDisable');
+		Blockly.ContextMenuRegistry.registry.unregister('blockComment');
+	} else {
+    	const collapseItem = Blockly.ContextMenuItems.registerCollapseExpandBlock();
+   		const inlineItem   = Blockly.ContextMenuItems.registerInline();
+    	const disableItem  = Blockly.ContextMenuItems.registerDisable();
+    	const commentItem  = Blockly.ContextMenuItems.registerComment();
 
+    	const registry = Blockly.ContextMenuRegistry.registry;
+
+	    if (!registry.getItem('blockCollapseExpand')) { registry.register(collapseItem); }
+    	if (!registry.getItem('blockInline')) { registry.register(inlineItem); }
+    	if (!registry.getItem('blockDisable')) { registry.register(disableItem); }
+    	if (!registry.getItem('blockComment')) { registry.register(commentItem); }
+	}
+}
+	
 Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'),workspace);
 
 workspace.addChangeListener(Blockly.Events.disableOrphans);
