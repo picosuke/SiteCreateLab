@@ -20,7 +20,7 @@ Blockly.Themes.dark = Blockly.Theme.defineTheme('dark', {
 });
 
 var workspace = Blockly.inject(`blocklyDiv`, {
-    toolbox: document.getElementById(`toolbox`),
+    toolbox: document.getElementById(`Hard_toolbox`),
     theme: Blockly.Themes.dark,
     renderer: 'SCL_renderer',
     sounds : false, 
