@@ -192,10 +192,18 @@ function H_E_Mode(Hard_Easy) {
     }
 
     // --- 5. 画面の更新処理 ---
-    const toolboxElement = document.getElementById('toolbox');
-    if (toolboxElement && typeof workspace !== 'undefined') {
-        workspace.updateToolbox(toolboxElement);
+    if (typeof workspace !== 'undefined') {
         
+        // ① モードに合わせて読み込むツールボックスのIDを変える
+        const toolboxId = (Hard_Easy === "H") ? 'Hard_toolbox' : 'Easy_toolbox';
+        const newToolboxElement = document.getElementById(toolboxId);
+        
+        // ② ツールボックスを新しいものに差し替える！
+        if (newToolboxElement) {
+            workspace.updateToolbox(newToolboxElement);
+        }
+
+        // ③ ワークスペース上のブロックの文字を更新する
         const state = Blockly.serialization.workspaces.save(workspace);
         workspace.clear();
         Blockly.serialization.workspaces.load(state, workspace);
