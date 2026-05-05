@@ -83,7 +83,7 @@ Blockly.Extensions.registerMutator(
 );
 
 // ==========================================
-// ★ シャドウブロック（引数）を掴むとクローンになる処理
+// ★ 安全なハック：シャドウブロックを掴むとクローンになる
 // ==========================================
 const origOnMouseDown = Blockly.BlockSvg.prototype.onMouseDown_;
 
@@ -93,8 +93,6 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
         const gesture = workspace.getGesture(e);
 
         if (e.button === 0 && gesture) {
-            
-            // ★ 元のコードと同じようにイベントを止める
             Blockly.Events.disable();
             let clone;
             try {
@@ -115,16 +113,12 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
                 clone.initSvg();
                 clone.render();
 
-                // ★ 元のコードと同じ getRelativeToSurfaceXY を使いつつ、
-                // 相対移動(moveBy)ではなく、確実な絶対移動(moveTo)を使う
                 const xy = this.getRelativeToSurfaceXY();
-                clone.moveTo(xy);
-
+                clone.moveBy(xy.x, xy.y);
             } finally {
                 Blockly.Events.enable();
             }
 
-            // ★ これも元のコードと全く同じ
             gesture.setTargetBlock(clone);
             gesture.handleWsStart(e, workspace);
             return; 
