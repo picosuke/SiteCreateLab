@@ -83,7 +83,7 @@ Blockly.Extensions.registerMutator(
 );
 
 // ==========================================
-// ★ 安全なハック：シャドウブロックを掴むとクローンになる
+// ★ シャドウブロック（引数）を掴むとクローンになる処理
 // ==========================================
 const origOnMouseDown = Blockly.BlockSvg.prototype.onMouseDown_;
 
@@ -93,34 +93,50 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
         const gesture = workspace.getGesture(e);
 
         if (e.button === 0 && gesture) {
-            Blockly.Events.disable();
-            let clone;
-            try {
-                clone = workspace.newBlock('KS_ARG_REPORTER');
-                clone.setFieldValue(this.getFieldValue('ARG_NAME'), 'ARG_NAME');
+            
+            // ★【修正1】イベントを止めない！
+            // イベントを止めるとBlocklyの画面更新がバグって左上に飛ぶ原因になるため、
+            // そのまま自然にブロックを生成させます。
+            
+            let clone = workspace.newBlock('KS_ARG_REPORTER');
+            clone.setFieldValue(this.getFieldValue('ARG_NAME'), 'ARG_NAME');
 
-                const targetConn = this.outputConnection.targetConnection;
-                if (targetConn) {
-                    const parentInputName = targetConn.getParentInput().name;
-                    const parentFunctionBlock = this.getParent();
-                    clone.data = JSON.stringify({
-                        parentId: parentFunctionBlock.id,
-                        inputName: parentInputName,
-                        originalName: this.getFieldValue('ARG_NAME')
-                    });
-                }
-
-                clone.initSvg();
-                clone.render();
-
-                const xy = this.getRelativeToSurfaceXY();
-                clone.moveBy(xy.x, xy.y);
-            } finally {
-                Blockly.Events.enable();
+            const targetConn = this.outputConnection.targetConnection;
+            if (targetConn) {
+                const parentInputName = targetConn.getParentInput().name;
+                const parentFunctionBlock = this.getParent();
+                clone.data = JSON.stringify({
+                    parentId: parentFunctionBlock.id,
+                    inputName: parentInputName,
+                    originalName: this.getFieldValue('ARG_NAME')
+                });
             }
 
-            gesture.setTargetBlock(clone);
-            gesture.handleWsStart(e, workspace);
+            clone.initSvg();
+            clone.render();
+
+            // 座標を元のブロックと全く同じ場所に合わせる
+            const xy = this.getRelativeToSurfaceXY();
+            clone.moveTo(xy);
+
+            // ★【修正2】親ブロックの再描画を強制する！
+            // クローンを作る際の色々な処理で、親ブロックの中の配置がおかしくなって
+            // 赤いブロックが左上に飛んでしまった場合でも、
+            // ここで親ブロックを「もう一回ちゃんと描画し直せ！」と命令することで、
+            // 赤いブロックが元の穴の位置にピタッと戻ります。
+            const parentBlock = this.getParent();
+            if (parentBlock) {
+                parentBlock.render();
+            }
+
+            // ドラッグ対象をクローンにすり替える
+            gesture.cancel();
+            e.target = clone.getSvgRoot();
+            const newGesture = new Blockly.Gesture(e, workspace);
+            workspace.currentGesture_ = newGesture;
+            newGesture.setTargetBlock(clone);
+            newGesture.handleWsStart(e, workspace);
+            
             return; 
         }
     }
