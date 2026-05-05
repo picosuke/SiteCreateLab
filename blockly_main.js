@@ -7,7 +7,7 @@ function Menu(Hard_Easy) {
     const registry = Blockly.ContextMenuRegistry.registry;
     
     // 消したいメニューのIDリスト
-    const menuIds = ['blockCollapseExpand', 'blockInline', 'blockDisable', 'blockComment'];
+    const menuIds = ['blockCollapseExpand', 'blockInline', 'blockComment'];
 
     if (Hard_Easy === "H") {
         // 【ハードモード】メニューを復活（表示する）
