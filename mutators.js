@@ -88,6 +88,7 @@ Blockly.Extensions.registerMutator(
 const origOnMouseDown = Blockly.BlockSvg.prototype.onMouseDown_;
 
 Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
+    // もしクリックしたのが「関数の引数（赤いブロック）」の影だったら
     if (this.isShadow() && this.type === 'KS_ARG_REPORTER') {
         const workspace = this.workspace;
         const gesture = workspace.getGesture(e);
@@ -96,6 +97,7 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
             Blockly.Events.disable();
             let clone;
             try {
+                // 1. クローンを作成
                 clone = workspace.newBlock('KS_ARG_REPORTER');
                 clone.setFieldValue(this.getFieldValue('ARG_NAME'), 'ARG_NAME');
 
@@ -113,17 +115,29 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
                 clone.initSvg();
                 clone.render();
 
+                // ★【ここが修正ポイント！】
+                // ファイル分割によって、親ブロックの描画が遅れている場合があります。
+                // クリックされた瞬間に、親（関数ブロック）を強制的に再描画させることで
+                // 赤いブロックの正しい座標（xy）を確定させます。
+                if (this.getParent()) {
+                    this.getParent().render(); 
+                }
+
+                // 2. 正しく確定した座標を取得して移動
                 const xy = this.getRelativeToSurfaceXY();
                 clone.moveBy(xy.x, xy.y);
+
             } finally {
                 Blockly.Events.enable();
             }
 
+            // 3. ジェスチャーにクローンを掴ませる
             gesture.setTargetBlock(clone);
             gesture.handleWsStart(e, workspace);
             return; 
         }
     }
+    // それ以外のブロックは普通のクリック処理
     origOnMouseDown.call(this, e);
 };
 
