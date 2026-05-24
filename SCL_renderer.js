@@ -69,39 +69,45 @@ class TicketDrawer extends Blockly.zelos.Drawer {
     }
 
     drawInlineInput_(input) {
-        // ★重要：この1行を最初に呼ぶことで、赤いブロックの座標が確定します
-        this.positionInlineInputConnection_(input);
-
         const checkArr = input.connectionModel.getCheck() ? input.connectionModel.getCheck() : [];
         const isTicket = checkArr.includes('TICKET');
         const isTicket2 = checkArr.includes('TICKET2');
 
-        // ★修正：ブロックが「物理的に接続されているか」と「ドラッグ中で中に入ろうとしているか」を厳密にチェック
-        const isConnected = input.connectionModel.targetConnection !== null;
-        if (isConnected || this.info_.isInserted) {
-            return; 
-        }
-
-        if (isTicket || isTicket2) {
-            const width = input.width;
-            const height = input.height;
-            const x = input.xPos;
-            const y = input.centerline - height / 2;
-            let path = '';
-
-            if (isTicket) {
-                const r = this.constants_.CUSTOM_TICKET_RADIUS;
-                path += `M ${x},${y + r} a ${r},${r} 0 0,0 ${r},-${r} h ${width - 2 * r} a ${r},${r} 0 0,0 ${r},${r} v ${height - 2 * r} a ${r},${r} 0 0,0 -${r},${r} h -${width - 2 * r} a ${r},${r} 0 0,0 -${r},-${r} z`;
-            } else if (isTicket2) {
-                const r = this.constants_.CUSTOM_TICKET2_RADIUS;
-                const safeR = Math.min(r, height / 3); 
-                const halfH = height / 2;
-                path += `M ${x},${y} h ${width} v ${halfH - safeR} a ${safeR},${safeR} 0 0,0 0,${2 * safeR} v ${halfH - safeR} h -${width} v -${halfH - safeR} a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} z`;
-            }
-            this.myTicketHolesPath_ += path;
-        } else {
+        // ★修正1：Ticket型以外の場合は、標準処理に完全に任せる
+        // これにより、通常のパズルタブ引数スロットの座標計算が正常化される
+        if (!isTicket && !isTicket2) {
             super.drawInlineInput_(input);
+            return;
         }
+
+        // ★修正2：Ticket型の場合のみ、位置計算を実行
+        this.positionInlineInputConnection_(input);
+
+        // ★修正3：シャドウブロックの表示判定を厳密に
+        // targetBlockがnullでない場合、物理的に接続されている
+        const targetBlock = input.connectionModel.targetBlock();
+        if (targetBlock !== null) {
+            // 本物のブロックが接続されている→シャドウを非表示にして早期リターン
+            return;
+        }
+
+        const width = input.width;
+        const height = input.height;
+        const x = input.xPos;
+        const y = input.centerline - height / 2;
+        let path = '';
+
+        if (isTicket) {
+            const r = this.constants_.CUSTOM_TICKET_RADIUS;
+            path += `M ${x},${y + r} a ${r},${r} 0 0,0 ${r},-${r} h ${width - 2 * r} a ${r},${r} 0 0,0 ${r},${r} v ${height - 2 * r} a ${r},${r} 0 0,0 -${r},${r} h -${width - 2 * r} a ${r},${r} 0 0,0 -${r},-${r} z`;
+        } else if (isTicket2) {
+            const r = this.constants_.CUSTOM_TICKET2_RADIUS;
+            const safeR = Math.min(r, height / 3); 
+            const halfH = height / 2;
+            path += `M ${x},${y} h ${width} v ${halfH - safeR} a ${safeR},${safeR} 0 0,0 0,${2 * safeR} v ${halfH - safeR} h -${width} v -${halfH - safeR} a ${safeR},${safeR} 0 0,0 0,-${2 * safeR} z`;
+        }
+        
+        this.myTicketHolesPath_ += path;
     }
 
     recordSizeOnBlock_() {
