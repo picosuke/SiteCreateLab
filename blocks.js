@@ -68,6 +68,7 @@ Blockly.Msg["SCL_CKLD"] = "クリックされたとき";
 Blockly.Msg["SCL_CHOD"] = "重なったとき";
 Blockly.Msg["SCL_KTD"] = "%1 で %2";
 Blockly.Msg["SCL_IMG_BLOCK"] = "パス %1 で画像を表示 詳細設定 %2";
+Blockly.Msg["SCL_SOUND_BLOCK"] = "パス %1 で音声を流すバー 詳細設定 %2";
 Blockly.Msg["SCL_JC"] = "JS コメント // %1";
 Blockly.Msg["SCL_JMD"] = "%1";
 Blockly.Msg["SCL_JKD"] = "%1";
@@ -927,6 +928,25 @@ const sclBlockDefinitions = [
 		"type": "field_input",
 		"name": "SRC",
 		"text": "画像名.png"
+	},
+	{
+		"type": "input_value",
+		"name": "syo",
+		"check": "syo"
+	}],
+	"inputsInline": true,
+	"previousStatement": "body",
+	"nextStatement": "body",
+	"colour": "#0580ed"
+},
+{
+	"type": "sound_block",
+	"message0": "%{BKY_SCL_SOUND_BLOCK}",
+	"args0": [
+	{
+		"type": "field_input",
+		"name": "SON",
+		"text": "サウンド名.png"
 	},
 	{
 		"type": "input_value",
