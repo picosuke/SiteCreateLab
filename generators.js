@@ -329,6 +329,18 @@ javascript.javascriptGenerator.forBlock['img_block'] = function(block, generator
     return '\n';
 };
 
+javascript.javascriptGenerator.forBlock['sound_block'] = function(block, generator) {
+    var src = block.getFieldValue('SON') || '';
+    
+    // メディアフォルダのパス処理
+    if (!src.startsWith('./') && !src.startsWith('http')) {
+        src = './media/' + src;
+    }
+    
+    var value_syo = generator.valueToCode(block, 'syo', javascript.Order.NONE) || '';
+    text = text + '\n<audio' + value_syo + ' controls style="width: 100%; height: 40px;">\n  <source src="' + src + '" type="audio/mpeg">\n  ブラウザが対応していません\n</audio>';
+    return '\n';
+};
 
 javascript.javascriptGenerator.forBlock['CNCD'] = function(block, generator) {
     var value_class = generator.valueToCode(block, 'class', javascript.Order.NONE) || '';
