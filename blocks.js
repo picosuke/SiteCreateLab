@@ -946,7 +946,7 @@ const sclBlockDefinitions = [
 	{
 		"type": "field_input",
 		"name": "SON",
-		"text": "サウンド名.png"
+		"text": "サウンド名.mp3"
 	},
 	{
 		"type": "input_value",
