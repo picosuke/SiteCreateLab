@@ -56,20 +56,30 @@ Blockly.Extensions.registerMutator(
 
         Blockly.Events.disable();
         try {
-            let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
+        // シャドウブロックを作成（描画は接続後に行う）
+        let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
             shadow.setShadow(true);
             shadow.setFieldValue(argName, 'ARG_NAME');
-            shadow.initSvg();
-            shadow.render();
-            
-            // ★ シャドウブロックをはめる一瞬だけロックを解除し、すぐまた鍵をかける！
+
+            // 一時的にチェックを解除して接続→その後レンダーする順にする
             input.setCheck(null);
             input.connection.connect(shadow.outputConnection);
+
+            // 接続ができたら描画を初期化して正しい位置にレンダーさせる
+            shadow.initSvg();
+            shadow.render();
+
+            // 元のチェック制約に戻す
             input.setCheck('NO_CONNECTION');
-            
+
+        } catch (err) {
+            // 失敗したら、念のためシャドウを破棄してログを残す
+            try { if (shadow && !shadow.isDisposed()) shadow.dispose(false); } catch(e){}
+            console.error('shadow connect/render failed', err);
         } finally {
             Blockly.Events.enable();
         }
+
       }
 
       if (!this.getInput('js')) {
