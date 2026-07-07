@@ -29,64 +29,59 @@ Blockly.Extensions.registerMutator(
       }
       this.updateShape_();
     },
-    
     updateShape_: function() {
-      let existingArgs = 0;
-      while (this.getInput('ARG' + existingArgs)) {
+    let existingArgs = 0;
+    while (this.getInput('ARG' + existingArgs)) {
         this.removeInput('ARG' + existingArgs);
         existingArgs++;
-      }
+    }
 
-      for (let i = 0; i < this.arguments_.length; i++) {
-        let argName = this.arguments_[i];
-        
-        let input = this.appendValueInput('ARG' + i)
-                        .setAlign(Blockly.inputs.Align.RIGHT);
-                        
-        // ★【安全なロック】この穴には、この世に存在しない型のブロックしか入らないようにする
-        input.setCheck('NO_CONNECTION');
-                        
-        if (i === 0) {
-            input.appendField("引数");
-        }
+    // イベント無効化は全シャドウ作成の期間で保持
+    Blockly.Events.disable();
+    try {
+        for (let i = 0; i < this.arguments_.length; i++) {
+            let argName = this.arguments_[i];
+            
+            let input = this.appendValueInput('ARG' + i)
+                            .setAlign(Blockly.inputs.Align.RIGHT);
+                            
+            input.setCheck('NO_CONNECTION');
+                            
+            if (i === 0) {
+                input.appendField("引数");
+            }
 
-        if (this.getInput('js')) {
-          this.moveInputBefore('ARG' + i, 'js');
-        }
+            if (this.getInput('js')) {
+                this.moveInputBefore('ARG' + i, 'js');
+            }
 
-        Blockly.Events.disable();
-        try {
-        // シャドウブロックを作成（描画は接続後に行う）
-        let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
+            let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
             shadow.setShadow(true);
             shadow.setFieldValue(argName, 'ARG_NAME');
 
-            // 一時的にチェックを解除して接続→その後レンダーする順にする
             input.setCheck(null);
             input.connection.connect(shadow.outputConnection);
-
-            // 接続ができたら描画を初期化して正しい位置にレンダーさせる
-            shadow.initSvg();
-            shadow.render();
-
-            // 元のチェック制約に戻す
             input.setCheck('NO_CONNECTION');
 
-        } catch (err) {
-            // 失敗したら、念のためシャドウを破棄してログを残す
-            try { if (shadow && !shadow.isDisposed()) shadow.dispose(false); } catch(e){}
-            console.error('shadow connect/render failed', err);
-        } finally {
-            Blockly.Events.enable();
+            shadow.initSvg();
+            shadow.render();
         }
 
-      }
+        // ★【ループ終了後に一度だけ親を再描画】
+        // これにより、全ての子シャドウの最終位置が正確に確定する
+        this.render();
 
-      if (!this.getInput('js')) {
+    } catch (err) {
+        console.error('shadow creation failed', err);
+    } finally {
+        Blockly.Events.enable();
+    }
+
+    if (!this.getInput('js')) {
         this.appendStatementInput('js')
             .setCheck('js')
-      }
     }
+}
   },
   function() { this.updateShape_(); },
   ['ks_mutator_arg']
