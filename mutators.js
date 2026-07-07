@@ -29,64 +29,64 @@ Blockly.Extensions.registerMutator(
       }
       this.updateShape_();
     },
-    
-    updateShape_: function() {
-      let existingArgs = 0;
-      while (this.getInput('ARG' + existingArgs)) {
-        this.removeInput('ARG' + existingArgs);
-        existingArgs++;
+
+updateShape_: function() {
+  let existingArgs = 0;
+  while (this.getInput('ARG' + existingArgs)) {
+    this.removeInput('ARG' + existingArgs);
+    existingArgs++;
+  }
+
+  Blockly.Events.disable();
+  try {
+    for (let i = 0; i < this.arguments_.length; i++) {
+      let argName = this.arguments_[i];
+      
+      let input = this.appendValueInput('ARG' + i)
+                      .setAlign(Blockly.inputs.Align.RIGHT);
+                      
+      input.setCheck('NO_CONNECTION');
+                      
+      if (i === 0) {
+          input.appendField("引数");
       }
 
-      // ★【全シャドウ作成の期間中、イベントを無効化】
-      Blockly.Events.disable();
-      try {
-        for (let i = 0; i < this.arguments_.length; i++) {
-          let argName = this.arguments_[i];
-          
-          let input = this.appendValueInput('ARG' + i)
-                          .setAlign(Blockly.inputs.Align.RIGHT);
-                          
-          // ★【安全なロック】この穴には、この世に存在しない型のブロックしか入らないようにする
-          input.setCheck('NO_CONNECTION');
-                          
-          if (i === 0) {
-              input.appendField("引数");
-          }
-
-          if (this.getInput('js')) {
-            this.moveInputBefore('ARG' + i, 'js');
-          }
-
-          // シャドウブロックを作成
-          let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
-          shadow.setShadow(true);
-          shadow.setFieldValue(argName, 'ARG_NAME');
-
-          // 一時的にチェックを解除して接続
-          input.setCheck(null);
-          input.connection.connect(shadow.outputConnection);
-          input.setCheck('NO_CONNECTION');
-
-          // 接続後に描画を初期化
-          shadow.initSvg();
-          shadow.render();
-        }
-
-        // ★【ループ終了後、親ブロック全体を一度だけ再描画】
-        // これにより全ての子シャドウの最終位置が正確に確定する
-        this.render();
-
-      } catch (err) {
-        console.error('shadow creation failed', err);
-      } finally {
-        Blockly.Events.enable();
+      if (this.getInput('js')) {
+        this.moveInputBefore('ARG' + i, 'js');
       }
 
-      if (!this.getInput('js')) {
-        this.appendStatementInput('js')
-            .setCheck('js')
-      }
+      // シャドウブロックを作成
+      let shadow = this.workspace.newBlock('KS_ARG_REPORTER');
+      shadow.setShadow(true);
+      shadow.setFieldValue(argName, 'ARG_NAME');
+      
+      // ★【修正】親ブロックを先に render してレイアウトを確定させる
+      this.render();
+
+      // その後に接続と initSvg
+      input.setCheck(null);
+      input.connection.connect(shadow.outputConnection);
+      input.setCheck('NO_CONNECTION');
+
+      shadow.initSvg();
+      shadow.render();
     }
+
+    // ★【最後にもう一度親全体を再描画】
+    this.render();
+
+  } catch (err) {
+    console.error('shadow creation failed', err);
+  } finally {
+    Blockly.Events.enable();
+  }
+
+  if (!this.getInput('js')) {
+    this.appendStatementInput('js')
+        .setCheck('js')
+  }
+}
+    
   },
   function() { this.updateShape_(); },
   ['ks_mutator_arg']
